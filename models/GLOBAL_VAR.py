@@ -20,6 +20,20 @@ TREE_CAPACITY = 100
 GOLD_CAPACITY = 800
 FARM_CAPACITY = 300
 
+#Menu constants
+
+MODE_MENU = 0
+MODE_TERMINAL = 1
+MODE_ISO_2D = 2
+MODE_PAUSE = 3
+
+
+#MAP constants
+
+NORMAL_MAP = 0
+CENTERED_MAP = 1
+
+
 from pvector2 import *
 from ImageProcessingDisplay.imagemethods import * 
 from ImageProcessingDisplay.viewport import ViewPort
@@ -76,12 +90,9 @@ def MAP_ANGLE_INDEX(angle, angle_map):
     return animation_index
  
 
-pygame.init() 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
-pygame.display.set_caption("AOE2")
-
 camera = Camera()
 font = pygame.font.Font(None, 24)
+
 
 GRASS_ARRAY_1D = zoomlevels_sprite("Sprites/grass.webp", camera)
 
@@ -101,4 +112,8 @@ SWORDMAN_ARRAY_4D =state_zoomlevels_load_sprite_sheet("Sprites/Unit/swordman", c
 VILLAGER_ARRAY_4D =state_zoomlevels_load_sprite_sheet("Sprites/Unit/villager", camera)
 
 ARROW_ARRAY_3D = zoomlevels_load_sprite_sheet("Sprites/Projectile/arrow.webp",32, 11, camera, skip_row = 2, limit_col = 1)
+
+
+
 CURSOR_IMG = pygame.image.load("Sprites/cursor.png")
+

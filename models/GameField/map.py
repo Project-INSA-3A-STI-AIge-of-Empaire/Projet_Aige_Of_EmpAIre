@@ -83,6 +83,21 @@ class Map:
            
         for current_entity in sorted(entity_to_display, key=lambda entity: (entity.position.y + entity.position.x, entity.position.y)):
             current_entity.display(current_time, screen, camera, g_width, g_height)
+    
+    def display_terminal(self, camera, g_width, g_height):
+        
+        start_X, start_Y, end_X, end_Y = camera.indexes_in_point_of_view(self.nb_CellY, self.nb_CellX, g_width, g_height)
+
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+        for Y_to_display in range(start_Y, end_Y + 1):
+            for X_to_display in range(start_X, end_X + 1):                
+                entities = self.entity_matrix.get((Y_to_display, X_to_display),None)
+                if (entities):
+                    for entity in entities:
+                        print(str(entity)+",",end="")
+                else:
+                    print("\t",end="")
         
     
     def generate_map(self, num_players=2):

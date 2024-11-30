@@ -1,10 +1,11 @@
 import pygame
 import random
+from GLOBAL_VAR import *
 from entities.unit import Villager
 from entities.resource import Wood, Gold, Food
 from entities.building import TownCentre
 class GameState:
-    def __init__(self):
+    def __init__(self, tmap):
         self.is_paused = False
         self.speed = 1
         self.tile_size = 10
@@ -22,6 +23,7 @@ class GameState:
         self.pause_cooldown = 200  # Délai de 0.2 secondes pour la pause
         self.last_zoom_time = 0
         self.zoom_cooldown = 100  # Délai de 0.2 secondes pour le zoom
+        self.tmap = tmap
 
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""
@@ -40,13 +42,19 @@ class GameState:
         self.display_mode = mode
 
     def generate_map(self):
-        if self.selected_map_type == "Carte Normal":
-            self.grid = self.generate_generous_map()
-        elif self.selected_map_type == "Carte Centrée":
-            self.grid = self.generate_centered_map()
-        else:
-            self.grid = [[None for _ in range(120)] for _ in range(120)]
-        self.place_resources_and_buildings()
+        match self.selected_map_type:
+            case "Carte Normal":
+                map_type = NORMAL_MAP
+            case "Carte Centrée":
+                map_type = CENTERED_MAP
+        match self.selected_mode:
+            case "Lean":
+                self.tmap.generate_map(num_players=2)
+            case "Mean":
+                self.tmap.generate_map(num_players=2)
+            case "Marines":
+                self.tmap.generate_map(num_players=2)
+
 
     def place_resources_and_buildings(self):
         if self.selected_mode in ["Lean", "Mean"]:

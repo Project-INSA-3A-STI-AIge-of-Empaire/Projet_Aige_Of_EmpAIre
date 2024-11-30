@@ -112,12 +112,15 @@ while running:
 
     horse.try_to_move(current_time, v)
 
-    fps = int(clock.get_fps())
-    fps_text = font.render(f"FPS: {fps}", True, (255, 255, 255))
-    screen.blit(fps_text, (10, 10))
-
-    screen.blit(CURSOR_IMG,(mouse_x, mouse_y))
-    clock.tick(FPS)
+    
+    
     pygame.display.flip()
     
 pygame.quit()
+
+
+
+
+if __name__ == "__main__":
+    game = GameLoop()
+    game.run() 

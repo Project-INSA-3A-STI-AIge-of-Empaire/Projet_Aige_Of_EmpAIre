@@ -9,7 +9,8 @@ class UserInterface:
         self.game_mode_options = ["Lean", "Mean", "Marines"]
         self.selected_mode_index = 0
         
-        self.display_mode = "2.5D"  # Default display mode
+        self.display_mode = ["Menu","Terminal","2.5D","Pause"]
+        self.selected_display_index = 0
         self.buttons = {
             "left_map": pygame.Rect(0, 0, 50, 50),  # Left button for map
             "right_map": pygame.Rect(0, 0, 50, 50),  # Right button for map
@@ -50,8 +51,8 @@ class UserInterface:
         self._draw_button("right_mode", ">")  # Right button for game mode
 
         # Draw display mode buttons
-        self._draw_button("Terminal", "Terminal", self.display_mode == "Terminal")
-        self._draw_button("2.5D", "2.5D", self.display_mode == "2.5D")
+        self._draw_button("Terminal", "Terminal", self.display_mode[self.selected_display_index] == "Terminal")
+        self._draw_button("2.5D", "2.5D", self.display_mode[self.selected_display_index] == "2.5D")
 
         # Draw launch game button
         self._draw_button("Lancer la Partie", "Lancer la Partie")
@@ -84,10 +85,11 @@ class UserInterface:
         elif self.buttons["right_mode"].collidepoint(pos):
             self.selected_mode_index = (self.selected_mode_index + 1) % len(self.game_mode_options)
         elif self.buttons["Terminal"].collidepoint(pos):
-            self.display_mode = "Terminal"
+            self.selected_display_index = 1
         elif self.buttons["2.5D"].collidepoint(pos):
-            self.display_mode = "2.5D"
+            self.selected_display_index = 2
         elif self.buttons["Lancer la Partie"].collidepoint(pos):
-            return True  # Indicate that the game can start
+            if self.selected_display_index == 0:
+                return True  # Indicate that the game can start
 
         return False  # Indicate that the game cannot start
