@@ -121,7 +121,7 @@ class Unit(Entity):
 
 
 
-    def move_to_position(self,current_time, camera):
+    def move_to_position(self,current_time):
         if (current_time - self.last_time_moved > ONE_SEC/(self.move_per_sec*self.speed)):
 
             self.last_time_moved = current_time
@@ -155,7 +155,7 @@ class Unit(Entity):
                     if self.position == self.move_position:
                         self.path_to_position = None
                 else:
-                    
+                    """
                     # for debugging purposes
                     for i in range(len(self.path_to_position) - 1):
                         
@@ -168,7 +168,7 @@ class Unit(Entity):
                         
                         # Draw a line between these two points
                         pygame.draw.line(screen, (255, 0, 0), (iso_x1, iso_y1), (iso_x2, iso_y2), 2)
-                    
+                    """
 
 
 
@@ -198,7 +198,7 @@ class Unit(Entity):
         else : 
             self.change_state(UNIT_IDLE)
 
-    def try_to_move(self, current_time, camera):
+    def try_to_move(self, current_time):
         if (self.state != UNIT_DYING):
             if self.position == self.move_position:
                 if not(self.state == UNIT_IDLE):
@@ -206,7 +206,7 @@ class Unit(Entity):
             else:
                 if not(self.state == UNIT_WALKING):
                     self.change_state(UNIT_WALKING)
-                self.move_to_position(current_time, camera)
+                self.move_to_position(current_time)
                 
     def move_to(self, position):
         if (position.x>=0 and position.y>=0 and position.x<=self.linked_map.tile_size_2d*self.linked_map.nb_CellX and position.y<=self.linked_map.tile_size_2d*self.linked_map.nb_CellY):
@@ -298,6 +298,10 @@ class Unit(Entity):
     def will_vanish(self):
         return self.is_dead() and self.animation_frame == self.len_current_animation_frames() - 1
     
+    def update(self, current_time):
+        self.update_animation_frame(current_time)
+        self.try_to_attack(current_time)
+        
 
 
     

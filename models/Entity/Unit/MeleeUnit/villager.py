@@ -78,7 +78,7 @@ class Villager(MeleeUnit):
     
     
 
-    def try_to_gather(self, current_time, entity, camera):   
+    def try_to_gather(self, current_time, entity):   
             
         if not(self.state == UNIT_TASK):
             self.change_state(UNIT_TASK)
@@ -100,7 +100,7 @@ class Villager(MeleeUnit):
                 self.will_collect = True 
             
         
-    def try_to_collect(self,current_time, camera):
+    def try_to_collect(self,current_time):
         if (self.state != UNIT_DYING):
             if self.resource_target_id != None:
                 if not(self.is_full()):
@@ -153,3 +153,7 @@ class Villager(MeleeUnit):
         self.resource_target_id = None # if collecting we stop and attack
         self.entity_target_id = None  
         self.drop_target_id = drop_target_id 
+
+    def update(self, current_time):
+        super().update(current_time)
+        self.try_to_collect(current_time)

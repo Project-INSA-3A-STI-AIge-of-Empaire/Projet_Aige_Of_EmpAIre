@@ -23,7 +23,25 @@ class GameLoop:
         
 
     def run(self):
+        print("------------------------------")
+        print(self.state.map.players_dict)
+        print("------------------------------")
         """
+        p1 = self.state.map.players_dict.get(1)
+        print(p1)
+        p2 = self.state.map.players_dict.get(2)
+        print(p2)
+        v_ids = p1.get_entities_by_class(['v'])
+
+        t_ids = p2.get_entities_by_class(['T'])
+        town_id = t_ids[0]
+
+        for id in v_ids:
+            self.state.map.get_entity_by_id(id).attack_entity(self.state.map.get_entity_by_id(town_id))
+        
+        """
+        """
+        
         ar = TownCenter(5, 5, PVector2(0, 0), 2)
         camp = Camp(15,15, None, 2)
         self.state.map.add_entity(ar)
@@ -43,7 +61,7 @@ class GameLoop:
         running = True
         while running:
             move_flags = 0
-
+            
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
             current_time = pygame.time.get_ticks()
@@ -65,6 +83,17 @@ class GameLoop:
                         self.state.set_difficulty_mode(self.state.startmenu.selected_mode_index)
                         self.state.set_display_mode(self.state.startmenu.display_mode)
                         self.state.start_game()
+                        p1 = self.state.map.players_dict.get(1)
+                        print(p1)
+                        p2 = self.state.map.players_dict.get(2)
+                        print(p2)
+                        v_ids = p1.get_entities_by_class(['v'])
+
+                        t_ids = p2.get_entities_by_class(['T'])
+                        town_id = t_ids[0]
+
+                        for id in v_ids:
+                            self.state.map.get_entity_by_id(id).attack_entity(town_id)
                         self.state.states = PLAY
                 if self.state.states == PAUSE:
                      if event.type == pygame.MOUSEBUTTONDOWN:
@@ -171,7 +200,7 @@ class GameLoop:
                 
             elif self.state.states == PAUSE:
                 self.state.pausemenu.draw()
-            else:
+            elif self.state.states == PLAY:
                 self.screen.fill((0, 0, 0))
                 if (self.state.display_mode == ISO2D): # everything in the iso2d 
                     
@@ -187,6 +216,7 @@ class GameLoop:
                    
                 elif (self.state.display_mode == TERMINAL):
                     self.state.map.terminal_display(current_time, self.state.terminal_camera)
+
                 self.state.map.update_all_events(current_time)
                 """
                 villager.try_to_attack(current_time, self.state.camera)

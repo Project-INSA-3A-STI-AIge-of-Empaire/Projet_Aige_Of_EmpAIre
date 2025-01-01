@@ -71,3 +71,6 @@ class Building(Entity):
     
     def will_vanish(self):
         return self.is_dead() and self.animation_frame == self.len_current_animation_frames() - 1
+
+    def update(self, current_time):
+        self.update_animation_frame(current_time)

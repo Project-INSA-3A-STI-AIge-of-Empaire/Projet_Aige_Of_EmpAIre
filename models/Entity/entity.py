@@ -21,7 +21,7 @@ class Entity():
     def __str__(self):
         return f"ent<{self.representation},Y:{self.cell_Y},X:{self.cell_X},sz:{self.sq_size}>"
     
-    def update_animation_frame(self, current_time):
+    def update(self, current_time):
         return None
     def save(self):
 

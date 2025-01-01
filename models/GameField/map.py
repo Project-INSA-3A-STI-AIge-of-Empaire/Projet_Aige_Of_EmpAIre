@@ -65,7 +65,7 @@ class Map:
         self.projectile_set = set()
         self.last_time_refershed = pygame.time.get_ticks() # refresh for the terminal display
 
-        self.player_team_dict = {} # each element is a player, and the key is the team number 1 : team1 2 : team2
+        self.players_dict = {} # each element is a player, and the key is the team number 1 : team1 2 : team2
 
         # for the minimap
         self.minimap = MiniMap(PVector2(1000,300), _nb_CellX, _nb_CellY)
@@ -89,7 +89,7 @@ class Map:
         else:
             return 0xff
 
-    def add_entity(self, _entity):
+    def add_entity(self, _entity, from_save = False):
 
         assert (_entity != None), 0x0001 # to check if the entity is not null in case there were some problem in the implementation
 
@@ -124,20 +124,22 @@ class Map:
                 
                 current_cell.add(_entity)
 
-        topleft_cell = PVector2(self.tile_size_2d/2 + ( _entity.cell_X - (_entity.sq_size - 1))*self.tile_size_2d, self.tile_size_2d/2 + (_entity.cell_Y - (_entity.sq_size - 1))*self.tile_size_2d) 
-        bottomright_cell =  PVector2(self.tile_size_2d/2 + ( _entity.cell_X )*self.tile_size_2d, self.tile_size_2d/2 + (_entity.cell_Y )*self.tile_size_2d) 
+        if not from_save:
+            topleft_cell = PVector2(self.tile_size_2d/2 + ( _entity.cell_X - (_entity.sq_size - 1))*self.tile_size_2d, self.tile_size_2d/2 + (_entity.cell_Y - (_entity.sq_size - 1))*self.tile_size_2d) 
+            bottomright_cell =  PVector2(self.tile_size_2d/2 + ( _entity.cell_X )*self.tile_size_2d, self.tile_size_2d/2 + (_entity.cell_Y )*self.tile_size_2d) 
 
-        _entity.position = (bottomright_cell + topleft_cell ) * (0.5)
-        _entity.box_size = bottomright_cell.x - _entity.position.x  # distance from the center to the corners of the collision box
+            _entity.position = (bottomright_cell + topleft_cell ) * (0.5)
+            _entity.box_size = bottomright_cell.x - _entity.position.x  # distance from the center to the corners of the collision box
 
-        if isinstance(_entity, Unit):
-            _entity.box_size += TILE_SIZE_2D/(2 * 3) # for the units hitbox is smaller 
-            _entity.move_position.x = _entity.position.x
-            _entity.move_position.y = _entity.position.y # well when the unit is added its target pos to move its it self se it doesnt move
             
-        else:
-            _entity.box_size += TILE_SIZE_2D/(2 * 1.5) # the factors used the box_size lines are to choosen values for a well scaled collision system with respec to the type and size of the entity
-        
+            if isinstance(_entity, Unit):
+                _entity.box_size += TILE_SIZE_2D/(2 * 3) # for the units hitbox is smaller 
+                _entity.move_position.x = _entity.position.x
+                _entity.move_position.y = _entity.position.y # well when the unit is added its target pos to move its it self se it doesnt move
+                
+            else:
+                _entity.box_size += TILE_SIZE_2D/(2 * 1.5) # the factors used the box_size lines are to choosen values for a well scaled collision system with respec to the type and size of the entity
+            
         _entity.linked_map = self
 
         # at the end add the entity pointer to the id dict with the id dict 
@@ -229,6 +231,8 @@ class Map:
                     if not region:  # Remove empty regions
                         self.entity_matrix.pop((REG_Y, REG_X), None)
 
+        player = self.players_dict.get(_entity.team, None)
+        player.remove_entity(_entity)
         self.entity_id_dict.pop(_entity.id, None)
 
         return _entity  # Return the entity if needed elsewhere
@@ -319,7 +323,7 @@ class Map:
         """ # debug purposes 
         
                                                                                 # priority to the farm ( they are like grass so the ground is displayed first) then the normal deep sort 
-        for current_entity in sorted(entity_to_display, key=lambda entity: (not(isinstance(entity, Farm)), entity.position.z, entity.position.y + entity.position.x, entity.position.y)):
+        for current_entity in sorted(entity_to_display, key=lambda entity: (isinstance(entity,Villager),not(isinstance(entity, Farm)), entity.position.z, entity.position.y + entity.position.x, entity.position.y)):
         
             current_entity.display(current_time, screen, camera, g_width, g_height)
         
@@ -447,8 +451,9 @@ class Map:
         
         spacing = self.nb_CellX // num_players 
         for i in range(num_players):
+
             current_player = Player(i + 1)
-            print(f"for player {current_player.team}")
+            
             # Base position for this player's starting area
             base_X = spacing * i + spacing // 2
             base_Y = self.nb_CellY // 2
@@ -465,18 +470,22 @@ class Map:
                 
                 current_player.resources = gen_option.get("resources").copy() # we dont want togive it as a pointer else all players will share the same resources haha
                 entities_gen = gen_option.get("entities")
-                print(entities_gen)
                 for entity_type, number in entities_gen.items():
-                    print("key is ",number)
+
                     EntityClass = CLASS_MAPPING.get(entity_type, None)
                     
                     
-                    for _ in range(number):
+                    for i in range(number):
+                        
                         entity_instance = EntityClass(None, None, None, current_player.team)
-                        print(entity_instance)
+                        print(f"the {i}th entity:{entity_instance}")
+                        current_player.add_entity(entity_instance)
                         self.add_entity_to_closest(entity_instance, center_Y, center_X, random_padding=0x01)
 
+            self.players_dict[current_player.team] = current_player
+        
 
+        print(self.players_dict)
 
 
     def _add_starting_resources(self, center_Y, center_X):
@@ -528,8 +537,11 @@ class Map:
                     self.remove_entity(entity)
 
     def update_all_entities(self, current_time):
-        for entity in self.entity_id_dict.values():
-            entity.update_animation_frame(current_time)
+        for id in list(self.entity_id_dict.keys()):
+            
+            entity = self.entity_id_dict.get(id)
+            if entity:
+                entity.update(current_time)
                 
 
 

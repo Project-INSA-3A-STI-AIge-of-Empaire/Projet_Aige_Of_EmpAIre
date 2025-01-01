@@ -18,11 +18,11 @@ class TownCenter(TrainingBuilding):
         display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = ["Gi"], camera = camera), gold_iso_x, gold_iso_y, screen, 0x04, 1)
         display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = ["Wi"], camera = camera), wood_iso_x, wood_iso_y, screen, 0x04, 1)
         display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = ["Mi"], camera = camera), food_iso_x, food_iso_y, screen, 0x04, 1)
-
+        """
         draw_text(str(self.resources["gold"]),gold_iso_x, gold_iso_y, screen, int(camera.zoom * camera.img_scale*20))
         draw_text(str(self.resources["wood"]),wood_iso_x, wood_iso_y, screen, int(camera.zoom * camera.img_scale*20))
         draw_text(str(self.resources["food"]),food_iso_x, food_iso_y, screen, int(camera.zoom * camera.img_scale*20))
-    
+        """
     def remove_resources(self, resources):
 
         for resource, amount in resources.items():

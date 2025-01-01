@@ -4,7 +4,7 @@ class MeleeUnit(Unit):
     def __init__(self, cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed):
         super().__init__(cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed)
 
-    def try_to_damage(self, current_time, entity, camera):
+    def try_to_damage(self, current_time, entity):
         
         if self.first_time_pass or (current_time - self.last_time_attacked > self.attack_speed * ONE_SEC):
             if (self.first_time_pass):
@@ -31,7 +31,7 @@ class MeleeUnit(Unit):
     
 
         
-    def try_to_attack(self,current_time, camera):
+    def try_to_attack(self,current_time):
         if (self.state != UNIT_DYING):
             if self.entity_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
@@ -53,13 +53,13 @@ class MeleeUnit(Unit):
                                     self.move_position.y = entity.position.y
 
                                     self.first_time_pass = True
-                                    self.try_to_move(current_time, camera)
+                                    self.try_to_move(current_time)
                             else: # collided 
                                 self.direction = self.position.alpha_angle(entity.position)
                                 dist_to_entity = self.position.abs_distance(entity.position)
 
                                 if (dist_to_entity <= ((entity.sq_size/2) * TILE_SIZE_2D + entity.box_size + self.box_size)):
-                                    self.try_to_damage(current_time, entity, camera)
+                                    self.try_to_damage(current_time, entity)
                                 else:
                                     self.check_range_with_target = False
                                     if not(self.state == UNIT_IDLE):
