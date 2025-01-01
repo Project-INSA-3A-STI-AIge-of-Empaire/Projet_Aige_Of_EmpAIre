@@ -65,7 +65,7 @@ class RangedUnit(Unit):
                                     self.change_state(UNIT_WALKING)
                                     self.move_position = entity.position
                                 self.first_time_pass = True
-                                self.try_to_move(current_time)
+                                self.try_to_move(current_time, entity)
                         else: # enemy in range  
                             self.direction = self.position.alpha_angle(entity.position)
                             dist_to_entity = self.position.abs_distance(entity.position)

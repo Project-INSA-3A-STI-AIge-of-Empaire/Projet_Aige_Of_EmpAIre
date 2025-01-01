@@ -53,7 +53,7 @@ class Villager(MeleeUnit):
                                     self.move_position.x = entity.position.x
                                     self.move_position.y = entity.position.y
 
-                                    self.try_to_move(current_time, camera)
+                                    self.try_to_move(current_time, entity)
                             else:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
@@ -114,7 +114,7 @@ class Villager(MeleeUnit):
                                     if (self.check_collision_with(entity)):
                                         
                                         
-                                        self.try_to_gather(current_time, entity, camera)
+                                        self.try_to_gather(current_time, entity)
                                         
                                     else:
                                         if not(self.state == UNIT_WALKING):
@@ -122,7 +122,7 @@ class Villager(MeleeUnit):
                                         self.move_position.x = entity.position.x
                                         self.move_position.y = entity.position.y
 
-                                        self.try_to_move(current_time, camera)
+                                        self.try_to_move(current_time, entity)
                                 else:
                                     if not(self.state == UNIT_IDLE):
                                         self.change_state(UNIT_IDLE)      

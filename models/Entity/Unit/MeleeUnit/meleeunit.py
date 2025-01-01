@@ -53,7 +53,7 @@ class MeleeUnit(Unit):
                                     self.move_position.y = entity.position.y
 
                                     self.first_time_pass = True
-                                    self.try_to_move(current_time)
+                                    self.try_to_move(current_time, entity)
                             else: # collided 
                                 self.direction = self.position.alpha_angle(entity.position)
                                 dist_to_entity = self.position.abs_distance(entity.position)

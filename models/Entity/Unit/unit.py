@@ -121,7 +121,7 @@ class Unit(Entity):
 
 
 
-    def move_to_position(self,current_time):
+    def move_to_position(self,current_time, _entity_optional_target = None):
         if (current_time - self.last_time_moved > ONE_SEC/(self.move_per_sec*self.speed)):
 
             self.last_time_moved = current_time
@@ -130,7 +130,7 @@ class Unit(Entity):
             if self.path_to_position != None and self.current_to_position == self.move_position:
                 
                 if (self.check_collision_around()):
-                    self.check_and_set_path()
+                    self.check_and_set_path(_entity_optional_target)
 
                 end_index = None
                 end_path_X = None
@@ -185,12 +185,12 @@ class Unit(Entity):
                     if self.position == current_path_node_position:
                         self.path_to_position = self.path_to_position[1:]
             else:
-                self.check_and_set_path()
+                self.check_and_set_path(_entity_optional_target)
 
             self.track_cell_position()
 
-    def check_and_set_path(self):
-        self.path_to_position = A_STAR(self.cell_X, self.cell_Y, math.floor(self.move_position.x/TILE_SIZE_2D), math.floor(self.move_position.y/TILE_SIZE_2D), self.linked_map)
+    def check_and_set_path(self, _entity_optional_target):
+        self.path_to_position = A_STAR(self.cell_X, self.cell_Y, math.floor(self.move_position.x/TILE_SIZE_2D), math.floor(self.move_position.y/TILE_SIZE_2D), self.linked_map, _entity_optional_target)
                 
         if self.path_to_position != None:
             self.current_to_position = PVector2(self.move_position.x, self.move_position.y)
@@ -198,7 +198,7 @@ class Unit(Entity):
         else : 
             self.change_state(UNIT_IDLE)
 
-    def try_to_move(self, current_time):
+    def try_to_move(self, current_time, _entity_optional_target = None):
         if (self.state != UNIT_DYING):
             if self.position == self.move_position:
                 if not(self.state == UNIT_IDLE):
@@ -206,7 +206,7 @@ class Unit(Entity):
             else:
                 if not(self.state == UNIT_WALKING):
                     self.change_state(UNIT_WALKING)
-                self.move_to_position(current_time)
+                self.move_to_position(current_time, _entity_optional_target)
                 
     def move_to(self, position):
         if (position.x>=0 and position.y>=0 and position.x<=self.linked_map.tile_size_2d*self.linked_map.nb_CellX and position.y<=self.linked_map.tile_size_2d*self.linked_map.nb_CellY):
