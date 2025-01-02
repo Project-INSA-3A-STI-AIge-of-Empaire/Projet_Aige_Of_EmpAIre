@@ -89,46 +89,148 @@ class GameState:
         # for i, position in enumerate(buildings_positions, start=1):  # Utiliser enumerate pour avoir un index
         #     building_list_html += f"""<li class="building">Building {i} : {position}</li>"""
 
-        dict_buildings1 = {}
-        dict_buildings2 = {}
-        dict_ressources1 = {}
-        dict_ressources2 = {}
+        dict_archeryrange1 = {}
+        dict_archeryrange2 = {}
+        dict_barracks1 = {}
+        dict_barracks2 = {}
+        dict_camp1 = {}
+        dict_camp2 = {}
+        dict_farm1 = {}
+        dict_farm2 = {}
+        dict_house1 = {}
+        dict_house2 = {}
+        dict_keep1 = {}
+        dict_keep2 = {}
+        dict_stable1 = {}
+        dict_stable2 = {}
+        dict_towncenter1 = {}
+        dict_towncenter2 = {}
         dict_unit1 = {}
         dict_unit2 = {}
         for current_region in self.map.entity_matrix.values():
             for entity_set in current_region.values():
                 for entity in entity_set:
                         match type(entity):
-                            case Building if entity.team == 1 :
-                                if entity.position not in dict_buildings1.values():
-                                    dict_buildings1[len(dict_buildings1)] = entity.position
-                            case Building if entity.team == 2 :
-                                if entity.position not in dict_buildings2.values():
-                                    dict_buildings2[len(dict_buildings2)] = entity.position
-                            case Ressources if entity.team == 1 :
-                                if entity.position not in dict_ressources1.values():
-                                    dict_ressources1[len(dict_ressources1)] = entity.position
-                            case Ressources if entity.team == 2 : 
-                                if entity.poition not in dict_ressources2.values():
-                                    dict_ressources2[len(dict_ressources2)] = entity.position
+                            case ArcheryRange if entity.team == 1 :
+                                if entity.position not in dict_archeryrange1.values():
+                                    dict_archeryrange1[len(dict_archeryrange1)] = entity.position
+                            case ArcheryRange if entity.team == 2 :
+                                if entity.position not in dict_archeryrange2.values():
+                                    dict_archeryrange2[len(dict_archeryrange2)] = entity.position
+                            case Barracks if entity.team == 1 :
+                                if entity.position not in dict_barracks1.values():
+                                    dict_barracks1[len(dict_barracks1)] = entity.position
+                            case Barracks if entity.team == 2 : 
+                                if entity.poition not in dict_barracks2.values():
+                                    dict_barracks2[len(dict_barracks2)] = entity.position
+                            case Camp if entity.team == 1 :
+                                if entity.position not in dict_camp1.values():
+                                    dict_camp1[len(dict_camp1)] = entity.position
+                            case Camp if entity.team == 2 :
+                                if entity.position not in dict_camp2.values():
+                                    dict_camp2[len(dict_camp2)] = entity.position
+                            case Farm if entity.team == 1 :
+                                if entity.position not in dict_farm1.values():
+                                    dict_farm1[len(dict_farm1)] = entity.position
+                            case Farm if entity.team == 2 :
+                                if entity.position not in dict_farm2.values():
+                                    dict_farm2[len(dict_farm2)] = entity.position
+                            case House if entity.team == 1 :
+                                if entity.position not in dict_house1.values():
+                                    dict_house1[len(dict_house1)] = entity.position
+                            case House if entity.team == 2 :
+                                if entity.position not in dict_house2.values():
+                                    dict_house2[len(dict_house2)] = entity.position
+                            case Keep if entity.team == 1 :
+                                if entity.position not in dict_keep1.values():
+                                    dict_keep1[len(dict_keep1)] = entity.position
+                            case Keep if entity.team == 2 :
+                                if entity.position not in dict_keep2.values():
+                                    dict_keep2[len(dict_keep2)] = entity.position
+                            case Stable if entity.team == 1 :
+                                if entity.position not in dict_stable1.values():
+                                    dict_stable1[len(dict_stable1)] = entity.position
+                            case Stable if entity.team == 2 :
+                                if entity.position not in dict_stable2.values():
+                                    dict_stable2[len(dict_stable2)] = entity.position
+                            case TownCenter if entity.team == 1 :
+                                if entity.position not in dict_towncenter1.values():
+                                    dict_towncenter1[len(dict_towncenter1)] = entity.position
+                            case TownCenter if entity.team == 2 :
+                                if entity.position not in dict_camp2.values():
+                                    dict_towncenter2[len(dict_towncenter2)] = entity.position
                             case Unit if entity.team == 1 :
                                 if entity.position not in dict_unit1.values():
                                     dict_unit1[len(dict_unit1)] = entity.position
                             case Unit if entity.team == 2 :
                                 if entity.position not in dict_unit2.values():
                                     dict_unit2[len(dict_unit2)] = entity.position
-           
-        # unit_list_html = ""
-        # for i in range(1,3):
-        #     unit_list_html += f'<li class="unit">Villager {i} : {i}, {i+1}</li>'
+        
+        # Génération des listes HTML par type de bâtiment pour l'équipe 1
+        archeryrange1_list_html = ""
+        for i, position in dict_archeryrange1.items():
+            archeryrange1_list_html += f'<li class="building">ArcheryRange {i} : {position}</li>'
 
-        buildings1_list_html = ""
-        for i, e in dict_buildings1.items():
-            buildings1_list_html +=f'<li class="building">Building {i} : {e}</li>'
+        barracks1_list_html = ""
+        for i, position in dict_barracks1.items():
+            barracks1_list_html += f'<li class="building">Barracks {i} : {position}</li>'
 
-        buildings2_list_html = ""
-        for i, e in dict_buildings2.items():
-            buildings2_list_html +=f'<li class="building">Building {i} : {e}</li>'
+        camp1_list_html = ""
+        for i, position in dict_camp1.items():
+            camp1_list_html += f'<li class="building">Camp {i} : {position}</li>'
+
+        farm1_list_html = ""
+        for i, position in dict_farm1.items():
+            farm1_list_html += f'<li class="building">Farm {i} : {position}</li>'
+
+        house1_list_html = ""
+        for i, position in dict_house1.items():
+            house1_list_html += f'<li class="building">House {i} : {position}</li>'
+
+        keep1_list_html = ""
+        for i, position in dict_keep1.items():
+            keep1_list_html += f'<li class="building">Keep {i} : {position}</li>'
+
+        stable1_list_html = ""
+        for i, position in dict_stable1.items():
+            stable1_list_html += f'<li class="building">Stable {i} : {position}</li>'
+
+        towncenter1_list_html = ""
+        for i, position in dict_towncenter1.items():
+            towncenter1_list_html += f'<li class="building">TownCenter {i} : {position}</li>'
+
+        # Génération des listes HTML par type de bâtiment pour l'équipe 2
+        archeryrange2_list_html = ""
+        for i, position in dict_archeryrange2.items():
+            archeryrange2_list_html += f'<li class="building">ArcheryRange {i} : {position}</li>'
+
+        barracks2_list_html = ""
+        for i, position in dict_barracks2.items():
+            barracks2_list_html += f'<li class="building">Barracks {i} : {position}</li>'
+
+        camp2_list_html = ""
+        for i, position in dict_camp2.items():
+            camp2_list_html += f'<li class="building">Camp {i} : {position}</li>'
+
+        farm2_list_html = ""
+        for i, position in dict_farm2.items():
+            farm2_list_html += f'<li class="building">Farm {i} : {position}</li>'
+
+        house2_list_html = ""
+        for i, position in dict_house2.items():
+            house2_list_html += f'<li class="building">House {i} : {position}</li>'
+
+        keep2_list_html = ""
+        for i, position in dict_keep2.items():
+            keep2_list_html += f'<li class="building">Keep {i} : {position}</li>'
+
+        stable2_list_html = ""
+        for i, position in dict_stable2.items():
+            stable2_list_html += f'<li class="building">Stable {i} : {position}</li>'
+
+        towncenter2_list_html = ""
+        for i, position in dict_towncenter2.items():
+            towncenter2_list_html += f'<li class="building">TownCenter {i} : {position}</li>'
 
         unit1_list_html = ""
         for i, e in dict_unit1.items():
@@ -138,8 +240,30 @@ class GameState:
         for i, e in dict_unit2.items():
             unit2_list_html +=f'<li class="unit">Unit {i} : {e}</li>'
         
-        html_content = html_content.replace("{{BUILDINGS1}}", buildings1_list_html)
-        html_content = html_content.replace("{{BUILDINGS2}}", buildings2_list_html)
+        html_content = html_content.replace("{{ARCHERYRANGE1}}", archeryrange1_list_html)
+        html_content = html_content.replace("{{ARCHERYRANGE2}}", archeryrange2_list_html)
+
+        html_content = html_content.replace("{{BARRACKS1}}", barracks1_list_html)
+        html_content = html_content.replace("{{BARRACKS2}}", barracks2_list_html)
+
+        html_content = html_content.replace("{{CAMP1}}", camp1_list_html)
+        html_content = html_content.replace("{{CAMP2}}", camp2_list_html)
+
+        html_content = html_content.replace("{{FARM1}}", farm1_list_html)
+        html_content = html_content.replace("{{FARM2}}", farm2_list_html)
+
+        html_content = html_content.replace("{{HOUSE1}}", house1_list_html)
+        html_content = html_content.replace("{{HOUSE2}}", house2_list_html)
+
+        html_content = html_content.replace("{{KEEP1}}", keep1_list_html)
+        html_content = html_content.replace("{{KEEP2}}", keep2_list_html)
+
+        html_content = html_content.replace("{{STABLE1}}", stable1_list_html)
+        html_content = html_content.replace("{{STABLE2}}", stable2_list_html)
+
+        html_content = html_content.replace("{{TOWNCENTER1}}", towncenter1_list_html)
+        html_content = html_content.replace("{{TOWNCENTER2}}", towncenter2_list_html)
+
         html_content = html_content.replace("{{UNITS1}}", unit1_list_html)
         html_content = html_content.replace("{{UNITS2}}", unit2_list_html)
 
