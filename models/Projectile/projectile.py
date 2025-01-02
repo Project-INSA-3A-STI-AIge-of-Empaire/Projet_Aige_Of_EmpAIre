@@ -4,7 +4,7 @@ from math import floor
 
 class Projectile:
     
-    def __init__(self, cell_Y, cell_X, position, entity_target, _map, damage):
+    def __init__(self, cell_Y, cell_X, position, entity_target, _map, damage, representation = 'p'):
         global ONE_SEC
         global PROJECTILE_ANGLE_MAPPING
         self.cell_Y = cell_Y
@@ -17,7 +17,7 @@ class Projectile:
         self.reached_target = False
         
         self.distance_left = self.position.abs_distance(entity_target.position)
-        self.time_to_get_target = (ONE_SEC/6) * self.distance_left/_map.tile_size_2d
+        self.time_to_get_target = (ONE_SEC/5.3) * self.distance_left/_map.tile_size_2d
         
         self.time_left = self.time_to_get_target
         self.last_time_changed_pos = pygame.time.get_ticks()
@@ -29,7 +29,7 @@ class Projectile:
         self.animation_frame = 0
         
         self.projectile_peak = self.position.abs_distance(entity_target.position)
-        self.representation = 'p'
+        self.representation = representation
         
         self.linked_map = _map
 
@@ -46,36 +46,42 @@ class Projectile:
 
                     self.reached_target = True
                     self.entity_target.hp -= self.damage
-                    
+                    if self.entity_target.is_dead():
+                        self.linked_map.dead_entities[self.entity_target.id] = self.entity_target
+                        print(STATES.get(self.entity_target.representation, None).get("dying", None))
+                        self.entity_target.change_state(STATES.get(self.entity_target.representation, None).get("dying", None))
+                        
                 else:
 
                     self.direction = self.position.alpha_angle(self.entity_target.position)
                     self.distance_left = self.position.abs_distance(self.entity_target.position)
             
-            if self.time_left > 0 and not(self.reached_target):
-                distance_to_add = self.distance_left / (self.time_left / time_elapsed)
-                self.position.x = self.position.x + math.cos(self.direction) * distance_to_add 
-                self.position.y = self.position.y + math.sin(self.direction) * distance_to_add
-                
 
-                progress_ratio = (self.time_to_get_target - self.time_left)/self.time_to_get_target
-                # f(x) = -a*(x**(b) - 0.5)**2 + peak , the function that returns the value of z where x is the ratio, lets find a 
+                if self.time_left > 0 and not(self.reached_target):
+                    distance_to_add = self.distance_left / (self.time_left / time_elapsed)
+                    self.position.x = self.position.x + math.cos(self.direction) * distance_to_add 
+                    self.position.y = self.position.y + math.sin(self.direction) * distance_to_add
+                    
 
-                a = self.projectile_peak/(0.5)**2
-                b = 2 
-                # f(progress_ratio)
-                self.position.z = -a*((progress_ratio)**(b) - 0.5)**2 + self.projectile_peak
-                
+                    progress_ratio = (self.time_to_get_target - self.time_left)/self.time_to_get_target
+                    # f(x) = -a*(x**(b) - 0.5)**2 + peak , the function that returns the value of z where x is the ratio, lets find a 
 
-                self.time_left -= time_elapsed
-                self.distance_left = - self.distance_left - distance_to_add
-                self.last_time_changed_pos = current_time
+                    a = self.projectile_peak/(0.5)**2
+                    b = 2 
+                    # f(progress_ratio)
+                    self.position.z = -a*((progress_ratio)**(b) - 0.5)**2 + self.projectile_peak
+                    
+
+                    self.time_left -= time_elapsed
+                    self.distance_left = - self.distance_left - distance_to_add
+                    self.last_time_changed_pos = current_time
+                else:
+                    distance_to_add = self.distance_left   
+
+                    self.position.x = self.position.x + math.cos(self.direction) * distance_to_add 
+                    self.position.y = self.position.y + math.sin(self.direction) * distance_to_add
             else:
-                distance_to_add = self.distance_left   
-
-                self.position.x = self.position.x + math.cos(self.direction) * distance_to_add 
-                self.position.y = self.position.y + math.sin(self.direction) * distance_to_add
-    
+                self.reached_target = True 
     def update_cell_on_map(self):
         if self.changed_cell_position():
             print("changing_cell")
@@ -110,5 +116,43 @@ class Projectile:
         iso_x, iso_y = camera.convert_to_isometric_3d(self.position.x, self.position.y, self.position.z)
         display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = [self.representation, self.animation_direction, self.animation_frame], camera = camera),iso_x, iso_y, screen, 0x04)
 
+    def save(self):
+
+        data_to_save = {}
+        current_data_to_save = None
+
+        for attr_name, attr_value in self.__dict__.items():
+
+            if hasattr(attr_value, "save"):
+                current_data_to_save = attr_value.save()
+            else:
+                current_data_to_save = attr_value
+
+            data_to_save[attr_name] = current_data_to_save
+
+        return data_to_save
+    
+    @classmethod
+    def load(cls, data_to_load):
+        global SAVE_MAPPING
+        instance = cls.__new__(cls) # skip the __init__()
+        current_attr_value = None
+        for attr_name, attr_value in data_to_load.items():
+            
+            if (isinstance(attr_value, dict)): # has the attribute representation then we will see
+                
+                ClassLoad = SAVE_MAPPING.get(attr_value.get("representation", None), None)
+                if (ClassLoad): # has a load method in the method specified in it
+                    
+                    current_attr_value = ClassLoad.load(attr_value)
+                else:
+                    current_attr_value = attr_value
+            else:
+                current_attr_value = attr_value
+        
+            setattr(instance, attr_name, current_attr_value)
+
+        return instance
+    
     def __str__(self):
         return f"Y:{self.cell_Y}, X:{self.cell_X}, reached:{self.reached_target}"

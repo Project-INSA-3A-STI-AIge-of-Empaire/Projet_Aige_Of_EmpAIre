@@ -1,7 +1,9 @@
 import heapq
 import math
-from GLOBAL_IMPORT import *
 
+
+from Entity.Resources.resources import Resources
+from Entity.Building.building import Building
 class Node:
     def __init__(self, _X, _Y):
         self.X = _X
@@ -62,15 +64,6 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, _entity_optional_target = None)
         # not a normal position path finding, but it doesnt affect 
         # the algo in the case of normal pathfinding
 
-        current_region = _map.entity_matrix.get((best_node.Y//_map.region_division, best_node.X//_map.region_division), None)
-
-        if (current_region != None):
-            current_entities = current_region.get((best_node.Y, best_node.X), None)
-            if(current_entities):
-                for current_entity in current_entities:
-                    if (current_entity == _entity_optional_target):
-                        collided_with_entity = True
-                        break
 
 
         ##found path !!###
@@ -106,6 +99,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, _entity_optional_target = None)
                         for entity in entities:
                             if (entity == _entity_optional_target):
                                 cell_walkable = True 
+                                collided_with_entity = True 
                                 break
 
                             if isinstance(entity, Building): # some building can be walkable

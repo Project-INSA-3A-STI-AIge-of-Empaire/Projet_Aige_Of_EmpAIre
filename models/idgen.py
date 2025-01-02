@@ -1,3 +1,5 @@
+
+
 class IdGenerator:
 
     def __init__(self, _id_ticket = 0):

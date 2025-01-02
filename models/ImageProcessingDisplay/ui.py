@@ -1,5 +1,6 @@
 import pygame
 from GLOBAL_VAR import *
+from ImageProcessingDisplay.imagemethods import *
 
 class UserInterface:
     def __init__(self, screen):
@@ -11,29 +12,51 @@ class UserInterface:
 
     def draw_resources(self, entity_matrix):
         player_1_data = {
-            'Food': 500,  # Ressources alimentaires
-            'Wood': 300,  # Ressources bois
-            'Gold': 150,  # Ressources or
-            'Units': {
-                'Villagers': 10,  # Nombre de villageois
-                'Soldiers': 5     # Nombre de soldats
-            },
-            'Builds': 3  # Nombre de bâtiments construits
+            "F" : 0,
+            "W" : 0,
+            "G": 0,
+            "v" : 0,
+            "s" : 0,
+            "h" : 0,
+            "a" : 0,
+            "T" : 0,
+            "H" : 0,
+            "C" : 0,
+            "F" : 0,
+            "B" : 0,
+            "S" : 0,
+            "A" : 0,
+            "K" : 0
         }
-
         player_2_data = {
-            'Food': 450,  # Ressources alimentaires
-            'Wood': 350,  # Ressources bois
-            'Gold': 200,  # Ressources or
-            'Units': {
-                'Villagers': 8,   # Nombre de villageois
-                'Soldiers': 7     # Nombre de soldats
-            },
-            'Builds': 4  # Nombre de bâtiments construits
+            "F" : 0,
+            "W" : 0,
+            "G": 0,
+            "v" : 0,
+            "s" : 0,
+            "h" : 0,
+            "a" : 0,
+            "T" : 0,
+            "H" : 0,
+            "C" : 0,
+            "F" : 0,
+            "B" : 0,
+            "S" : 0,
+            "A" : 0,
+            "K" : 0
         }
+        for current_region in entity_matrix.values():
+            for entity_set in current_region.values():
+                for entity in entity_set:
+                    if entity.team == 1:
+                        player_1_data[entity.representation] += 1
+                    elif entity.team == 2:
+                        player_2_data[entity.representation] += 1
+
+
         # Position des joueurs
-        player_1_pos = (10, 10)
-        player_2_pos = (self.screen.get_width()//2, 10)
+        player_1_pos = (10, 15)
+        player_2_pos = (self.screen.get_width()//2, 15)
 
         # Y offsets distincts pour chaque joueur
         y_offset_player_1 = 0
@@ -41,38 +64,41 @@ class UserInterface:
         
         # Affichage des données des joueurs
         if self.display_resources:
-            resources = f"Player 1 - Food: {player_1_data['Food']} | Wood: {player_1_data['Wood']} | Gold: {player_1_data['Gold']}"
+            display_image(ICONS["Mi"], player_1_pos[0], player_1_pos[1]+y_offset_player_1, self.screen, 0x04)
+            display_image(ICONS["Wi"], player_1_pos[0] + 100, player_1_pos[1]+y_offset_player_1, self.screen, 0x04)
+            display_image(ICONS["Gi"], player_1_pos[0] + 200, player_1_pos[1]+y_offset_player_1, self.screen, 0x04)
+            resources = f"     : {player_1_data['F']} |  : {player_1_data['W']} |   : {player_1_data['G']}"
             text = self.font.render(resources, True, WHITE_COLOR)
             self.screen.blit(text, (player_1_pos[0], player_1_pos[1] + y_offset_player_1))
             y_offset_player_1 += 20
 
         if self.display_units:
-            units = f"Units - Villagers: {player_1_data['Units']['Villagers']} | Soldiers: {player_1_data['Units']['Soldiers']}"
+            units = f"Units - Villagers: {player_1_data['v']} | Swordsman: {player_1_data['s']} | Horseman: {player_1_data['h']} | Archer: {player_1_data['a']}"
             text = self.font.render(units, True, WHITE_COLOR)
             self.screen.blit(text, (player_1_pos[0], player_1_pos[1] + y_offset_player_1))
             y_offset_player_1 += 20
 
         if self.display_builds:
-            builds = f"Builds: {player_1_data['Builds']}"
+            builds = f"Builds - Town Centre : {player_1_data['T']} | House : {player_1_data['H']} | Camp : {player_1_data['C']} | Farm : {player_1_data['F']} | Barracks : {player_1_data['B']} | Stable : {player_1_data['S']} | Keep : {player_1_data['K']}"
             text = self.font.render(builds, True, WHITE_COLOR)
             self.screen.blit(text, (player_1_pos[0], player_1_pos[1] + y_offset_player_1))
             y_offset_player_1 += 20
 
         # Affichage des données pour Player 2
         if self.display_resources:
-            resources = f"Player 2 - Food: {player_2_data['Food']} | Wood: {player_2_data['Wood']} | Gold: {player_2_data['Gold']}"
+            resources = f"Player 2 - Food: {player_2_data['F']} | Wood: {player_2_data['W']} | Gold: {player_2_data['G']}"
             text = self.font.render(resources, True, WHITE_COLOR)
             self.screen.blit(text, (player_2_pos[0], player_2_pos[1] + y_offset_player_2))
             y_offset_player_2 += 20
 
         if self.display_units:
-            units = f"Units - Villagers: {player_2_data['Units']['Villagers']} | Soldiers: {player_2_data['Units']['Soldiers']}"
+            units = f"Units - Villagers: {player_2_data['v']} | Swordsman: {player_2_data['s']} | Horseman: {player_2_data['h']} | Archer: {player_2_data['a']}"
             text = self.font.render(units, True, WHITE_COLOR)
             self.screen.blit(text, (player_2_pos[0], player_2_pos[1] + y_offset_player_2))
             y_offset_player_2 += 20
 
         if self.display_builds:
-            builds = f"Builds: {player_2_data['Builds']}"
+            builds = f"Builds - Town Centre : {player_2_data['T']} | House : {player_2_data['H']} | Camp : {player_2_data['C']} | Farm : {player_2_data['F']} | Barracks : {player_2_data['B']} | Stable : {player_2_data['S']} | Keep : {player_2_data['K']}"
             text = self.font.render(builds, True, WHITE_COLOR)
             self.screen.blit(text, (player_2_pos[0], player_2_pos[1] + y_offset_player_2))
             y_offset_player_2 += 20

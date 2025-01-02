@@ -8,7 +8,7 @@ class Cell:
         self.Y = _Y
         self.X = _X
         self.position = _position
-        self.representation = "G"
+        self.representation = "g"
 
     def display(self, screen, camera):
         iso_x, iso_y = camera.convert_to_isometric_2d( self.position.x, self.position.y)

@@ -12,7 +12,6 @@ class rayCastingRange:
 
         self.polygon = Polygon([(top[1], top[0]), (left[1], left[0]), (bottom[1], bottom[0]), (right[1], right[0])])
 
-
     def __iter__(self):
         min_X, min_Y = self.left[1], self.top[0]
         max_X, max_Y = self.right[1], self.bottom[0]

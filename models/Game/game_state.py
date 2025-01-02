@@ -1,14 +1,14 @@
 import pygame
 import random 
 import webbrowser
-from Game.savegame import *
+#from Game.savegame import *
 from ImageProcessingDisplay import UserInterface, StartMenu, PauseMenu, Camera, TerminalCamera 
 from GameField.map import *
 from GLOBAL_VAR import *
 
 class GameState:
     def __init__(self, screen):
-        self.save_manager = Savegame(self)
+        #self.save_manager = Savegame(self)
         self.states = START
         self.screen = screen
         self.startmenu = StartMenu(screen)
@@ -68,7 +68,7 @@ class GameState:
         if current_time - self.last_switch_time >= self.switch_cooldown:
             if self.display_mode == ISO2D:
                 self.display_mode = TERMINAL
-                gameloop.screen = None
+                gameloop.screen = pygame.display.set_mode((20, 20), pygame.HWSURFACE | pygame.DOUBLEBUF )
             elif self.display_mode == TERMINAL:
                 self.display_mode = ISO2D
                 gameloop.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)

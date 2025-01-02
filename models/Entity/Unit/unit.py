@@ -19,7 +19,8 @@ class Unit(Entity):
         self.last_time_attacked = pygame.time.get_ticks()
         self.will_attack = False
         self.attack_frame = 0
-        self.entity_target = None
+        self.entity_target_id= None
+
         self.check_range_with_target = False
         self.first_time_pass = True
 
@@ -46,13 +47,17 @@ class Unit(Entity):
         self.animation_speed = []  # Animation frame interval in milliseconds for each unit_state
         self.linked_map = None
 
-    def set_target(self, entity_target):
-        self.entity_target = entity_target
 
+    #def affordable_by()
     def set_direction_index(self):
         self.animation_direction = MAP_ANGLE_INDEX(self.direction, UNIT_ANGLE_MAPPING) # map the animation index for the direction with repect to the sprites sheet
 
-
+    def affordable_by(self, player):
+        for resource, amount in player.resources.items():
+            if amount < self.cost.get(resource, None):
+                return False
+        
+        return True 
 
     def len_current_animation_frames(self):
         return len(self.image.get(self.state,None).get(0, None)) #the length changes with respect to the state but the zoom and direction does not change the animation frame count
@@ -63,7 +68,7 @@ class Unit(Entity):
             self.last_animation_time = current_time
 
             self.animation_frame = (self.animation_frame + 1)%(self.len_current_animation_frames()) #the length changes with respect to the state but the zoom and direction does not change the animation frame count
-    
+
     def changed_cell_position(self):
         topleft = PVector2(self.cell_X*self.linked_map.tile_size_2d, self.cell_Y*self.linked_map.tile_size_2d)
         bottomright = PVector2((self.cell_X + 1)*self.linked_map.tile_size_2d, (self.cell_Y + 1)*self.linked_map.tile_size_2d)
@@ -116,7 +121,7 @@ class Unit(Entity):
 
 
 
-    def move_to_position(self,current_time, camera):
+    def move_to_position(self,current_time, _entity_optional_target = None):
         if (current_time - self.last_time_moved > ONE_SEC/(self.move_per_sec*self.speed)):
 
             self.last_time_moved = current_time
@@ -125,7 +130,7 @@ class Unit(Entity):
             if self.path_to_position != None and self.current_to_position == self.move_position:
                 
                 if (self.check_collision_around()):
-                    self.check_and_set_path()
+                    self.check_and_set_path(_entity_optional_target)
 
                 end_index = None
                 end_path_X = None
@@ -150,7 +155,7 @@ class Unit(Entity):
                     if self.position == self.move_position:
                         self.path_to_position = None
                 else:
-                    
+                    """
                     # for debugging purposes
                     for i in range(len(self.path_to_position) - 1):
                         
@@ -163,7 +168,7 @@ class Unit(Entity):
                         
                         # Draw a line between these two points
                         pygame.draw.line(screen, (255, 0, 0), (iso_x1, iso_y1), (iso_x2, iso_y2), 2)
-                    
+                    """
 
 
 
@@ -180,12 +185,12 @@ class Unit(Entity):
                     if self.position == current_path_node_position:
                         self.path_to_position = self.path_to_position[1:]
             else:
-                self.check_and_set_path()
+                self.check_and_set_path(_entity_optional_target)
 
             self.track_cell_position()
 
-    def check_and_set_path(self):
-        self.path_to_position = A_STAR(self.cell_X, self.cell_Y, math.floor(self.move_position.x/TILE_SIZE_2D), math.floor(self.move_position.y/TILE_SIZE_2D), self.linked_map)
+    def check_and_set_path(self, _entity_optional_target):
+        self.path_to_position = A_STAR(self.cell_X, self.cell_Y, math.floor(self.move_position.x/TILE_SIZE_2D), math.floor(self.move_position.y/TILE_SIZE_2D), self.linked_map, _entity_optional_target)
                 
         if self.path_to_position != None:
             self.current_to_position = PVector2(self.move_position.x, self.move_position.y)
@@ -193,16 +198,22 @@ class Unit(Entity):
         else : 
             self.change_state(UNIT_IDLE)
 
-    def try_to_move(self, current_time, camera):
-        
-        if self.position == self.move_position:
-            if not(self.state == UNIT_IDLE):
-                self.change_state(UNIT_IDLE)
-        else:
+    def try_to_move(self, current_time, _entity_optional_target = None):
+        if (self.state != UNIT_DYING):
+            if self.position == self.move_position:
+                if not(self.state == UNIT_IDLE):
+                    self.change_state(UNIT_IDLE)
+            else:
+                if not(self.state == UNIT_WALKING):
+                    self.change_state(UNIT_WALKING)
+                self.move_to_position(current_time, _entity_optional_target)
+                
+    def move_to(self, position):
+        if (position.x>=0 and position.y>=0 and position.x<=self.linked_map.tile_size_2d*self.linked_map.nb_CellX and position.y<=self.linked_map.tile_size_2d*self.linked_map.nb_CellY):
             if not(self.state == UNIT_WALKING):
                 self.change_state(UNIT_WALKING)
-            self.move_to_position(current_time, camera)
-
+            self.move_position.x = position.x
+            self.move_position.y = position.y
         
     def change_state(self, new_state):
         self.animation_frame = 0 # we put the animationframe index to 0 in order
@@ -215,6 +226,9 @@ class Unit(Entity):
 
         self.state = new_state  
 
+    def attack_entity(self, entity_id):
+            
+        self.entity_target_id = entity_id
 
     def display(self, current_time, screen, camera, g_width, g_height):
         
@@ -224,10 +238,10 @@ class Unit(Entity):
         if (camera.check_in_point_of_view(iso_x, iso_y, g_width, g_height)):
             
             camera.draw_box(screen, self)
-            self.update_animation_frame(current_time)
             self.set_direction_index()
             display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = [self.representation, self.state, self.animation_direction, self.animation_frame], camera = camera), iso_x, iso_y, screen, 0x04, 1)
-            draw_percentage_bar(screen, camera, iso_x, iso_y, self.hp, self.max_hp, self.sq_size, self.team)
+            if not(self.is_dead()):
+                draw_percentage_bar(screen, camera, iso_x, iso_y, self.hp, self.max_hp, self.sq_size, self.team)
             draw_point(screen, (0, 0, 0), px, py, radius=5)
 
     def check_collision_with(self, _entity):
@@ -281,74 +295,13 @@ class Unit(Entity):
     def is_dead(self):
         return self.hp <= 0
     
-    def try_to_damage(self, current_time, entity, camera):
+    def will_vanish(self):
+        return self.is_dead() and self.animation_frame == self.len_current_animation_frames() - 1
+    
+    def update(self, current_time):
+        self.update_animation_frame(current_time)
+        self.try_to_attack(current_time)
         
-        if self.first_time_pass or (current_time - self.last_time_attacked > self.attack_speed * ONE_SEC):
-            if (self.first_time_pass):
-                self.first_time_pass = False
-            if not(self.state == UNIT_ATTACKING):
-                self.change_state(UNIT_ATTACKING)
-            self.last_time_attacked = current_time
-
-            self.will_attack = True
-        
-        if self.state == UNIT_ATTACKING:
-            if self.animation_frame == self.attack_frame and self.will_attack:
-                self.will_attack = False
-                entity.hp -= self.attack
-
-                if entity.is_dead():
-                    self.linked_map.remove_entity(entity)
-                    
-
-            elif self.animation_frame == (self.len_current_animation_frames() - 1):
-                self.check_range_with_target = False # we need to recheck if it is still in range
-                self.change_state(UNIT_IDLE) # if the entity is killed we stop 
-
-
-
-            
-
-    def try_to_attack(self,current_time, entity_id, camera):
-        entity = self.linked_map.get_entity_by_id(entity_id)
-        print(entity)
-        if (entity != None): 
-            if (entity.team != 0 and entity.team != self.team):
-                if (entity.is_dead() == False):
-                    
-                    
-                    if (self.range == 1): # for melee attack 
-                        if not(self.check_range_with_target):
-                            if (self.check_collision_with(entity)):
-                                self.check_range_with_target = True
-                                
-                                print(f"animation_frame:{self.animation_frame}")
-                                
-                            else:
-                                if not(self.state == UNIT_WALKING):
-                                    self.change_state(UNIT_WALKING)
-                                    self.move_position = entity.position
-
-                                self.first_time_pass = True
-                                self.try_to_move(current_time, camera)
-                        else: # collided 
-                            self.direction = self.position.alpha_angle(entity.position)
-                            dist_to_entity = self.position.abs_distance(entity.position)
-
-                            if (dist_to_entity <= (self.range * (entity.sq_size/2) * TILE_SIZE_2D + entity.box_size + self.box_size)):
-                                self.try_to_damage(current_time, entity, camera)
-                            else:
-                                self.check_range_with_target = False
-                                if not(self.state == UNIT_IDLE):
-                                    self.change_state(UNIT_IDLE)
-                
-                
-                else:
-                    if not(self.state == UNIT_IDLE):
-                        self.change_state(UNIT_IDLE)
-        else:        
-            if not(self.state == UNIT_IDLE):
-                self.change_state(UNIT_IDLE)
 
 
     

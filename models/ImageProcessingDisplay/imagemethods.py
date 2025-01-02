@@ -43,8 +43,10 @@ def state_load_sprite_sheet(path): # define for each state ( attacking, walking 
         content = file.read()
     content = content.split("\n")
     image_range = int(content[0])
+    print(image_range)
     content = content[1:len(content) - 1]   # in size_each there is info about how the state and sprites are organized
-    for i in range(len(content)):
+    print(content)
+    for i in range(image_range):
         content[i] = content[i].split(",")
         row = content[i][0]
         col = content[i][1] 
@@ -101,7 +103,7 @@ def display_image(image, x, y, screen, flags=0x00, team = 0): # flags to display
         final_x, final_y = x, y
 
     
-    # Blit the main image onto the screen
+    # Blit the main image on the screen
     screen.blit(image, (final_x, final_y))
 
 def draw_rectangle_with_borders(screen, topleftx, toplefty, bottomrightx, bottomrighty, color=(255, 255, 255), border_thickness=1):
@@ -157,3 +159,11 @@ def draw_diamond(screen, color, top, right, bottom, left):
 def draw_point(screen, color, x, y, radius=2):
 
     pygame.draw.circle(screen, color, (x, y), radius)
+
+def draw_text(text, x, y, screen, font_size=30, col=(255, 255, 255)):
+    
+    font = pygame.font.Font(None, font_size)
+    
+    text_to_display = font.render(text, True, col)
+ 
+    screen.blit(text_to_display, (int(x), int(y)))

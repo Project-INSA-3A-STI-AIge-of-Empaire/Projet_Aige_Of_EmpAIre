@@ -52,7 +52,7 @@ class PauseMenu:
     def handle_click(self, pos, game_state):
         """Handle button clicks based on mouse position."""
         if self.buttons['save'].collidepoint(pos):
-            self.game_state.save_manager.save_game()
+            #game_state.save_manager.save_game()
             print("Game Saved!")  # Replace with actual save logic
         elif self.buttons['quit'].collidepoint(pos):
             pygame.quit()
