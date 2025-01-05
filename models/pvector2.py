@@ -26,7 +26,7 @@ class PVector2:
         return PVector2(self.x - other_vector.x,self.y - other_vector.y)
 
     def __eq__(self, other):
-        return is_almost(self.x, other.x, TILE_SIZE_2D/20) and is_almost(self.y, other.y, TILE_SIZE_2D/20)
+        return is_almost(self.x, other.x, TILE_SIZE_2D/10) and is_almost(self.y, other.y, TILE_SIZE_2D/10)
     
     def __lt__(self, other):
         return self.x <= other.x and self.y <= other.y 

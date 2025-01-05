@@ -87,13 +87,11 @@ class GameLoop:
                         print(p1)
                         p2 = self.state.map.players_dict.get(2)
                         print(p2)
-                        v_ids = p1.get_entities_by_class(['v'])
+                        v_ids = p1.get_entities_by_class(['ca'])
 
-                        t_ids = p2.get_entities_by_class(['T'])
-                        town_id = t_ids[0]
+                        
 
-                        for id in v_ids:
-                            self.state.map.get_entity_by_id(id).attack_entity(town_id)
+                        
                         self.state.states = PLAY
                 if self.state.states == PAUSE:
                      if event.type == pygame.MOUSEBUTTONDOWN:
@@ -101,8 +99,11 @@ class GameLoop:
 
                 else:
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
-
+                        if self.state.states == PLAY:
+                            entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
+                            print(self.state.map.get_entity_by_id(entity_id))
+                            for id in v_ids:
+                                self.state.map.get_entity_by_id(id).attack_entity(entity_id)
                         if event.button == LEFT_CLICK:
                             self.state.mouse_held = True
                             
@@ -217,7 +218,7 @@ class GameLoop:
                 elif (self.state.display_mode == TERMINAL):
                     self.state.map.terminal_display(current_time, self.state.terminal_camera)
 
-                self.state.map.update_all_events(current_time)
+                self.state.map.update_all_events(current_time, self.state.camera, self.screen)
                 """
                 villager.try_to_attack(current_time, self.state.camera)
                 villager.try_to_drop(current_time, self.state.camera)

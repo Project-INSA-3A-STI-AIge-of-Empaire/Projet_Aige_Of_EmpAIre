@@ -26,7 +26,10 @@ class UserInterface:
             "B" : 0,
             "S" : 0,
             "A" : 0,
-            "K" : 0
+            "K" : 0,
+            "ca": 0,
+            "sm":0,
+            "am":0
         }
         player_2_data = {
             "F" : 0,
@@ -43,7 +46,10 @@ class UserInterface:
             "B" : 0,
             "S" : 0,
             "A" : 0,
-            "K" : 0
+            "K" : 0,
+            "ca": 0,
+            "sm":0,
+            "am":0
         }
         for current_region in entity_matrix.values():
             for entity_set in current_region.values():

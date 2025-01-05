@@ -4,7 +4,7 @@ from math import floor
 
 class Projectile:
     
-    def __init__(self, cell_Y, cell_X, position, entity_target, _map, damage, representation = 'p'):
+    def __init__(self, cell_Y, cell_X, position, entity_target, _map, damage, representation = 'p', element =""):
         global ONE_SEC
         global PROJECTILE_ANGLE_MAPPING
         self.cell_Y = cell_Y
@@ -15,7 +15,7 @@ class Projectile:
         self.damage = damage
         self.entity_target = entity_target
         self.reached_target = False
-        
+        self.element = element
         self.distance_left = self.position.abs_distance(entity_target.position)
         self.time_to_get_target = (ONE_SEC/5.3) * self.distance_left/_map.tile_size_2d
         
@@ -42,7 +42,7 @@ class Projectile:
             # Calculate the angle to the target
             if (self.entity_target):
                 
-                if (self.position == self.entity_target.position):
+                if (self.position == self.entity_target.position and not(self.entity_target.is_dead())):
 
                     self.reached_target = True
                     self.entity_target.hp -= self.damage
@@ -51,11 +51,12 @@ class Projectile:
                         print(STATES.get(self.entity_target.representation, None).get("dying", None))
                         self.entity_target.change_state(STATES.get(self.entity_target.representation, None).get("dying", None))
                         
-                else:
+                elif not(self.entity_target.is_dead()):
 
                     self.direction = self.position.alpha_angle(self.entity_target.position)
                     self.distance_left = self.position.abs_distance(self.entity_target.position)
-            
+                else:
+                    self.reached_target = True
 
                 if self.time_left > 0 and not(self.reached_target):
                     distance_to_add = self.distance_left / (self.time_left / time_elapsed)
@@ -104,9 +105,10 @@ class Projectile:
         self.cell_Y = live_cell_Y
         self.cell_X = live_cell_X
 
+    
     def update_animation_frame(self, current_time):
 
-        if current_time - self.last_animation_time > self.time_to_get_target/11:
+        if current_time - self.last_animation_time > self.time_to_get_target/10:
             self.last_animation_time = current_time
             self.animation_frame = (self.animation_frame + 1)%len(self.image.get(0,None))
         
@@ -115,6 +117,8 @@ class Projectile:
         self.update_animation_frame(current_time)
         iso_x, iso_y = camera.convert_to_isometric_3d(self.position.x, self.position.y, self.position.z)
         display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = [self.representation, self.animation_direction, self.animation_frame], camera = camera),iso_x, iso_y, screen, 0x04)
+        if self.element != "":
+            display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = [self.element + self.representation, self.animation_direction, self.animation_frame], camera = camera),iso_x, iso_y, screen, 0x04)
 
     def save(self):
 
@@ -141,7 +145,7 @@ class Projectile:
             
             if (isinstance(attr_value, dict)): # has the attribute representation then we will see
                 
-                ClassLoad = SAVE_MAPPING.get(attr_value.get("representation", None), None)
+                ClassLoad = SAVE_MAPPING.get(attr_value.get("element", None) + attr_value.get("representation", None), None)
                 if (ClassLoad): # has a load method in the method specified in it
                     
                     current_attr_value = ClassLoad.load(attr_value)

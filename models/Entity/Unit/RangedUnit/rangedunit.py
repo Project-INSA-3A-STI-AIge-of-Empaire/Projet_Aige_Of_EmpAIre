@@ -3,21 +3,27 @@ from PACKAGE_IMPORT import *
 PACKAGE_DYNAMIC_IMPORT("Projectile")
 
 PROJECTILE_TYPE_MAPPING = {
-    "na":Arrow 
+    "pa":Arrow,
+    "ps":Spear,
+    "fpa":FireArrow,
+    "fps":FireSpear 
 }
+
+
 class RangedUnit(Unit):
 
     def __init__(self, cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed , _range, _projetctile_type):
         super().__init__(cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed, _range)
         self.projetctile_type = _projetctile_type
+        self.projetctile_padding = None 
 
     def check_in_range_with(self, entity):
-        return self.position.abs_distance(entity.position) < (self.linked_map.tile_size_2d * self.range)
+        return self.position.abs_distance(entity.position) < (self.linked_map.tile_size_2d * (self.range + math.floor(entity.sq_size/2)))
     
 
     def try_to_damage(self, current_time, _entity):
         global PROJECTILE_TYPE_MAPPING
-        if self.first_time_pass or (current_time - self.last_time_attacked > self.attack_speed * ONE_SEC):
+        if self.first_time_pass or (current_time - self.last_time_attacked > self.attack_delta_time):
             if (self.first_time_pass):
                 self.first_time_pass = False
             if not(self.state == UNIT_ATTACKING):
@@ -32,7 +38,7 @@ class RangedUnit(Unit):
                 self.will_attack = False
                 
                 ProjectileClass = PROJECTILE_TYPE_MAPPING.get(self.projetctile_type, None)
-                arrow = ProjectileClass(self.cell_Y, self.cell_X, PVector2(self.position.x - self.linked_map.tile_size_2d/2, self.position.y- self.linked_map.tile_size_2d/2), _entity, self.linked_map, self.attack)
+                arrow = ProjectileClass(self.cell_Y, self.cell_X, PVector2(self.position.x - self.projetctile_padding, self.position.y - self.projetctile_padding), _entity, self.linked_map, self.attack)
                 self.linked_map.add_projectile(arrow)
 
             elif self.animation_frame == (self.len_current_animation_frames() - 1):
@@ -40,7 +46,7 @@ class RangedUnit(Unit):
                 self.change_state(UNIT_IDLE) # if the entity is killed we stop
 
 
-    def try_to_attack(self,current_time):
+    def try_to_attack(self,current_time, camera, screen):
         if (self.state != UNIT_DYING):
             entity = self.linked_map.get_entity_by_id(self.entity_target_id)
             print(entity)
@@ -63,11 +69,13 @@ class RangedUnit(Unit):
                                 print("will walk")
                                 if not(self.state == UNIT_WALKING): # we need to reach it in range
                                     self.change_state(UNIT_WALKING)
-                                    self.move_position = entity.position
+                                self.move_position.x = entity.position.x
+                                self.move_position.y = entity.position.y
+
                                 self.first_time_pass = True
-                                self.try_to_move(current_time, entity)
+                                self.try_to_move(current_time,camera,screen, entity)
                         else: # enemy in range  
-                            self.direction = self.position.alpha_angle(entity.position)
+                            self.target_direction = self.position.alpha_angle(entity.position)
                             dist_to_entity = self.position.abs_distance(entity.position)
 
                             if (dist_to_entity <= (self.range * (entity.sq_size) * self.linked_map.tile_size_2d + entity.box_size + self.box_size)):

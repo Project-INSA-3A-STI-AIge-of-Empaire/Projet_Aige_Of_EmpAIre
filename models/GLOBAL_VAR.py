@@ -80,7 +80,7 @@ MODE_GENERATION = {
         "resources":{"gold":20000, "wood":20000, "food":20000},
         "entities":{
             "T":3,
-            "v":15,
+            "ca":3,
             "B":2,
             "S":2,
             "A":2
@@ -229,8 +229,15 @@ HORSEMAN_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/horseman")
 ARCHER_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/archer")
 SWORDMAN_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/swordman")
 VILLAGER_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/villager")
+CAVARLYARCHER_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/cavarlyarcher")
+AXEMAN_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/axeman")
+SPEARMAN_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/spearman")
 
 ARROW_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/arrow.webp",32, 11, skip_row = 2, limit_col = 1)
+FIREARROW_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/fire_arrow.webp",32, 11, skip_row = 2, limit_col = 1)
+SPEAR_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/spear.webp",32, 10, skip_row = 2, limit_col = 1)
+FIRESPEAR_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/fire_spear.webp",32, 10, skip_row = 2, limit_col = 1)
+
 
 SPRITES = {
     'g': GRASS,
@@ -248,7 +255,13 @@ SPRITES = {
     'a': ARCHER_ARRAY_3D,
     's': SWORDMAN_ARRAY_3D,
     'v': VILLAGER_ARRAY_3D,
-    'na': ARROW_ARRAY_2D
+    'ca': CAVARLYARCHER_ARRAY_3D,
+    'sm':SPEARMAN_ARRAY_3D,
+    'am':AXEMAN_ARRAY_3D,
+    'pa': ARROW_ARRAY_2D,
+    'fpa': FIREARROW_ARRAY_2D,
+    'ps': SPEAR_ARRAY_2D,
+    'fps': FIRESPEAR_ARRAY_2D
 }
 
 UNIT_SATES = {
@@ -274,7 +287,7 @@ STATES = {
 }
 
 WATER_MARK_SKIP = {
-    "A":[(2,0,10), (2,0,15)],
+    "A":[(2,0,11), (2,0,16)], # the first number is the numgber of the state, 0 number of row and 11 of the line that contains watermarks
     "B":[(2,0,20), (2,0,18)],
     "C":[(2,0,20), (2,0,17)],
     "H":[(2,0,7), (2,2,17)],
