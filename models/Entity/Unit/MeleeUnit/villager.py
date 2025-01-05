@@ -50,10 +50,13 @@ class Villager(MeleeUnit):
                                 else:
                                     if not(self.state == UNIT_WALKING):
                                         self.change_state(UNIT_WALKING)
+
+                                    self._entity_optional_target_id = entity.id
+
                                     self.move_position.x = entity.position.x
                                     self.move_position.y = entity.position.y
-
-                                    self.try_to_move(current_time, entity)
+                                    
+                                    self.try_to_move(current_time)
                             else:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
@@ -119,10 +122,11 @@ class Villager(MeleeUnit):
                                     else:
                                         if not(self.state == UNIT_WALKING):
                                             self.change_state(UNIT_WALKING)
+                                            
                                         self.move_position.x = entity.position.x
                                         self.move_position.y = entity.position.y
-
-                                        self.try_to_move(current_time, entity)
+                                        self._entity_optional_target_id = entity.id
+                                        self.try_to_move(current_time)
                                 else:
                                     if not(self.state == UNIT_IDLE):
                                         self.change_state(UNIT_IDLE)      
@@ -132,12 +136,8 @@ class Villager(MeleeUnit):
                         else:
                             if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
-                    else:
-                        if not(self.state == UNIT_IDLE):
-                            self.change_state(UNIT_IDLE)
-                else:        
-                    if not(self.state == UNIT_IDLE):
-                        self.change_state(UNIT_IDLE)
+                    
+                
     
     def collect_entity(self, resource_target_id):
         self.entity_target_id = None # if attacking we stop and collect

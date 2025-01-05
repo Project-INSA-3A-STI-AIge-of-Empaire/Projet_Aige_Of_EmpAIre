@@ -9,7 +9,7 @@ MIN_ZOOM = 1
 MAX_ZOOM = 7
 TILE_SIZE_2ISO = 15
 TILE_SIZE_2D = 40
-
+COLLISION_THRESHOLD = TILE_SIZE_2D/5
 ONE_SEC = 1000 # 1000 millisec
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 800
@@ -80,7 +80,7 @@ MODE_GENERATION = {
         "resources":{"gold":20000, "wood":20000, "food":20000},
         "entities":{
             "T":3,
-            "ca":3,
+            "ca":15,
             "B":2,
             "S":2,
             "A":2

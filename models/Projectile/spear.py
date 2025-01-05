@@ -6,3 +6,4 @@ class Spear(Projectile):
         global ARROW_ARRAY_2D
         super().__init__(cell_Y, cell_X, position, entity_target,_map, damage, representation, element)
         self.image = SPEAR_ARRAY_2D
+        self.projectile_peak = self.projectile_peak/3

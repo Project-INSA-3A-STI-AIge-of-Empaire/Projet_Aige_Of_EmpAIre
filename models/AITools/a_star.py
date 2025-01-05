@@ -28,14 +28,14 @@ class Node:
 
     def __str__(self):
         return f"({self.X},{self.Y}): G={self.G_cost} H={self.H_cost} F={self.F_cost}"
-def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_optional_target_id = None):
+def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit):
     if not (0 <= start_X < _map.nb_CellX and 0 <= start_Y < _map.nb_CellY and 
             0 <= end_X < _map.nb_CellX and 0 <= end_Y < _map.nb_CellY):
         return None # Invalid start or end
     print("----------- sss")
     print(f"startX:{start_X}, start_Y:{start_Y}")
     print(f"moving entity: {the_moving_unit}")
-    print(f"to target :{_map.entity_id_dict.get(_entity_optional_target_id, None)}")
+    print(f"to target :{_map.entity_id_dict.get(the_moving_unit._entity_optional_target_id, None)}")
     start_node = Node(start_X, start_Y)
     
     target_node = Node(end_X, end_Y)
@@ -49,6 +49,20 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_option
     discoverd = {}
     searched = set()
 
+    region = _map.entity_matrix.get((end_Y//_map.region_division, end_X//_map.region_division), None)
+
+    if the_moving_unit._entity_optional_target_id == None: # in this case we are only moving to a certan position so we need to see if it is reachable
+        print("hey")
+        if (region != None):
+            
+            entities = region.get((end_Y, end_X), None)
+            if(entities): # entities exists so the cell is occupied
+
+                for entity in entities:
+
+                    if not(entity.walkable): # non walkable = non reachable so nooo
+                        print("ntakkkkkkk")
+                        return None
     
     collided_with_entity = False # these 3 variables are used in case we have an entity as target
 
@@ -106,7 +120,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_option
                         if(entities): # entities exists so the cell is occupied
                 
                             for entity in entities:
-                                if (entity.id == _entity_optional_target_id):
+                                if (entity.id == the_moving_unit._entity_optional_target_id):
                                     print(f"found at Y:{neighbor_Y}, X:{neighbor_X}")
                                     print(entity)
                                     cell_walkable = True 
@@ -141,7 +155,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_option
                         collision_node = neighbor_node
     return None  # No path found
 """
-def arrounding_cells(start_X, start_Y, _map, the_moving_unit, _entity_optional_target_id):
+def arrounding_cells(start_X, start_Y, _map, the_moving_unit, the_moving_unit._entity_optional_target_id):
     def process_cell(currentY, currentX, ite_list):
         
         matrix_Y = currentY // CELL_DIVISION
@@ -167,7 +181,7 @@ def arrounding_cells(start_X, start_Y, _map, the_moving_unit, _entity_optional_t
                 for entity in current_set:
                         
                     if entity.collide_with_shape(current_shape):
-                        if not(entity != the_moving_unit and entity != _entity_optional_target_id):
+                        if not(entity != the_moving_unit and entity != the_moving_unit._entity_optional_target_id):
                             
                             if (isinstance(entity,Building) and not(entity.walkable)) or isinstance(entity, Resources):
                                 cell_walkable = False
@@ -182,10 +196,10 @@ def arrounding_cells(start_X, start_Y, _map, the_moving_unit, _entity_optional_t
     closest_available_cell = None
 
 
-    if _entity_optional_target_id:
-        top_Y = (_entity_optional_target_id.cell_Y + 1) * CELL_DIVISION
-        top_X = (_entity_optional_target_id.cell_X + 1) * CELL_DIVISION
-        sq_size = _entity_optional_target_id.sq_size
+    if the_moving_unit._entity_optional_target_id:
+        top_Y = (the_moving_unit._entity_optional_target_id.cell_Y + 1) * CELL_DIVISION
+        top_X = (the_moving_unit._entity_optional_target_id.cell_X + 1) * CELL_DIVISION
+        sq_size = the_moving_unit._entity_optional_target_id.sq_size
 
         bottom_Y = top_Y - sq_size * CELL_DIVISION - 1
         bottom_X = top_X - sq_size * CELL_DIVISION - 1
@@ -228,7 +242,7 @@ def arrounding_cells(start_X, start_Y, _map, the_moving_unit, _entity_optional_t
 
 
 
-def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_optional_target_id = None):
+def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, the_moving_unit._entity_optional_target_id = None):
     if not (0 <= start_X < _map.nb_CellX * CELL_DIVISION and 0 <= start_Y < _map.nb_CellY* CELL_DIVISION and 
             0 <= end_X < _map.nb_CellX* CELL_DIVISION and 0 <= end_Y < _map.nb_CellY* CELL_DIVISION):
         return None # Invalid start or end
@@ -240,8 +254,8 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_option
         
     start_node = Node(start_X, start_Y)
     
-    if _entity_optional_target_id:
-        closest_availalbe_cell = arrounding_cells(start_X, start_Y, _map, the_moving_unit, _entity_optional_target_id)
+    if the_moving_unit._entity_optional_target_id:
+        closest_availalbe_cell = arrounding_cells(start_X, start_Y, _map, the_moving_unit, the_moving_unit._entity_optional_target_id)
 
         if closest_availalbe_cell == None: # not avaible cells
             return None
@@ -281,7 +295,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_option
             path = []
 
             
-            if _entity_optional_target_id:
+            if the_moving_unit._entity_optional_target_id:
                 ent = []
 
                 for offsetY in range(-1, 2):
@@ -304,7 +318,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_option
                             if current_set:
 
                                 for entity in current_set:
-                                    if entity == _entity_optional_target_id:
+                                    if entity == the_moving_unit._entity_optional_target_id:
                                         print("marra")
                                         ent.append((currentX, currentY))
                     
@@ -447,7 +461,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_option
 
 
 """
-def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_optional_target_id = None):
+def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, the_moving_unit._entity_optional_target_id = None):
     if not (0 <= start_X < _map.nb_CellX and 0 <= start_Y < _map.nb_CellY and 
             0 <= end_X < _map.nb_CellX and 0 <= end_Y < _map.nb_CellY):
         return None # Invalid start or end
@@ -516,7 +530,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, _entity_option
                         
                         for entity in entities:
                             #if entity != the_moving_unit:
-                            if (entity == _entity_optional_target_id):
+                            if (entity == the_moving_unit._entity_optional_target_id):
                                 cell_walkable = True 
                                 collided_with_entity = True
                                 print("collided")

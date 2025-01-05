@@ -127,7 +127,7 @@ class Map:
                 _entity.move_position.y = _entity.position.y # well when the unit is added its target pos to move its it self se it doesnt move
                 
             else:
-                _entity.box_size += TILE_SIZE_2D/(2 * 2) # the factors used the box_size lines are to choosen values for a well scaled collision system with respec to the type and size of the entity
+                _entity.box_size += TILE_SIZE_2D/(2 * 1.5) # the factors used the box_size lines are to choosen values for a well scaled collision system with respec to the type and size of the entity
             
         _entity.linked_map = self
 

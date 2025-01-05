@@ -66,13 +66,14 @@ class Projectile:
 
                     progress_ratio = (self.time_to_get_target - self.time_left)/self.time_to_get_target
                     # f(x) = -a*(x**(b) - 0.5)**2 + peak , the function that returns the value of z where x is the ratio, lets find a 
-
+                    # or f(x) = peak*(sqrt(1 - (x-0.5)**2/0.25))
                     a = self.projectile_peak/(0.5)**2
                     b = 2 
                     # f(progress_ratio)
                     self.position.z = -a*((progress_ratio)**(b) - 0.5)**2 + self.projectile_peak
                     
-
+                    #self.position.z = self.projectile_peak * math.sqrt(1 - (progress_ratio - 0.5)**2 / 0.25)
+                    
                     self.time_left -= time_elapsed
                     self.distance_left = - self.distance_left - distance_to_add
                     self.last_time_changed_pos = current_time

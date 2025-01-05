@@ -41,6 +41,17 @@ class PVector2:
         delta_x = other_vector.x - self.x
         delta_y = other_vector.y - self.y
         return (math.atan2(delta_y, delta_x) + 2*math.pi)%(2*math.pi)
+    def magnitude(self):
+        
+        return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    def normalize(self):
+        """Normalize the vector so that its magnitude is 1."""
+        length = self.magnitude()
+        if length != 0:  # Avoid division by zero
+            self.x /= length
+            self.y /= length
+        
     
     def save(self):
 

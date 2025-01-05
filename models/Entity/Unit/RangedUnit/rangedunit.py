@@ -48,50 +48,55 @@ class RangedUnit(Unit):
 
     def try_to_attack(self,current_time, camera, screen):
         if (self.state != UNIT_DYING):
-            entity = self.linked_map.get_entity_by_id(self.entity_target_id)
             
-            if (entity != None):
+            if self.entity_target_id != None:
+                entity = self.linked_map.get_entity_by_id(self.entity_target_id)
                 
-                if (entity.team != 0 and entity.team != self.team):
+                if (entity != None):
                     
-                    if (entity.is_dead() == False):
+                    if (entity.team != 0 and entity.team != self.team):
                         
-                        
-                        if not(self.check_range_with_target):
+                        if (entity.is_dead() == False):
                             
-                            if (self.check_in_range_with(entity)):
+                            
+                            if not(self.check_range_with_target):
                                 
-                                self.check_range_with_target = True
-                                
-                                
-                                
-                            else:
-                                
-                                if not(self.state == UNIT_WALKING): # we need to reach it in range
-                                    self.change_state(UNIT_WALKING)
-                                self.move_position.x = entity.position.x
-                                self.move_position.y = entity.position.y
+                                if (self.check_in_range_with(entity)):
+                                    
+                                    self.check_range_with_target = True
+                                    
+                                    
+                                    
+                                else:
+                                    
+                                    if not(self.state == UNIT_WALKING): # we need to reach it in range
+                                        self.change_state(UNIT_WALKING)
 
-                                self.first_time_pass = True
-                                self.try_to_move(current_time,camera,screen, entity.id)
-                        else: # enemy in range  
-                            self.target_direction = self.position.alpha_angle(entity.position)
-                            dist_to_entity = self.position.abs_distance(entity.position)
+                                    self._entity_optional_target_id = entity.id
+                                    self.move_position.x = entity.position.x
+                                    self.move_position.y = entity.position.y
+                                    
 
-                            if (dist_to_entity <= (self.range * (entity.sq_size) * self.linked_map.tile_size_2d + entity.box_size + self.box_size)):
-                                self.try_to_damage(current_time, entity)
-                            else:
-                                self.check_range_with_target = False
-                                if not(self.state == UNIT_IDLE):
-                                    self.change_state(UNIT_IDLE)
-                    
-                    
+                                    
+
+                                    self.first_time_pass = True
+                                    self.try_to_move(current_time,camera,screen)
+                            else: # enemy in range  
+                                self.target_direction = self.position.alpha_angle(entity.position)
+                                dist_to_entity = self.position.abs_distance(entity.position)
+
+                                if (dist_to_entity <= (self.range * (entity.sq_size) * self.linked_map.tile_size_2d + entity.box_size + self.box_size)):
+                                    self.try_to_damage(current_time, entity)
+                                else:
+                                    self.check_range_with_target = False
+                                    if not(self.state == UNIT_IDLE):
+                                        self.change_state(UNIT_IDLE)
+                        
+                        
+                        else:
+                            if not(self.state == UNIT_IDLE):
+                                self.change_state(UNIT_IDLE)
                     else:
                         if not(self.state == UNIT_IDLE):
-                            self.change_state(UNIT_IDLE)
-                else:
-                    if not(self.state == UNIT_IDLE):
-                            self.change_state(UNIT_IDLE)
-            else:        
-                if not(self.state == UNIT_IDLE):
-                    self.change_state(UNIT_IDLE)
+                                self.change_state(UNIT_IDLE)
+                

@@ -1,6 +1,7 @@
 from Entity.entity import *
 from AITools.a_star import *
 from math import floor, sqrt
+import random
 
 class Unit(Entity):
 
@@ -50,8 +51,10 @@ class Unit(Entity):
         self.linked_map = None
         self.HitboxClass = Circle
 
+        self._entity_optional_target_id = None
+        
     def adapte_attack_delta_time(self):
-        if self.attack_speed > 1:
+        if self.attack_speed >= 1:
             self.attack_delta_time = (self.attack_speed - 1) * ONE_SEC
         else:
             self.attack_delta_time = self.attack_speed * ONE_SEC
@@ -128,16 +131,20 @@ class Unit(Entity):
 
 
 
-    def move_to_position(self,current_time, camera, screen, _entity_optional_target_id = None):
+    def move_to_position(self,current_time, camera, screen):
         if (current_time - self.last_time_moved > ONE_SEC/(self.move_per_sec*self.speed)):
 
             self.last_time_moved = current_time
-            
+            collided, avoidance_force = self.check_collision_with_other_units()
+        
+            # Apply avoidance force if collision is detected
+            if collided:
+                self.position += avoidance_force
 
             if self.path_to_position != None and self.current_to_position == self.move_position:
                 
-                if (self.check_collision_around(_entity_optional_target_id)):
-                    self.check_and_set_path(_entity_optional_target_id)
+                if (self.check_collision_around()):
+                    self.check_and_set_path()
 
                 end_index = None
                 end_path_X = None
@@ -193,12 +200,12 @@ class Unit(Entity):
                     if self.position == current_path_node_position:
                         self.path_to_position = self.path_to_position[1:]
             else:
-                self.check_and_set_path(_entity_optional_target_id)
+                self.check_and_set_path()
 
             self.track_cell_position()
 
-    def check_and_set_path(self, _entity_optional_target_id):
-        self.path_to_position = A_STAR(self.cell_X, self.cell_Y, math.floor(self.move_position.x/TILE_SIZE_2D), math.floor(self.move_position.y/TILE_SIZE_2D), self.linked_map,self, _entity_optional_target_id)
+    def check_and_set_path(self):
+        self.path_to_position = A_STAR(self.cell_X, self.cell_Y, math.floor(self.move_position.x/TILE_SIZE_2D), math.floor(self.move_position.y/TILE_SIZE_2D), self.linked_map,self)
                 
         if self.path_to_position != None:
             self.current_to_position = PVector2(self.move_position.x, self.move_position.y)
@@ -206,28 +213,72 @@ class Unit(Entity):
         else : 
             self.change_state(UNIT_IDLE)
 
-    def try_to_move(self, current_time,camera, screen, _entity_optional_target_id = None):
+    def try_to_move(self, current_time,camera, screen):
         if (self.state != UNIT_DYING):
-            if self.position == self.move_position:
-                if not(self.state == UNIT_IDLE):
-                    self.change_state(UNIT_IDLE)
-            else:
-                if not(self.state == UNIT_WALKING):
-                    self.change_state(UNIT_WALKING)
-                self.move_to_position(current_time, camera, screen ,_entity_optional_target_id)
+            if self.state == UNIT_WALKING:
+                if self.position == self.move_position:
+                    if not(self.state == UNIT_IDLE):
+                        self.change_state(UNIT_IDLE)
+                else:
+                    if not(self.state == UNIT_WALKING):
+                        self.change_state(UNIT_WALKING)
+                    self.move_to_position(current_time, camera, screen )
+    
+    def check_collision_with_other_units(self):
+        collided = False
+        avoidance_force = PVector2(0, 0)  # We will store the avoidance force here
+
+        # Check surrounding cells for nearby units
+        for offsetY in [-1, 0, 1]:
+            for offsetX in [-1, 0, 1]:
+
+                currentY = self.cell_Y + offsetY
+                currentX = self.cell_X + offsetX
+
                 
+                current_region = self.linked_map.entity_matrix.get((currentY//self.linked_map.region_division, currentX//self.linked_map.region_division))
+
+                if current_region:
+                    current_set = current_region.get((currentY, currentX))
+
+                    if current_set:
+                        for entity in current_set:
+
+                            if entity.id != self.id and isinstance(entity, Unit):
+                                distance = self.position.abs_distance(entity.position)
+                                print(distance)
+                                # If the distance between units is smaller than a threshold, avoid collision
+                                if distance < COLLISION_THRESHOLD:
+                                    # Calculate the direction to push the unit away from the other
+                                    diff = self.position - entity.position
+                                    diff.normalize()  # Normalize to get direction
+                                    diff *= 2/distance  # Stronger force the closer the units are
+                                    avoidance_force += diff
+                                    collided = True
+
+        return collided, avoidance_force
+
     def move_to(self, position):
         if (position.x>=0 and position.y>=0 and position.x<=self.linked_map.tile_size_2d*self.linked_map.nb_CellX and position.y<=self.linked_map.tile_size_2d*self.linked_map.nb_CellY):
             if not(self.state == UNIT_WALKING):
                 self.change_state(UNIT_WALKING)
             self.move_position.x = position.x
             self.move_position.y = position.y
+        else:
+            if not(self.state == UNIT_IDLE):
+                self.change_state(UNIT_IDLE)
         
     def change_state(self, new_state):
+        self.state = new_state
+
         if new_state != UNIT_ATTACKING and new_state != UNIT_DYING:
-            self.animation_frame = self.animation_frame % 30
+            self.animation_frame = random.randint(0, self.len_current_animation_frames() - 1)
         else:
-            self.animation_frame = 0 # we put the animationframe index to 0 in order
+            self.animation_frame = 0 # we put the animationframe index to 0 for attack and dying or task
+        
+        if new_state == UNIT_IDLE:
+            self.path_to_position = None
+            self._entity_optional_target_id = None
         if self.will_attack:
             self.will_attack = False
         # to avoid index out of bound in the animationframes list, 
@@ -237,11 +288,14 @@ class Unit(Entity):
         # the state changes, now it is moving, but the frame index is 58
         # and move has max 30, 58 > 30 ==> unsupported type (Nonetype)
 
-        self.state = new_state  
+          
 
     def attack_entity(self, entity_id):
             
         self.entity_target_id = entity_id
+        if self.entity_target_id == None:
+            if not(self.state == UNIT_IDLE):
+                self.change_state(UNIT_IDLE)
         #self.last_time_attacked = pygame.time.get_ticks()
         self.check_range_with_target = False
 
@@ -261,7 +315,7 @@ class Unit(Entity):
 
      
 
-    def check_collision_around(self,_entity_optional_target_id = None): # this function is only made to se if we need to recalculate the path for the unit
+    def check_collision_around(self): # this function is only made to se if we need to recalculate the path for the unit
         collided = False
 
         for offsetY in [-1, 0, 1]:
@@ -278,7 +332,7 @@ class Unit(Entity):
 
                         if (current_set):
                             for entity in current_set:
-                                if entity.id != _entity_optional_target_id:
+                                if entity.id != self._entity_optional_target_id:
                                     if not(entity.walkable):
                                         if (self.collide_with_entity(entity)):
                                             collided = True # all we need is to get one collision with a non walkable entity
@@ -300,6 +354,7 @@ class Unit(Entity):
     def update(self, current_time, camera, screen):
         self.update_animation_frame(current_time)
         self.try_to_attack(current_time, camera, screen)
+        self.try_to_move(current_time, camera, screen)
         self.update_direction(current_time)
 
     def update_direction(self, current_time):

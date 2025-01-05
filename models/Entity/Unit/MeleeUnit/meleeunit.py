@@ -8,6 +8,7 @@ class MeleeUnit(Unit):
         
         if self.first_time_pass or (current_time - self.last_time_attacked > self.attack_delta_time):
             if (self.first_time_pass):
+                print("using free pas")
                 self.first_time_pass = False
             if not(self.state == UNIT_ATTACKING):
                 self.change_state(UNIT_ATTACKING)
@@ -48,16 +49,19 @@ class MeleeUnit(Unit):
                                 else:
                                     if not(self.state == UNIT_WALKING):
                                         self.change_state(UNIT_WALKING)
+
+                                    self._entity_optional_target_id = entity.id
                                     self.move_position.x = entity.position.x
                                     self.move_position.y = entity.position.y
+                                    
 
                                     self.first_time_pass = True
-                                    self.try_to_move(current_time, camera, screen , entity)
+                                    self.try_to_move(current_time, camera, screen )
                             else: # collided 
                                 self.target_direction = self.position.alpha_angle(entity.position)
                                 dist_to_entity = self.position.abs_distance(entity.position)
 
-                                if (dist_to_entity <= ((entity.sq_size/2) * TILE_SIZE_2D + entity.box_size + self.box_size)):
+                                if (dist_to_entity <= ((entity.sq_size) * TILE_SIZE_2D + entity.box_size + self.box_size)):
                                     
                                     self.try_to_damage(current_time, entity)
                                 else:
@@ -70,10 +74,6 @@ class MeleeUnit(Unit):
                     else:
                         if not(self.state == UNIT_IDLE):
                             self.change_state(UNIT_IDLE)
-                else:
-                    if not(self.state == UNIT_IDLE):
-                        self.change_state(UNIT_IDLE)
-            else:
-                if not(self.state == UNIT_IDLE):
-                    self.change_state(UNIT_IDLE)
+                
+            
             

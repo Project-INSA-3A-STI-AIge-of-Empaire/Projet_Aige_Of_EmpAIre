@@ -100,10 +100,13 @@ class GameLoop:
                 else:
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if self.state.states == PLAY:
+                            x, y = self.state.camera.convert_from_isometric_2d(mouse_x, mouse_y)
+                            
                             entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
                             print(self.state.map.get_entity_by_id(entity_id))
                             for id in v_ids:
                                 self.state.map.get_entity_by_id(id).attack_entity(entity_id)
+                                #self.state.map.get_entity_by_id(id).move_to(PVector2(x,y))
                         if event.button == LEFT_CLICK:
                             self.state.mouse_held = True
                             
