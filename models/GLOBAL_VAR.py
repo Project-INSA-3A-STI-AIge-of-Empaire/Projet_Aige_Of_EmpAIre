@@ -283,7 +283,10 @@ STATES = {
     'h': UNIT_SATES,
     'a': UNIT_SATES,
     's': UNIT_SATES,
-    'v': UNIT_SATES
+    'v': UNIT_SATES,
+    'ca': UNIT_SATES,
+    'sm': UNIT_SATES,
+    'am':UNIT_SATES
 }
 
 WATER_MARK_SKIP = {

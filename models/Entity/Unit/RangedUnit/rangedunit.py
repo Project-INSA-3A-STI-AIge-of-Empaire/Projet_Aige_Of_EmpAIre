@@ -49,31 +49,31 @@ class RangedUnit(Unit):
     def try_to_attack(self,current_time, camera, screen):
         if (self.state != UNIT_DYING):
             entity = self.linked_map.get_entity_by_id(self.entity_target_id)
-            print(entity)
+            
             if (entity != None):
-                print("not none")
+                
                 if (entity.team != 0 and entity.team != self.team):
-                    print("different team")
+                    
                     if (entity.is_dead() == False):
-                        print("not dead")
+                        
                         
                         if not(self.check_range_with_target):
-                            print("not check")
+                            
                             if (self.check_in_range_with(entity)):
-                                print("now checked")
+                                
                                 self.check_range_with_target = True
                                 
-                                print(f"animation_frame:{self.animation_frame}")
+                                
                                 
                             else:
-                                print("will walk")
+                                
                                 if not(self.state == UNIT_WALKING): # we need to reach it in range
                                     self.change_state(UNIT_WALKING)
                                 self.move_position.x = entity.position.x
                                 self.move_position.y = entity.position.y
 
                                 self.first_time_pass = True
-                                self.try_to_move(current_time,camera,screen, entity)
+                                self.try_to_move(current_time,camera,screen, entity.id)
                         else: # enemy in range  
                             self.target_direction = self.position.alpha_angle(entity.position)
                             dist_to_entity = self.position.abs_distance(entity.position)

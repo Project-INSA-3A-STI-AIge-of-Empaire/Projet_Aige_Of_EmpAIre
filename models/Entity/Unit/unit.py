@@ -37,7 +37,7 @@ class Unit(Entity):
         self.last_time_update_direction = pygame.time.get_ticks()
 
         #self.last_time_collided = pygame.time.get_ticks()
-
+        self.walkable = True
         self.state = UNIT_IDLE
         self.attack_delta_time = None
 
@@ -97,9 +97,8 @@ class Unit(Entity):
                 if(live_entity_set):
 
                     for live_entity in live_entity_set:
-                        if isinstance(live_entity, Building) and not(live_entity.walkable) or \
-                            isinstance(live_entity, Resources):
-                                cell_free = False
+                        if not(live_entity.walkable):
+                            cell_free = False
             if cell_free:
                 uself = self.linked_map.remove_entity(self) # remove from the current cell
                 self.cell_X, self.cell_Y = live_cell_X, live_cell_Y # update the cell
@@ -129,7 +128,7 @@ class Unit(Entity):
 
 
 
-    def move_to_position(self,current_time, camera, screen, _entity_optional_target = None):
+    def move_to_position(self,current_time, camera, screen, _entity_optional_target_id = None):
         if (current_time - self.last_time_moved > ONE_SEC/(self.move_per_sec*self.speed)):
 
             self.last_time_moved = current_time
@@ -137,8 +136,8 @@ class Unit(Entity):
 
             if self.path_to_position != None and self.current_to_position == self.move_position:
                 
-                if (self.check_collision_around()):
-                    self.check_and_set_path(_entity_optional_target)
+                if (self.check_collision_around(_entity_optional_target_id)):
+                    self.check_and_set_path(_entity_optional_target_id)
 
                 end_index = None
                 end_path_X = None
@@ -194,12 +193,12 @@ class Unit(Entity):
                     if self.position == current_path_node_position:
                         self.path_to_position = self.path_to_position[1:]
             else:
-                self.check_and_set_path(_entity_optional_target)
+                self.check_and_set_path(_entity_optional_target_id)
 
             self.track_cell_position()
 
-    def check_and_set_path(self, _entity_optional_target):
-        self.path_to_position = A_STAR(self.cell_X, self.cell_Y, math.floor(self.move_position.x/TILE_SIZE_2D), math.floor(self.move_position.y/TILE_SIZE_2D), self.linked_map,self, _entity_optional_target)
+    def check_and_set_path(self, _entity_optional_target_id):
+        self.path_to_position = A_STAR(self.cell_X, self.cell_Y, math.floor(self.move_position.x/TILE_SIZE_2D), math.floor(self.move_position.y/TILE_SIZE_2D), self.linked_map,self, _entity_optional_target_id)
                 
         if self.path_to_position != None:
             self.current_to_position = PVector2(self.move_position.x, self.move_position.y)
@@ -207,7 +206,7 @@ class Unit(Entity):
         else : 
             self.change_state(UNIT_IDLE)
 
-    def try_to_move(self, current_time,camera, screen, _entity_optional_target = None):
+    def try_to_move(self, current_time,camera, screen, _entity_optional_target_id = None):
         if (self.state != UNIT_DYING):
             if self.position == self.move_position:
                 if not(self.state == UNIT_IDLE):
@@ -215,7 +214,7 @@ class Unit(Entity):
             else:
                 if not(self.state == UNIT_WALKING):
                     self.change_state(UNIT_WALKING)
-                self.move_to_position(current_time, camera, screen ,_entity_optional_target)
+                self.move_to_position(current_time, camera, screen ,_entity_optional_target_id)
                 
     def move_to(self, position):
         if (position.x>=0 and position.y>=0 and position.x<=self.linked_map.tile_size_2d*self.linked_map.nb_CellX and position.y<=self.linked_map.tile_size_2d*self.linked_map.nb_CellY):
@@ -262,7 +261,7 @@ class Unit(Entity):
 
      
 
-    def check_collision_around(self): # this function is only made to se if we need to recalculate the path for the unit
+    def check_collision_around(self,_entity_optional_target_id = None): # this function is only made to se if we need to recalculate the path for the unit
         collided = False
 
         for offsetY in [-1, 0, 1]:
@@ -279,14 +278,12 @@ class Unit(Entity):
 
                         if (current_set):
                             for entity in current_set:
-                                if isinstance(entity, Building) and not(entity.walkable):
-                                    if (self.collide_with_entity(entity)):
-                                        collided = True # all we need is to get one collision with a non walkable entity
-                                        break 
-                                elif isinstance(entity, Resources):
-                                    if (self.collide_with_entity(entity)):
-                                        collided = True 
-                                        break
+                                if entity.id != _entity_optional_target_id:
+                                    if not(entity.walkable):
+                                        if (self.collide_with_entity(entity)):
+                                            collided = True # all we need is to get one collision with a non walkable entity
+                                            break 
+                                    
                 if (collided):
                     break
             if (collided):

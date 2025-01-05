@@ -21,7 +21,7 @@ class Entity():
         self.image = None
         self.box_size = None
         self.HitboxClass = None
-
+        self.walkable = False
     def __str__(self):
         return f"ent<{self.representation},Y:{self.cell_Y},X:{self.cell_X},sz:{self.sq_size}>"
     

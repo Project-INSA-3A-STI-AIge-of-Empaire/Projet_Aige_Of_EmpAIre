@@ -85,7 +85,7 @@ class Projectile:
                 self.reached_target = True 
     def update_cell_on_map(self):
         if self.changed_cell_position():
-            print("changing_cell")
+            
             self.change_cell_on_map()
     
     def is_in_region(self, reg_Y, reg_X):
