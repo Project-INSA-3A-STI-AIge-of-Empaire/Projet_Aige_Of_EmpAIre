@@ -70,6 +70,38 @@ class Unit(Entity):
         
         return True 
 
+    def update_path_nodes(self, entity):
+        if self.path_to_position:
+            
+            for Y_to_maybe_remove in range(entity.cell_Y, entity.cell_Y - entity.sq_size, -1):
+                for X_to_maybe_remove in range(entity.cell_X, entity.cell_X - entity.sq_size, -1):
+                    try:
+                        
+                        current_node = self.path_to_position[0]
+
+                        if (current_node[0] == X_to_maybe_remove and current_node[1] == Y_to_maybe_remove):
+                            self.path_to_position = self.path_to_position[1:]
+                    except IndexError as e:
+                        print(e)
+            
+            if self.path_to_position:
+                around_path = A_STAR(self.cell_X, self.cell_Y, self.path_to_position[0][0], self.path_to_position[0][1], self.linked_map, self)
+
+                if around_path:
+                    around_path = around_path[1:len(around_path) - 1]
+
+                    self.path_to_position = around_path + self.path_to_position
+
+            else:
+                self.move_position.x = self.position.x
+                self.move_position.y = self.position.y
+
+                #self.current_to_position = None
+
+
+
+
+            
     def len_current_animation_frames(self):
         return len(self.image.get(self.state,None).get(0, None)) #the length changes with respect to the state but the zoom and direction does not change the animation frame count
  
@@ -135,7 +167,7 @@ class Unit(Entity):
         if (current_time - self.last_time_moved > ONE_SEC/(self.move_per_sec*self.speed)):
 
             self.last_time_moved = current_time
-            collided, avoidance_force = self.check_collision_with_other_units()
+            collided, avoidance_force = self.avoid_others()
         
             # Apply avoidance force if collision is detected
             if collided:
@@ -143,8 +175,6 @@ class Unit(Entity):
 
             if self.path_to_position != None and self.current_to_position == self.move_position:
                 
-                if (self.check_collision_around()):
-                    self.check_and_set_path()
 
                 end_index = None
                 end_path_X = None
@@ -224,7 +254,7 @@ class Unit(Entity):
                         self.change_state(UNIT_WALKING)
                     self.move_to_position(current_time, camera, screen )
     
-    def check_collision_with_other_units(self):
+    def avoid_others(self):
         collided = False
         avoidance_force = PVector2(0, 0)  # We will store the avoidance force here
 
@@ -244,17 +274,32 @@ class Unit(Entity):
                     if current_set:
                         for entity in current_set:
 
-                            if entity.id != self.id and isinstance(entity, Unit):
+                            if entity.id != self.id  and entity.id != self._entity_optional_target_id:
                                 distance = self.position.abs_distance(entity.position)
                                 print(distance)
-                                # If the distance between units is smaller than a threshold, avoid collision
-                                if distance < COLLISION_THRESHOLD:
-                                    # Calculate the direction to push the unit away from the other
-                                    diff = self.position - entity.position
-                                    diff.normalize()  # Normalize to get direction
-                                    diff *= 2/distance  # Stronger force the closer the units are
-                                    avoidance_force += diff
-                                    collided = True
+                                if isinstance(entity, Unit):
+                                    # If the distance between units is smaller than a threshold, avoid collision
+                                    if distance < COLLISION_THRESHOLD:
+                                        # Calculate the direction to push the unit away from the other
+                                        diff = self.position - entity.position
+                                        diff.normalize()  # Normalize to get direction
+                                        diff *= 1/distance  # Stronger force the closer the units are
+                                        avoidance_force += diff
+                                        collided = True
+                                elif not(entity.walkable):
+                                    
+                                    if self.collide_with_entity(entity):
+
+                                        self.update_path_nodes(entity)
+
+                                        diff = self.position - entity.position
+                                        diff.normalize()  # Normalize to get direction
+                                        diff *= TILE_SIZE_2D/distance  # Stronger force the closer the units are
+                                        avoidance_force += diff
+                                        collided = True
+
+
+                                    
 
         return collided, avoidance_force
 
@@ -378,3 +423,4 @@ class Unit(Entity):
                     self.direction += max(-rotation_speed, min(rotation_speed, delta_angle))
 
                 self.direction %= (2 * math.pi)  # Normalize within [0, 2π]
+    

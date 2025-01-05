@@ -1,5 +1,6 @@
 import math
 import json
+import random
 from GLOBAL_VAR import TILE_SIZE_2D
 def is_almost(a, b, p=1e-7):
     return abs(a - b) < p
@@ -51,7 +52,13 @@ class PVector2:
         if length != 0:  # Avoid division by zero
             self.x /= length
             self.y /= length
-        
+    
+    @staticmethod
+    def random_direction():
+        # Generate a random angle in radians
+        angle = random.uniform(0, 2 * math.pi)
+        # Create a unit vector pointing in that direction
+        return PVector2(math.cos(angle), math.sin(angle))
     
     def save(self):
 

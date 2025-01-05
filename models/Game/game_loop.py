@@ -87,7 +87,7 @@ class GameLoop:
                         print(p1)
                         p2 = self.state.map.players_dict.get(2)
                         print(p2)
-                        v_ids = p1.get_entities_by_class(['ca'])
+                        v_ids = p1.get_entities_by_class(['h'])
 
                         
 
@@ -102,20 +102,26 @@ class GameLoop:
                         if self.state.states == PLAY:
                             x, y = self.state.camera.convert_from_isometric_2d(mouse_x, mouse_y)
                             
-                            entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
-                            print(self.state.map.get_entity_by_id(entity_id))
-                            for id in v_ids:
-                                self.state.map.get_entity_by_id(id).attack_entity(entity_id)
-                                #self.state.map.get_entity_by_id(id).move_to(PVector2(x,y))
-                        if event.button == LEFT_CLICK:
-                            self.state.mouse_held = True
+                           
                             
-                            #villager.drop_to_entity(entity_id)
+                                #self.state.map.get_entity_by_id(id).attack_entity(entity_id)
+                            if event.button == LEFT_CLICK:
+                                self.state.mouse_held = True
+                                entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
 
-                            #ar.train_unit(player, current_time, 'v')
-                        elif event.button == RIGHT_CLICK:
-                            print("a")
-                            #villager.collect_entity(entity_id)
+                                for id in v_ids:
+                                    self.state.map.get_entity_by_id(id).attack_entity(entity_id)
+                                #villager.drop_to_entity(entity_id)
+
+                                #ar.train_unit(player, current_time, 'v')
+                            elif event.button == RIGHT_CLICK:
+                                Y, X = math.floor(y/TILE_SIZE_2D), math.floor(x/TILE_SIZE_2D)
+                                
+                                house = House(Y, X, None, 2)
+                                print(house)
+                                self.state.map.add_entity(house)
+                                print("a")
+                                #villager.collect_entity(entity_id)
 
 
                         print(f"screen( width:{SCREEN_WIDTH}, {SCREEN_HEIGHT}), mouse( x:{mouse_x}, y:{mouse_y})")
