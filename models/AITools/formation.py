@@ -2,9 +2,10 @@
 import math
 from GLOBAL_VAR import *
 from Entity.Unit.unit import Unit
-
+from shape import *
 FORMATION_PADDING = 20
 
+BOX_DEFAULT = 10
 class FormationNode:
 
     def __init__(self, position, direction = None):
@@ -41,9 +42,51 @@ class FormationNode:
         self.direction = parent.direction
 
         # this does all the linking to the nodes so they follow the leader
+    """
+    def avoid_others(self, _map):
+            if self != None:
+                cell_Y, cell_X = math.floor(self.position.y/_map.tile_size_2d), math.floor(self.position.x/_map.tile_size_2d)
+                
+                collided = False
+                avoidance_force = PVector2(0, 0)  # We will store the avoidance force here
+                box_size = BOX_DEFAULT
+                
+                if self.unit_id:
+                    unit = _map.get_entity_by_id(self.unit_id)
 
-    
+                    box_size = unit.box_size
 
+                # Check surrounding cells for nearby units
+                for offsetY in [-1, 0, 1]:
+                    for offsetX in [-1, 0, 1]:
+
+                        currentY = cell_Y + offsetY
+                        currentX = cell_X + offsetX
+
+                        
+                        current_region = _map.entity_matrix.get((currentY//_map.region_division, currentX//_map.region_division))
+
+                        if current_region:
+                            current_set = current_region.get((currentY, currentX))
+
+                            if current_set:
+                                for entity in current_set:
+
+                                    if entity.id != self.unit_id:
+                                        distance = self.position.abs_distance(entity.position)
+                                        if not(entity.walkable):
+                                            
+                                            if entity.collide_with_shape(Circle(self.position.x, self.position.y, box_size)):
+
+                                                diff = self.position - entity.position
+                                                diff.normalize()  # Normalize to get direction
+                                                diff *= 2 *_map.tile_size_2d/distance  # Stronger force the closer the units are
+                                                avoidance_force += diff
+                                                collided = True
+
+                return collided, avoidance_force
+            return None, None
+        """
 
 
 class Formation:
@@ -64,8 +107,8 @@ class Formation:
         id_giver_list = units_id_list
 
         for wings_depth in range(depth, 0, -1):
-            id_giver_list = Formation.init_wings(current_node, wings_depth,id_giver_list, child="left")
-            id_giver_list = Formation.init_wings(current_node, wings_depth,id_giver_list, child="right")
+            id_giver_list = Formation.init_wings(current_node, wings_depth,id_giver_list, child="left", _linked_map = linked_map)
+            id_giver_list = Formation.init_wings(current_node, wings_depth,id_giver_list, child="right", _linked_map = linked_map)
 
             if wings_depth > 1:
                 new_node = FormationNode(PVector2(current_node.position.x- FORMATION_PADDING*1.5, current_node.position.y ))
@@ -73,8 +116,14 @@ class Formation:
                 if id_giver_list:
                     print("adding")
                     print(id_giver_list)
+
                     new_node.unit_id = id_giver_list[0]
                     id_giver_list = id_giver_list[1:]
+
+                    unit = linked_map.get_entity_by_id(new_node.unit_id)
+                    unit.role_in_group = UNIT_FOLLOWER
+                    unit.group_node = new_node
+
                 current_node = new_node
         
         instance.leader = leader
@@ -83,7 +132,7 @@ class Formation:
         return instance
 
     @staticmethod
-    def init_wings(parent, wings_depth,id_giver_list, child):
+    def init_wings(parent, wings_depth,id_giver_list, child, _linked_map):
         current_node = parent
         for _ in range(1, wings_depth + 1):
             print("adding")
@@ -95,6 +144,9 @@ class Formation:
             if id_giver_list:
                 new_node.unit_id = id_giver_list[0]
                 id_giver_list = id_giver_list[1:]
+                unit = _linked_map.get_entity_by_id(new_node.unit_id)
+                unit.role_in_group = UNIT_FOLLOWER
+                unit.group_node = new_node
         
             current_node = new_node  # Move to the newly created node
 
@@ -107,7 +159,6 @@ class Formation:
                 if node.is_leader == False: 
                     node.position.rotate_with_respect_to(node.leader.direction - node.direction, node.leader.position) #rotate the position of the node 
                     node.direction = node.leader.direction # and set to the new direction
-                
                 update_direction(node.left)
                 update_direction(node.middle)
                 update_direction(node.right)
@@ -120,13 +171,12 @@ class Formation:
 
             if node != None :
                 
+                if node.is_leader == False:
+                    amountx = math.cos(node.direction) * scale
+                    amounty = math.sin(node.direction) * scale
 
-                amountx = math.cos(node.direction) * scale
-                amounty = math.sin(node.direction) * scale
-
-                node.position.x += amountx
-                node.position.y += amounty
-                    
+                    node.position.x += amountx
+                    node.position.y += amounty
                     
                 update_position(node.left, scale)
                 update_position(node.middle, scale)
@@ -160,3 +210,6 @@ class Formation:
                 recursive_node(node.right)
 
         recursive_node(self.leader)
+    
+    
+        

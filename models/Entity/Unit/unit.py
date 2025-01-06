@@ -42,8 +42,9 @@ class Unit(Entity):
         self.state = UNIT_IDLE
         self.attack_delta_time = None
 
-        self.linked_group = None
-        self.leader_of_a_group = False
+        self.linked_group = None # we need it if leader
+        self.role_in_group = None # specify the role in the group
+        self.group_node = None # if follower we node the node to move to it
 
         #animation attributes
         self.image = None
@@ -189,81 +190,94 @@ class Unit(Entity):
 
             self.last_time_moved = current_time
             collided, avoidance_force = self.avoid_others()
-        
+
             # Apply avoidance force if collision is detected
             if collided:
                 self.position += avoidance_force
 
-            if self.path_to_position != None and self.current_to_position == self.move_position:
-                
+            if self.role_in_group == UNIT_FOLLOWER:
+                self.target_direction = self.position.alpha_angle(self.move_position)
 
-                end_index = None
-                end_path_X = None
-                end_path_Y = None
-
-                to_target_directly = False
-
-                if self.path_to_position == {}:
-                    to_target_directly = True
-                elif len(self.path_to_position) == 1:
-                     # if we entered the last last cell we dont go to the center of the cell, straight to the position
-                    
-                    last_node, _ = next(iter(self.path_to_position.items())) 
-                    to_target_directly = (self.cell_X == last_node[1] and self.cell_Y == last_node[0])
-
-                if to_target_directly:
-                    self.target_direction = self.position.alpha_angle(self.move_position)
-
-                    amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                    amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                    if self.leader_of_a_group:
-                        self.linked_group.formation.leader.direction = self.target_direction
-                        self.linked_group.formation.update_formation_direction()
-                        self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)
-
-                    self.position.x += amount_x
-                    self.position.y += amount_y 
-
-                    if self.position == self.move_position:
-                        self.path_to_position = None
-                else:
-                    
-                    dbg_kl = list(self.path_to_position.keys())
-                    # for debugging purposes
-                    for i in range(len(dbg_kl) - 1):
-                        
-                        (Y1, X1) = dbg_kl[i]
-                        (Y2, X2) = dbg_kl[i + 1]
-                        
-                        
-                        iso_x1, iso_y1 = camera.convert_to_isometric_2d(X1 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y1 * TILE_SIZE_2D + TILE_SIZE_2D/2)
-                        iso_x2, iso_y2 = camera.convert_to_isometric_2d(X2 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y2 * TILE_SIZE_2D + TILE_SIZE_2D/2)
-                        
-                        # Draw a line between these two points
-                        pygame.draw.line(screen, (255, 0, 0), (iso_x1, iso_y1), (iso_x2, iso_y2), 2)
-                    
-
-
-                    current_node, _ = next(iter(self.path_to_position.items()))
-
-                    current_path_node_position = PVector2(current_node[1] * TILE_SIZE_2D + TILE_SIZE_2D/2, current_node[0] * TILE_SIZE_2D + TILE_SIZE_2D/2)
-                    self.target_direction = self.position.alpha_angle(current_path_node_position)
-                    
-
-                    amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                    amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                    
-                    if self.leader_of_a_group:
-                        self.linked_group.formation.leader.direction = self.target_direction
-                        self.linked_group.formation.update_formation_direction()
-                        self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)
-                    self.position.x += amount_x
-                    self.position.y += amount_y 
-
-                    if self.position == current_path_node_position:
-                        self.path_to_position.pop(current_node)
+                amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+                amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+            
+                self.position.x += amount_x
+                self.position.y += amount_y 
             else:
-                self.check_and_set_path()
+                if self.path_to_position != None and self.current_to_position == self.move_position:
+
+                    to_target_directly = False
+
+                    if self.path_to_position == {}:
+                        to_target_directly = True
+                    elif len(self.path_to_position) == 1:
+                        # if we entered the last last cell we dont go to the center of the cell, straight to the position
+                        
+                        last_node, _ = next(iter(self.path_to_position.items())) 
+                        to_target_directly = (self.cell_X == last_node[1] and self.cell_Y == last_node[0])
+
+                    if to_target_directly:
+                        self.target_direction = self.position.alpha_angle(self.move_position)
+                        
+                        amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+                        amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+                        self.position.x += amount_x
+                        self.position.y += amount_y 
+                        if self.role_in_group == UNIT_LEADER:
+
+                            self.linked_group.formation.leader.direction = self.target_direction
+                            self.linked_group.formation.leader.position.x = self.position.x
+                            self.linked_group.formation.leader.position.y = self.position.y
+
+                            self.linked_group.formation.update_formation_direction()
+                            self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)
+
+                        
+
+                        if self.position == self.move_position:
+                            self.path_to_position = None
+                    else:
+                        
+                        dbg_kl = list(self.path_to_position.keys())
+                        # for debugging purposes
+                        for i in range(len(dbg_kl) - 1):
+                            
+                            (Y1, X1) = dbg_kl[i]
+                            (Y2, X2) = dbg_kl[i + 1]
+                            
+                            
+                            iso_x1, iso_y1 = camera.convert_to_isometric_2d(X1 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y1 * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                            iso_x2, iso_y2 = camera.convert_to_isometric_2d(X2 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y2 * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                            
+                            # Draw a line between these two points
+                            pygame.draw.line(screen, (255, 0, 0), (iso_x1, iso_y1), (iso_x2, iso_y2), 2)
+                        
+
+
+                        current_node, _ = next(iter(self.path_to_position.items()))
+
+                        current_path_node_position = PVector2(current_node[1] * TILE_SIZE_2D + TILE_SIZE_2D/2, current_node[0] * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                        self.target_direction = self.position.alpha_angle(current_path_node_position)
+                        
+
+                        amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+                        amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+                        
+                        self.position.x += amount_x
+                        self.position.y += amount_y 
+                        if self.role_in_group == UNIT_LEADER:
+
+                            self.linked_group.formation.leader.direction = self.target_direction
+                            self.linked_group.formation.leader.position.x = self.position.x
+                            self.linked_group.formation.leader.position.y = self.position.y
+                            
+                            self.linked_group.formation.update_formation_direction()
+                            self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)
+
+                        if self.position == current_path_node_position:
+                            self.path_to_position.pop(current_node)
+                else:
+                    self.check_and_set_path()
 
             self.track_cell_position()
 
@@ -328,7 +342,7 @@ class Unit(Entity):
 
                                         diff = self.position - entity.position
                                         diff.normalize()  # Normalize to get direction
-                                        diff *= TILE_SIZE_2D/distance  # Stronger force the closer the units are
+                                        diff *= TILE_SIZE_2D/distance  
                                         avoidance_force += diff
                                         collided = True
 

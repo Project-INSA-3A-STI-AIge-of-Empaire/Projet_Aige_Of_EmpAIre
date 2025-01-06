@@ -82,7 +82,7 @@ MODE_GENERATION = {
         "entities":{
             
             "T":3,
-            "ca":15,
+            "ca":40,
             "B":2,
             "S":2,
             "A":2
@@ -99,6 +99,9 @@ UNIT_WALKING = 1
 UNIT_ATTACKING = 2
 UNIT_DYING = 3
 UNIT_TASK = 4
+
+UNIT_LEADER = 0
+UNIT_FOLLOWER = 1
 
 BUILDING_INPROGRESS= 0
 BUILDING_ACTIVE = 1

@@ -15,13 +15,14 @@ class Group:
         self.linked_map = linked_map
         self.action = None
         leader = linked_map.get_entity_by_id(self.leader_id)
-        leader.leader_of_a_group = True
+        leader.role_in_group = UNIT_LEADER
         
         leader.linked_group = self
         self.formation = Formation.Create(PVector2(leader.position.x, leader.position.y), leader.direction, calc_depth_from_unit_num(len(units_id_list)),units_id_list, linked_map)
 
 
     def update(self):
+        
         self.formation.units_follow_formation()
     
     def move_to(self, position):
