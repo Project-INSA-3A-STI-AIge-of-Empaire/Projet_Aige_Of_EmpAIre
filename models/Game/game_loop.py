@@ -87,11 +87,10 @@ class GameLoop:
                         print(p1)
                         p2 = self.state.map.players_dict.get(2)
                         print(p2)
-                        v_ids = p1.get_entities_by_class(['h'])
+                        v_ids = p1.get_entities_by_class(['ca'])
+                        group = Group(v_ids, self.state.map)
 
-                        
-
-                        
+                        group.formation.display()
                         self.state.states = PLAY
                 if self.state.states == PAUSE:
                      if event.type == pygame.MOUSEBUTTONDOWN:
@@ -107,17 +106,17 @@ class GameLoop:
                                 #self.state.map.get_entity_by_id(id).attack_entity(entity_id)
                             if event.button == LEFT_CLICK:
                                 self.state.mouse_held = True
-                                entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
-
-                                for id in v_ids:
-                                    self.state.map.get_entity_by_id(id).attack_entity(entity_id)
+                                #entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
+                                group.move_to(PVector2(x, y))
+                                #for id in v_ids:
+                                #    self.state.map.get_entity_by_id(id).attack_entity(entity_id)
                                 #villager.drop_to_entity(entity_id)
 
                                 #ar.train_unit(player, current_time, 'v')
                             elif event.button == RIGHT_CLICK:
                                 Y, X = math.floor(y/TILE_SIZE_2D), math.floor(x/TILE_SIZE_2D)
                                 
-                                house = House(Y, X, None, 2)
+                                house = ArcheryRange(Y, X, None, 2)
                                 print(house)
                                 self.state.map.add_entity(house)
                                 print("a")
@@ -228,6 +227,7 @@ class GameLoop:
                     self.state.map.terminal_display(current_time, self.state.terminal_camera)
 
                 self.state.map.update_all_events(current_time, self.state.camera, self.screen)
+                group.update()
                 """
                 villager.try_to_attack(current_time, self.state.camera)
                 villager.try_to_drop(current_time, self.state.camera)

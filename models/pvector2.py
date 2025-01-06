@@ -52,7 +52,21 @@ class PVector2:
         if length != 0:  # Avoid division by zero
             self.x /= length
             self.y /= length
-    
+
+    def rotate_with_respect_to(self, theta, other):
+        px_translated = self.x - other.x
+        py_translated = self.y - other.y
+        
+        # Apply rotation using the 2D rotation matrix
+        px_rot = px_translated * math.cos(theta) - py_translated * math.sin(theta)
+        py_rot = px_translated * math.sin(theta) + py_translated * math.cos(theta)
+        
+        # Translate the point back
+        px_rot += other.x
+        py_rot += other.y
+        
+        self.x = px_rot
+        self.y = py_rot
     @staticmethod
     def random_direction():
         # Generate a random angle in radians

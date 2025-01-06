@@ -2,6 +2,7 @@ from GameField.cell import *
 from GLOBAL_IMPORT import *
 from ImageProcessingDisplay.minimap import *
 from AITools.isorange import *
+
 import random 
 import math
 
@@ -88,9 +89,13 @@ class Map:
             
             return 0 # to check if all the cells that will be occupied by the entity are in the map
         
-       
-        for Y_to_check in range(_entity.cell_Y,_entity.cell_Y - _entity.sq_size, -1):
-            for X_to_check in range(_entity.cell_X,_entity.cell_X - _entity.sq_size, -1):
+        cell_padding = 0
+
+        if not(isinstance(_entity, Unit)):
+            cell_padding = 1
+        
+        for Y_to_check in range(_entity.cell_Y,_entity.cell_Y - _entity.sq_size - cell_padding, -1): # we add minus 1 cause we need at least one cell free so that the units can reach this target
+            for X_to_check in range(_entity.cell_X,_entity.cell_X - _entity.sq_size - cell_padding, -1):
                 
                 if self.check_cell(Y_to_check, X_to_check):
                     return 0 # not all the cells are free to put the entity 

@@ -42,6 +42,9 @@ class Unit(Entity):
         self.state = UNIT_IDLE
         self.attack_delta_time = None
 
+        self.linked_group = None
+        self.leader_of_a_group = False
+
         #animation attributes
         self.image = None
         self.animation_frame = 0
@@ -75,22 +78,40 @@ class Unit(Entity):
             
             for Y_to_maybe_remove in range(entity.cell_Y, entity.cell_Y - entity.sq_size, -1):
                 for X_to_maybe_remove in range(entity.cell_X, entity.cell_X - entity.sq_size, -1):
-                    try:
-                        
-                        current_node = self.path_to_position[0]
-
-                        if (current_node[0] == X_to_maybe_remove and current_node[1] == Y_to_maybe_remove):
-                            self.path_to_position = self.path_to_position[1:]
-                    except IndexError as e:
-                        print(e)
+                    
+                    self.path_to_position.pop((Y_to_maybe_remove, X_to_maybe_remove), None)
+                    
             
+
             if self.path_to_position:
-                around_path = A_STAR(self.cell_X, self.cell_Y, self.path_to_position[0][0], self.path_to_position[0][1], self.linked_map, self)
+                current_node, _ = next(iter(self.path_to_position.items()))
+                
+                found_around = True
+                next_entity = None
 
-                if around_path:
-                    around_path = around_path[1:len(around_path) - 1]
+                region = self.linked_map.entity_matrix.get((current_node[0]//self.linked_map.region_division, current_node[1]//self.linked_map.region_division), None)
+                if region:
 
-                    self.path_to_position = around_path + self.path_to_position
+                    current_set = region.get((current_node[0], current_node[1]), None)
+                    if current_set:
+                        for entity in current_set:
+
+                            if entity.id != self._entity_optional_target_id:
+
+                                if not(entity.walkable):
+                                    found_around = False
+                                    next_entity = entity
+                                    break
+                
+                if found_around:
+                    around_path = A_STAR(self.cell_X, self.cell_Y, current_node[1], current_node[0], self.linked_map, self, pass_flags = 1)
+
+                    if around_path:
+                        current_node, _ = next(iter(around_path.items()))
+                        around_path.pop(current_node)
+                        self.path_to_position = around_path | self.path_to_position
+                else:
+                    self.update_path_nodes(next_entity)
 
             else:
                 self.move_position.x = self.position.x
@@ -180,19 +201,26 @@ class Unit(Entity):
                 end_path_X = None
                 end_path_Y = None
 
-                if self.path_to_position: # if not empty 
-                    end_index = len(self.path_to_position) - 1
-                    end_path_X = self.path_to_position[end_index][0]
-                    end_path_Y = self.path_to_position[end_index][1]
+                to_target_directly = False
 
-                if self.path_to_position == [] or (self.cell_X == end_path_X and self.cell_Y == end_path_Y): # if we entered the last last cell we dont go to the center of the cell, straight to the position
+                if self.path_to_position == {}:
+                    to_target_directly = True
+                elif len(self.path_to_position) == 1:
+                     # if we entered the last last cell we dont go to the center of the cell, straight to the position
                     
-                    
+                    last_node, _ = next(iter(self.path_to_position.items())) 
+                    to_target_directly = (self.cell_X == last_node[1] and self.cell_Y == last_node[0])
+
+                if to_target_directly:
                     self.target_direction = self.position.alpha_angle(self.move_position)
 
                     amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
                     amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                    
+                    if self.leader_of_a_group:
+                        self.linked_group.formation.leader.direction = self.target_direction
+                        self.linked_group.formation.update_formation_direction()
+                        self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)
+
                     self.position.x += amount_x
                     self.position.y += amount_y 
 
@@ -200,11 +228,12 @@ class Unit(Entity):
                         self.path_to_position = None
                 else:
                     
+                    dbg_kl = list(self.path_to_position.keys())
                     # for debugging purposes
-                    for i in range(len(self.path_to_position) - 1):
+                    for i in range(len(dbg_kl) - 1):
                         
-                        (X1, Y1) = self.path_to_position[i]
-                        (X2, Y2) = self.path_to_position[i + 1]
+                        (Y1, X1) = dbg_kl[i]
+                        (Y2, X2) = dbg_kl[i + 1]
                         
                         
                         iso_x1, iso_y1 = camera.convert_to_isometric_2d(X1 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y1 * TILE_SIZE_2D + TILE_SIZE_2D/2)
@@ -215,20 +244,24 @@ class Unit(Entity):
                     
 
 
+                    current_node, _ = next(iter(self.path_to_position.items()))
 
-
-                    current_path_node_position = PVector2(self.path_to_position[0][0] * TILE_SIZE_2D + TILE_SIZE_2D/2, self.path_to_position[0][1] * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                    current_path_node_position = PVector2(current_node[1] * TILE_SIZE_2D + TILE_SIZE_2D/2, current_node[0] * TILE_SIZE_2D + TILE_SIZE_2D/2)
                     self.target_direction = self.position.alpha_angle(current_path_node_position)
                     
 
                     amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
                     amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
                     
+                    if self.leader_of_a_group:
+                        self.linked_group.formation.leader.direction = self.target_direction
+                        self.linked_group.formation.update_formation_direction()
+                        self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)
                     self.position.x += amount_x
                     self.position.y += amount_y 
 
                     if self.position == current_path_node_position:
-                        self.path_to_position = self.path_to_position[1:]
+                        self.path_to_position.pop(current_node)
             else:
                 self.check_and_set_path()
 
@@ -239,7 +272,8 @@ class Unit(Entity):
                 
         if self.path_to_position != None:
             self.current_to_position = PVector2(self.move_position.x, self.move_position.y)
-            self.path_to_position = self.path_to_position[1:]
+            current_node, _ = next(iter(self.path_to_position.items()))
+            self.path_to_position.pop(current_node)
         else : 
             self.change_state(UNIT_IDLE)
 
@@ -276,7 +310,7 @@ class Unit(Entity):
 
                             if entity.id != self.id  and entity.id != self._entity_optional_target_id:
                                 distance = self.position.abs_distance(entity.position)
-                                print(distance)
+                
                                 if isinstance(entity, Unit):
                                     # If the distance between units is smaller than a threshold, avoid collision
                                     if distance < COLLISION_THRESHOLD:

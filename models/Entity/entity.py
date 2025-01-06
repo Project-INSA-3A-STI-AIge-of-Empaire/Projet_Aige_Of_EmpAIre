@@ -23,7 +23,7 @@ class Entity():
         self.HitboxClass = None
         self.walkable = False
     def __str__(self):
-        return f"ent<{self.representation},Y:{self.cell_Y},X:{self.cell_X},sz:{self.sq_size}>"
+        return f"ent<{self.id},{self.representation},Y:{self.cell_Y},X:{self.cell_X},sz:{self.sq_size}>"
     
     def collide_with_shape(self, shape):
         shape_self = self.HitboxClass(self.position.x, self.position.y, self.box_size)

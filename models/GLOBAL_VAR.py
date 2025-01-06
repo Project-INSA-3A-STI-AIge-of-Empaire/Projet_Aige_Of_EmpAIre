@@ -80,8 +80,9 @@ MODE_GENERATION = {
     MARINES:{
         "resources":{"gold":20000, "wood":20000, "food":20000},
         "entities":{
+            
             "T":3,
-            "h":1,
+            "ca":15,
             "B":2,
             "S":2,
             "A":2

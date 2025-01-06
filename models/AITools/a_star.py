@@ -28,14 +28,10 @@ class Node:
 
     def __str__(self):
         return f"({self.X},{self.Y}): G={self.G_cost} H={self.H_cost} F={self.F_cost}"
-def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit):
+def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, pass_flags = 0):
     if not (0 <= start_X < _map.nb_CellX and 0 <= start_Y < _map.nb_CellY and 
             0 <= end_X < _map.nb_CellX and 0 <= end_Y < _map.nb_CellY):
         return None # Invalid start or end
-    print("----------- sss")
-    print(f"startX:{start_X}, start_Y:{start_Y}")
-    print(f"moving entity: {the_moving_unit}")
-    print(f"to target :{_map.entity_id_dict.get(the_moving_unit._entity_optional_target_id, None)}")
     start_node = Node(start_X, start_Y)
     
     target_node = Node(end_X, end_Y)
@@ -51,8 +47,8 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit):
 
     region = _map.entity_matrix.get((end_Y//_map.region_division, end_X//_map.region_division), None)
 
-    if the_moving_unit._entity_optional_target_id == None: # in this case we are only moving to a certan position so we need to see if it is reachable
-        print("hey")
+    if the_moving_unit._entity_optional_target_id == None and not(pass_flags): # in this case we are only moving to a certan position so we need to see if it is reachable
+       
         if (region != None):
             
             entities = region.get((end_Y, end_X), None)
@@ -61,7 +57,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit):
                 for entity in entities:
 
                     if not(entity.walkable): # non walkable = non reachable so nooo
-                        print("ntakkkkkkk")
+                        
                         return None
     
     collided_with_entity = False # these 3 variables are used in case we have an entity as target
@@ -80,23 +76,24 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit):
         ##found path !!###
         if collided_with_entity: # in case optional target
 
-            path = []
+            path = {}
             while collision_node: # this maybe is not the best one to the center but the closest one to collide
-                path.append((collision_node.X, collision_node.Y))
+                path[(collision_node.Y, collision_node.X)] = None # the keys are the node we did this so we can pop easliy later
                 collision_node = collision_node.previus
-            path.reverse()
-            print(path)
-            return path
+            reversed_path = dict(reversed(list(path.items())))
+            
+            return reversed_path
         
         elif best_node == target_node:
             # Reconstruct path
-            path = []
+            path = {}
             while best_node:
-                path.append((best_node.X, best_node.Y))
+                path[(best_node.Y, best_node.X)] = None 
                 best_node = best_node.previus
-            path.reverse()
-            print(path)
-            return path
+
+            reversed_path = dict(reversed(list(path.items())))
+            
+            return reversed_path
         ## end ##
         
         searched.add((best_node.X, best_node.Y))
@@ -121,18 +118,17 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit):
                 
                             for entity in entities:
                                 if (entity.id == the_moving_unit._entity_optional_target_id):
-                                    print(f"found at Y:{neighbor_Y}, X:{neighbor_X}")
-                                    print(entity)
+                                    
                                     cell_walkable = True 
                                     collided_with_entity = True 
                                     break
 
                                 elif not(entity.walkable):
-                                    cell_walkable = False
-                                    break
+                                    if not(neighbor_X == end_X and neighbor_Y == end_Y and pass_flags):
+                                        cell_walkable = False
+                                        break
 
                     if cell_walkable:
-                        print(f"walkable node Y:{neighbor_Y}, X:{neighbor_X}")
                         neighbor_node = discoverd.get((neighbor_Y, neighbor_X),None) 
 
                         if neighbor_node is None: # we didnt discover this cell in the grid, so we create the node 

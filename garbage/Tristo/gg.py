@@ -23,3 +23,5 @@ my_dict = {'a': 1, 'b': 2, 'c': 3}
 # Reverse the order of the dictionary
 reversed_dict = dict(reversed(list(my_dict.items())))
 print(reversed_dict)
+
+print(len(reversed_dict))
