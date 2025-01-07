@@ -78,10 +78,6 @@ class GameState:
                 gameloop.screen.set_alpha(None)
             self.last_switch_time = current_time
 
-    def update(self):
-        if (self.states != PAUSE):
-            pass
-
 
     def toggle_resources(self):
         current_time = pygame.time.get_ticks()
