@@ -5,6 +5,7 @@ import webbrowser
 from ImageProcessingDisplay import UserInterface, StartMenu, PauseMenu, Camera, TerminalCamera 
 from GameField.map import *
 from GLOBAL_VAR import *
+from Entity import *
 
 class GameState:
     def __init__(self, screen):
@@ -111,42 +112,47 @@ class GameState:
         with open("Game/generate.html", "r") as template_file:
             html_content = template_file.read()
 
-        unit_list_html = ""
-        building_list_html = ""
-        resource_list_html = ""
-
         insert_index = 0
         for i, line in enumerate(html_content):
             if '<div>' in line and '<button' in html_content[i + 1]:  # Locate button section
                 insert_index = i + 1
                 break
 
-        
         team_dict = {}
         for player in self.map.players_dict.values():
             team = player.team
             if team not in team_dict:
-                team_dict[team] = {'': ''}
+                team_dict[team] = {}
 
                 new_button_html = f'        <button onclick="toggleTeam({team})">Show Team {team}</button>\n'
                 html_content.insert(insert_index + 1, new_button_html)
                 insert_index += 1
 
             for repr in player.entities_dict:
+                if repr not in team_dict[team]:
+                    team_dict[team][repr] = ""
                 for ent in repr.values():
                     match ent:
                         case Unit():
-                            ent.get_unit_html()
+                            team_dict[team][repr] += ent.get_unit_html()
                         case Building():
-                            ent.get_building_html()
+                            team_dict[team][repr] += ent.get_building_html()
             for repr in player.resources: 
-                repr.get_resource_html()
+                if repr not in team_dict[team]:
+                    team_dict[team][repr] = ""
+                team_dict[team][repr] += repr.get_resource_html()
 
+            for team, entities in team_dict.items():
+                for repr, html in entities.items():
+                    # Switch placeholder and html
+                    placeholder = f"{{{{{repr}_{team}}}}}"
+                    html_content = html_content.replace(placeholder, html)
+            
 
-        # Write the modified HTML content to a new file
-        with open("overview.html", "w") as output_file:
-            output_file.write(html_content)
-        webbrowser.open_new_tab('overview.html')      
+            # Write the modified HTML content to a new file
+            with open("overview.html", "w") as output_file:
+                output_file.write(html_content)
+            webbrowser.open_new_tab('overview.html')      
 
     # def draw_pause_text(self, screen):
     #     """Affiche le texte 'Jeu en pause' au centre de l'écran."""
