@@ -15,50 +15,43 @@ class UserInterface:
             "F" : players_dict[1].resources["food"],
             "W" : players_dict[1].resources["wood"],
             "G": players_dict[1].resources["gold"],
-            "v" : len(players_dict[1].entities_dict["v"]),
-            "s" : len(players_dict[1].entities_dict["s"]),
-            "h" : len(players_dict[1].entities_dict["h"]),
-            "a" : len(players_dict[1].entities_dict["a"]),
-            "T" : len(players_dict[1].entities_dict["T"]),
-            "H" : len(players_dict[1].entities_dict["H"]),
-            "C" : len(players_dict[1].entities_dict["C"]),
-            "F" : len(players_dict[1].entities_dict["F"]),
-            "B" : len(players_dict[1].entities_dict["B"]),
-            "S" : len(players_dict[1].entities_dict["S"]),
-            "A" : len(players_dict[1].entities_dict["A"]),
-            "K" : len(players_dict[1].entities_dict["K"]),
-            "ca": len(players_dict[1].entities_dict["ca"]),
-            "sm":len(players_dict[1].entities_dict["sm"]),
-            "am":len(players_dict[1].entities_dict["am"])
+            "v" : 0,
+            "s" : 0,
+            "h" : 0,
+            "a" : 0,
+            "T" : 0,
+            "H" : 0,
+            "C" : 0,
+            "F" : 0,
+            "B" : 0,
+            "S" : 0,
+            "A" : 0,
+            "K" : 0,
+            "ca": 0,
+            "sm":0,
+            "am":0
         }
         player_2_data = {
             "F" : players_dict[2].resources["food"],
             "W" : players_dict[2].resources["wood"],
             "G": players_dict[2].resources["gold"],
-            "v" : len(players_dict[2].entities_dict["v"]),
-            "s" : len(players_dict[2].entities_dict["s"]),
-            "h" : len(players_dict[2].entities_dict["h"]),
-            "a" : len(players_dict[2].entities_dict["a"]),
-            "T" : len(players_dict[2].entities_dict["T"]),
-            "H" : len(players_dict[2].entities_dict["H"]),
-            "C" : len(players_dict[2].entities_dict["C"]),
-            "F" : len(players_dict[2].entities_dict["F"]),
-            "B" : len(players_dict[2].entities_dict["B"]),
-            "S" : len(players_dict[2].entities_dict["S"]),
-            "A" : len(players_dict[2].entities_dict["A"]),
-            "K" : len(players_dict[2].entities_dict["K"]),
-            "ca": len(players_dict[2].entities_dict["ca"]),
-            "sm":len(players_dict[2].entities_dict["sm"]),
-            "am":len(players_dict[2].entities_dict["am"])
+            "v" : 0,
+            "s" : 0,
+            "h" : 0,
+            "a" : 0,
+            "T" : 0,
+            "H" : 0,
+            "C" : 0,
+            "F" : 0,
+            "B" : 0,
+            "S" : 0,
+            "A" : 0,
+            "K" : 0,
+            "ca": 0,
+            "sm":0,
+            "am":0
         }
         
-        for current_region in entity_matrix.values():
-            for entity_set in current_region.values():
-                for entity in entity_set:
-                    if entity.team == 1:
-                        player_1_data[entity.representation] += 1
-                    elif entity.team == 2:
-                        player_2_data[entity.representation] += 1
 
 
         # Position des joueurs
