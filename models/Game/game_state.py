@@ -109,19 +109,28 @@ class GameState:
     def generate_html_file(self):
         with open("Game/generate.html", "r") as template_file:
             html_content = template_file.read()
-    
-       
-        # buildings_positions = [(1, 2), (3, 4)]
-        # building_list_html = ""
-        # for i, position in enumerate(buildings_positions, start=1):  # Utiliser enumerate pour avoir un index
-        #     building_list_html += f"""<li class="building">Building {i} : {position}</li>"""
 
+        unit_list_html = ""
+        building_list_html = ""
+        resource_list_html = ""
         team_dict = {}
         for player in self.map.players_dict.values():
             team = player.team
             if team not in team_dict:
-                team_dict[team] = {'representation': ''}
-            team_dict[team]['representation'] += get_html(player)
+                team_dict[team] = {'': ''}
+            for repr in player.entities_dict:
+                for ent in repr.values():
+                    match ent:
+                        case Unit():
+                            ent.get_unit_html()
+                        case Building():
+                            ent.get_building_html()
+            for repr in player.resources: 
+                repr.get_resource_html()
+
+        
+
+                        
 
         # Write the modified HTML content to a new file
         with open("overview.html", "w") as output_file:

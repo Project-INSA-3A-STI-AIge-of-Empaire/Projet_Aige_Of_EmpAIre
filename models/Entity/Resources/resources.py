@@ -29,7 +29,5 @@ class Resources(Entity):
 
         return amount
     
-def get_ressource_html(self):
-        ressource_list_html = ""
-        ressource_list_html += f'<li class="unit">f"{self.dict_repr.get(self.representation)} : {self.position}</li>'
-        return ressource_list_html
+def get_resource_html(self):
+        return f'<li class="resource">f"{self.dict_repr.get(self.representation)} : {self.position}</li>'
