@@ -117,7 +117,7 @@ class GameState:
         #     building_list_html += f"""<li class="building">Building {i} : {position}</li>"""
 
         team_dict = {}
-        for player in self.map.players_dict.values()
+        for player in self.map.players_dict.values():
             team = player.team
             if team not in team_dict:
                 team_dict[team] = {'representation': ''}
