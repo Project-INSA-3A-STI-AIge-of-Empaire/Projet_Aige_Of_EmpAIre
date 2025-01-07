@@ -114,6 +114,7 @@ class GameState:
         unit_list_html = ""
         building_list_html = ""
         resource_list_html = ""
+
         insert_index = 0
         for i, line in enumerate(html_content):
             if '<div>' in line and '<button' in html_content[i + 1]:  # Locate button section
@@ -126,6 +127,11 @@ class GameState:
             team = player.team
             if team not in team_dict:
                 team_dict[team] = {'': ''}
+
+                new_button_html = f'        <button onclick="toggleTeam({team})">Show Team {team}</button>\n'
+                html_content.insert(insert_index + 1, new_button_html)
+                insert_index += 1
+
             for repr in player.entities_dict:
                 for ent in repr.values():
                     match ent:
@@ -136,9 +142,6 @@ class GameState:
             for repr in player.resources: 
                 repr.get_resource_html()
 
-        
-
-                        
 
         # Write the modified HTML content to a new file
         with open("overview.html", "w") as output_file:
