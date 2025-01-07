@@ -346,6 +346,7 @@ MINIMAP_IMG = adjust_sprite(MINIMAP_IMG, MINIMAP_WIDTH*(2 + 0.2), MINIMAP_HEIGHT
 GOLD_ICON = pygame.image.load("Icons/Resources/Aoe2de_gold.png").convert_alpha()
 WOOD_ICON = pygame.image.load("Icons/Resources/Aoe2de_wood.png").convert_alpha()
 FOOD_ICON = pygame.image.load("Icons/Resources/Aoe2de_food.png").convert_alpha()
+#FOOD_ICON = adjust_sprite(FOOD_ICON, , )
 
 #Bulding
 ARCHERY_RANGE_ICON = pygame.image.load("Icons/Building/Archery_range_aoe2DE.png").convert_alpha()
@@ -355,7 +356,7 @@ HOUSE_ICON = pygame.image.load("Icons/Building/House_aoe2DE.png").convert_alpha(
 KEEP_ICON = pygame.image.load("Icons/Building/Keep_icon_AoE2DE.png").convert_alpha()
 CAMP_ICON = pygame.image.load("Icons/Building/Lumber_camp_aoe2de.png").convert_alpha()
 STABLE_ICON = pygame.image.load("Icons/Building/Stable_aoe2DE.png").convert_alpha()
-TOWNCENTRE_ICON = pygame.image.load("Icons/Building/Towncenter_aoe2DE.png").convert_alpha()
+TOWNCENTER_ICON = pygame.image.load("Icons/Building/Towncenter_aoe2DE.png").convert_alpha()
 
 #Unit
 ARCHER_ICON = pygame.image.load("Icons/Unit/Archer_aoe2DE.png").convert_alpha()
@@ -374,7 +375,7 @@ ICONS = {
     "Ki":KEEP_ICON,
     "Ci":CAMP_ICON,
     "Si":STABLE_ICON,
-    "Ti":TOWNCENTRE_ICON,
+    "Ti":TOWNCENTER_ICON,
     "ai":ARCHER_ICON,
     "hi":HORSEMAN_ICON,
     "si":SWORDSMAN_ICON,
