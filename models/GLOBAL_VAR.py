@@ -375,7 +375,7 @@ ICONS = {
     "Ki":KEEP_ICON,
     "Ci":CAMP_ICON,
     "Si":STABLE_ICON,
-    "Ti":TOWNCENTRE_ICON,
+    "Ti":TOWNCENTER_ICON,
     "ai":ARCHER_ICON,
     "hi":HORSEMAN_ICON,
     "si":SWORDSMAN_ICON,
