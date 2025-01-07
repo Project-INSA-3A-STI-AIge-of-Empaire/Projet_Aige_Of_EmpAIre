@@ -152,6 +152,18 @@ class Formation:
 
         return id_giver_list
     
+    def update_formation_avoidance(self, avoidance_force):
+        def update_avoidance(node, avoidance_force):
+            if node != None:
+
+                
+                node.position += avoidance_force
+                update_avoidance(node.left, avoidance_force)
+                update_avoidance(node.right, avoidance_force)
+                update_avoidance(node.middle, avoidance_force)
+
+        update_avoidance(self.leader, avoidance_force)
+
     def update_formation_direction(self):
         def update_direction(node):
             if node != None:
@@ -171,13 +183,12 @@ class Formation:
 
             if node != None :
                 
-                if node.is_leader == False:
-                    amountx = math.cos(node.direction) * scale
-                    amounty = math.sin(node.direction) * scale
-
-                    node.position.x += amountx
-                    node.position.y += amounty
-                    
+                
+                amountx = math.cos(node.direction) * scale
+                amounty = math.sin(node.direction) * scale
+                
+                node.position.x += amountx
+                node.position.y += amounty
                 update_position(node.left, scale)
                 update_position(node.middle, scale)
                 update_position(node.right, scale)

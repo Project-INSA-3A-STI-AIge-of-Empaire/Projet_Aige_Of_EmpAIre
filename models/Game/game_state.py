@@ -55,9 +55,11 @@ class GameState:
         if not(self.full_screen):
             self.full_screen = True
             gameloop.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.FULLSCREEN)
+            #self.screen.set_alpha(None)
         else:
             self.full_screen = False
             gameloop.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
+            #self.screen.set_alpha(None)
     def set_speed(self, new_speed):
         if new_speed > 0:
             self.speed = new_speed
@@ -69,10 +71,11 @@ class GameState:
             if self.display_mode == ISO2D:
                 self.display_mode = TERMINAL
                 gameloop.screen = pygame.display.set_mode((20, 20), pygame.HWSURFACE | pygame.DOUBLEBUF )
+                gameloop.screen.set_alpha(None)
             elif self.display_mode == TERMINAL:
                 self.display_mode = ISO2D
                 gameloop.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
-
+                gameloop.screen.set_alpha(None)
             self.last_switch_time = current_time
 
     def update(self):

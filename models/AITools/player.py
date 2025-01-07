@@ -16,7 +16,7 @@ class Player:
 
         for resource, amount in resources.items():
             if resource in self.resources and isinstance(amount, (int, float )):
-                self.resources[resource] = max(0, self.resources[resource] - amount) # in case something not usual happen so the currency doesnt drop to neg numbers, it is not going to happen but who knows
+                self.resources[resource] = max(0, self.resources[resource] - amount) # in case something unusual happen so the currency doesnt drop to neg numbers, it is not going to happen but who knows
     
     def add_entity(self, entity):
 

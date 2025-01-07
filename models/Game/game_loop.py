@@ -10,6 +10,7 @@ class GameLoop:
         pygame.init()
 
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
+        self.screen.set_alpha(None)
         pygame.display.set_caption("Age Of Empaire II")
 
         pygame.mouse.set_visible(False)
@@ -58,6 +59,7 @@ class GameLoop:
         self.state.map.add_entity(keep)
         self.state.map.add_entity(camp)
         """
+
         running = True
         while running:
             move_flags = 0

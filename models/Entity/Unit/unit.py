@@ -222,13 +222,13 @@ class Unit(Entity):
                         amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
                         amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
                         self.position.x += amount_x
-                        self.position.y += amount_y 
+                        self.position.y += amount_y
+
                         if self.role_in_group == UNIT_LEADER:
 
                             self.linked_group.formation.leader.direction = self.target_direction
-                            self.linked_group.formation.leader.position.x = self.position.x
-                            self.linked_group.formation.leader.position.y = self.position.y
-
+                            if collided:
+                                self.linked_group.formation.update_formation_avoidance(avoidance_force)
                             self.linked_group.formation.update_formation_direction()
                             self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)
 
@@ -268,8 +268,8 @@ class Unit(Entity):
                         if self.role_in_group == UNIT_LEADER:
 
                             self.linked_group.formation.leader.direction = self.target_direction
-                            self.linked_group.formation.leader.position.x = self.position.x
-                            self.linked_group.formation.leader.position.y = self.position.y
+                            if collided:
+                                self.linked_group.formation.update_formation_avoidance(avoidance_force)
                             
                             self.linked_group.formation.update_formation_direction()
                             self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)

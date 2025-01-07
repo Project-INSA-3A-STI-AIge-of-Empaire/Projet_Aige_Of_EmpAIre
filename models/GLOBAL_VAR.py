@@ -82,7 +82,7 @@ MODE_GENERATION = {
         "entities":{
             
             "T":3,
-            "ca":40,
+            "ca":35,
             "B":2,
             "S":2,
             "A":2
