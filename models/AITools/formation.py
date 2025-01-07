@@ -1,7 +1,7 @@
 
 import math
 from GLOBAL_VAR import *
-from Entity.Unit.unit import Unit
+
 from shape import *
 FORMATION_PADDING = 20
 
