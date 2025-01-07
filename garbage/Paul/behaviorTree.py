@@ -25,6 +25,10 @@ class decoNode(treeNode):
 
         assert isinstance(child,treeNode)
 
+    def update(self):
+        self.status=self.child.update(self.child)
+        return self.status
+
 
 class leafNode(treeNode):
     pass                                        #a leaf node has no children
