@@ -2,7 +2,9 @@ from GameField.cell import *
 from GLOBAL_IMPORT import *
 from ImageProcessingDisplay.minimap import *
 from AITools.isorange import *
+
 import random 
+import math
 
 CLASS_MAPPING = {
     'A': ArcheryRange,
@@ -19,31 +21,19 @@ CLASS_MAPPING = {
     'a': Archer,
     's': SwordMan,
     'v': Villager,
+    'ca': CavalryArcher,
+    'sm':SpearMan,
+    'am':AxeMan,
     'p': Projectile,
-    'a': Arrow,
+    'pa': Arrow,
+    'ps':Spear,
+    'fpa':FireArrow,
+    'fps':FireSpear,
     'V': PVector2
 }
 
 
-SAVE_MAPPING = {
-    'A': ArcheryRange,
-    'B': Barracks,
-    'C': Camp,
-    'K': Keep,
-    'T': TownCenter,
-    'F': Farm,
-    'G': Gold,
-    'W': Tree,
-    'S': Stable,
-    'H': House,
-    'h': HorseMan,
-    'a': Archer,
-    's': SwordMan,
-    'v': Villager,
-    'p': Projectile,
-    'a': Arrow,
-    'V': PVector2
-}
+
 
 
 #from AITools.raycastingrange import *
@@ -99,9 +89,13 @@ class Map:
             
             return 0 # to check if all the cells that will be occupied by the entity are in the map
         
-       
-        for Y_to_check in range(_entity.cell_Y,_entity.cell_Y - _entity.sq_size, -1):
-            for X_to_check in range(_entity.cell_X,_entity.cell_X - _entity.sq_size, -1):
+        cell_padding = 0
+
+        if not(isinstance(_entity, Unit)):
+            cell_padding = 1
+        
+        for Y_to_check in range(_entity.cell_Y,_entity.cell_Y - _entity.sq_size - cell_padding, -1): # we add minus 1 cause we need at least one cell free so that the units can reach this target
+            for X_to_check in range(_entity.cell_X,_entity.cell_X - _entity.sq_size - cell_padding, -1):
                 
                 if self.check_cell(Y_to_check, X_to_check):
                     return 0 # not all the cells are free to put the entity 
@@ -133,7 +127,7 @@ class Map:
 
             
             if isinstance(_entity, Unit):
-                _entity.box_size += TILE_SIZE_2D/(2 * 3) # for the units hitbox is smaller 
+                _entity.box_size += TILE_SIZE_2D/(2 * 3.2) # for the units hitbox is smaller 
                 _entity.move_position.x = _entity.position.x
                 _entity.move_position.y = _entity.position.y # well when the unit is added its target pos to move its it self se it doesnt move
                 
@@ -536,16 +530,16 @@ class Map:
                     self.dead_entities.pop(key, 0)
                     self.remove_entity(entity)
 
-    def update_all_entities(self, current_time):
+    def update_all_entities(self, current_time, camera, sceen):
         for id in list(self.entity_id_dict.keys()):
             
             entity = self.entity_id_dict.get(id)
             if entity:
-                entity.update(current_time)
+                entity.update(current_time, camera, screen)
                 
 
 
-    def update_all_events(self, current_time):
-        self.update_all_entities(current_time)
+    def update_all_events(self, current_time, camera, screen):
+        self.update_all_entities(current_time, camera, screen)
         self.update_all_projectiles(current_time)
         self.update_all_dead_entities(current_time)

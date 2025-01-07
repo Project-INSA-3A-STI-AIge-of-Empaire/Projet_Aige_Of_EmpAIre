@@ -17,7 +17,7 @@ class Building(Entity):
         self.animation_frame = 0
         self.state = BUILDING_ACTIVE
         self.animation_speed = [1, 1, 20]
-
+        self.HitboxClass = RoundedSquare
     def len_current_animation_frames(self):
         return len(self.image.get(self.state,None).get(self.display_choice, None)) #the length changes with respect to the state but the zoom and direction does not change the animation frame count
 
@@ -75,5 +75,5 @@ class Building(Entity):
     def will_vanish(self):
         return self.is_dead() and self.animation_frame == self.len_current_animation_frames() - 1
 
-    def update(self, current_time):
+    def update(self, current_time, camera = None, screen = None):
         self.update_animation_frame(current_time)

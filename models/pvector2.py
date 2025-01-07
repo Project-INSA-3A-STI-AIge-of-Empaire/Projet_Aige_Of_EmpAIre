@@ -1,5 +1,6 @@
 import math
 import json
+import random
 from GLOBAL_VAR import TILE_SIZE_2D
 def is_almost(a, b, p=1e-7):
     return abs(a - b) < p
@@ -26,7 +27,7 @@ class PVector2:
         return PVector2(self.x - other_vector.x,self.y - other_vector.y)
 
     def __eq__(self, other):
-        return is_almost(self.x, other.x, TILE_SIZE_2D/20) and is_almost(self.y, other.y, TILE_SIZE_2D/20)
+        return is_almost(self.x, other.x, TILE_SIZE_2D/10) and is_almost(self.y, other.y, TILE_SIZE_2D/10)
     
     def __lt__(self, other):
         return self.x <= other.x and self.y <= other.y 
@@ -41,6 +42,37 @@ class PVector2:
         delta_x = other_vector.x - self.x
         delta_y = other_vector.y - self.y
         return (math.atan2(delta_y, delta_x) + 2*math.pi)%(2*math.pi)
+    def magnitude(self):
+        
+        return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    def normalize(self):
+        """Normalize the vector so that its magnitude is 1."""
+        length = self.magnitude()
+        if length != 0:  # Avoid division by zero
+            self.x /= length
+            self.y /= length
+
+    def rotate_with_respect_to(self, theta, other):
+        px_translated = self.x - other.x
+        py_translated = self.y - other.y
+        
+        # Apply rotation using the 2D rotation matrix
+        px_rot = px_translated * math.cos(theta) - py_translated * math.sin(theta)
+        py_rot = px_translated * math.sin(theta) + py_translated * math.cos(theta)
+        
+        # Translate the point back
+        px_rot += other.x
+        py_rot += other.y
+        
+        self.x = px_rot
+        self.y = py_rot
+    @staticmethod
+    def random_direction():
+        # Generate a random angle in radians
+        angle = random.uniform(0, 2 * math.pi)
+        # Create a unit vector pointing in that direction
+        return PVector2(math.cos(angle), math.sin(angle))
     
     def save(self):
 

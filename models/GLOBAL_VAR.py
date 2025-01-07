@@ -9,7 +9,8 @@ MIN_ZOOM = 1
 MAX_ZOOM = 7
 TILE_SIZE_2ISO = 15
 TILE_SIZE_2D = 40
-
+RANDOM_JITTER_FORCE = TILE_SIZE_2D / 20
+COLLISION_THRESHOLD = TILE_SIZE_2D/5
 ONE_SEC = 1000 # 1000 millisec
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 800
@@ -79,8 +80,9 @@ MODE_GENERATION = {
     MARINES:{
         "resources":{"gold":20000, "wood":20000, "food":20000},
         "entities":{
+            
             "T":3,
-            "v":15,
+            "ca":35,
             "B":2,
             "S":2,
             "A":2
@@ -97,6 +99,9 @@ UNIT_WALKING = 1
 UNIT_ATTACKING = 2
 UNIT_DYING = 3
 UNIT_TASK = 4
+
+UNIT_LEADER = 0
+UNIT_FOLLOWER = 1
 
 BUILDING_INPROGRESS= 0
 BUILDING_ACTIVE = 1
@@ -229,8 +234,15 @@ HORSEMAN_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/horseman")
 ARCHER_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/archer")
 SWORDMAN_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/swordman")
 VILLAGER_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/villager")
+CAVARLYARCHER_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/cavarlyarcher")
+AXEMAN_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/axeman")
+SPEARMAN_ARRAY_3D = state_load_sprite_sheet("Sprites/Unit/spearman")
 
 ARROW_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/arrow.webp",32, 11, skip_row = 2, limit_col = 1)
+FIREARROW_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/fire_arrow.webp",32, 11, skip_row = 2, limit_col = 1)
+SPEAR_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/spear.webp",32, 10, skip_row = 2, limit_col = 1)
+FIRESPEAR_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/fire_spear.webp",32, 10, skip_row = 2, limit_col = 1)
+
 
 SPRITES = {
     'g': GRASS,
@@ -248,7 +260,13 @@ SPRITES = {
     'a': ARCHER_ARRAY_3D,
     's': SWORDMAN_ARRAY_3D,
     'v': VILLAGER_ARRAY_3D,
-    'na': ARROW_ARRAY_2D
+    'ca': CAVARLYARCHER_ARRAY_3D,
+    'sm':SPEARMAN_ARRAY_3D,
+    'am':AXEMAN_ARRAY_3D,
+    'pa': ARROW_ARRAY_2D,
+    'fpa': FIREARROW_ARRAY_2D,
+    'ps': SPEAR_ARRAY_2D,
+    'fps': FIRESPEAR_ARRAY_2D
 }
 
 UNIT_SATES = {
@@ -270,11 +288,14 @@ STATES = {
     'h': UNIT_SATES,
     'a': UNIT_SATES,
     's': UNIT_SATES,
-    'v': UNIT_SATES
+    'v': UNIT_SATES,
+    'ca': UNIT_SATES,
+    'sm': UNIT_SATES,
+    'am':UNIT_SATES
 }
 
 WATER_MARK_SKIP = {
-    "A":[(2,0,10), (2,0,15)],
+    "A":[(2,0,11), (2,0,16)], # the first number is the numgber of the state, 0 number of row and 11 of the line that contains watermarks
     "B":[(2,0,20), (2,0,18)],
     "C":[(2,0,20), (2,0,17)],
     "H":[(2,0,7), (2,2,17)],
@@ -325,6 +346,7 @@ MINIMAP_IMG = adjust_sprite(MINIMAP_IMG, MINIMAP_WIDTH*(2 + 0.2), MINIMAP_HEIGHT
 GOLD_ICON = pygame.image.load("Icons/Resources/Aoe2de_gold.png").convert_alpha()
 WOOD_ICON = pygame.image.load("Icons/Resources/Aoe2de_wood.png").convert_alpha()
 FOOD_ICON = pygame.image.load("Icons/Resources/Aoe2de_food.png").convert_alpha()
+#FOOD_ICON = adjust_sprite(FOOD_ICON, , )
 
 #Bulding
 ARCHERY_RANGE_ICON = pygame.image.load("Icons/Building/Archery_range_aoe2DE.png").convert_alpha()
@@ -334,7 +356,7 @@ HOUSE_ICON = pygame.image.load("Icons/Building/House_aoe2DE.png").convert_alpha(
 KEEP_ICON = pygame.image.load("Icons/Building/Keep_icon_AoE2DE.png").convert_alpha()
 CAMP_ICON = pygame.image.load("Icons/Building/Lumber_camp_aoe2de.png").convert_alpha()
 STABLE_ICON = pygame.image.load("Icons/Building/Stable_aoe2DE.png").convert_alpha()
-TOWNCENTRE_ICON = pygame.image.load("Icons/Building/Towncenter_aoe2DE.png").convert_alpha()
+TOWNCENTER_ICON = pygame.image.load("Icons/Building/Towncenter_aoe2DE.png").convert_alpha()
 
 #Unit
 ARCHER_ICON = pygame.image.load("Icons/Unit/Archer_aoe2DE.png").convert_alpha()
@@ -353,7 +375,7 @@ ICONS = {
     "Ki":KEEP_ICON,
     "Ci":CAMP_ICON,
     "Si":STABLE_ICON,
-    "Ti":TOWNCENTRE_ICON,
+    "Ti":TOWNCENTER_ICON,
     "ai":ARCHER_ICON,
     "hi":HORSEMAN_ICON,
     "si":SWORDSMAN_ICON,

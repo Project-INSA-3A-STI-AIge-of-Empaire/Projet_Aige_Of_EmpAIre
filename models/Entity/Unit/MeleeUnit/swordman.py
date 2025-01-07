@@ -8,3 +8,4 @@ class SwordMan(MeleeUnit):
         
         self.animation_speed = [30, 30, 30, 30]
         self.attack_frame = 17
+        self.adapte_attack_delta_time()

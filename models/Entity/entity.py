@@ -1,6 +1,10 @@
 from GLOBAL_VAR import *
 from idgen import *
 from AITools.player import *
+from shapely.geometry import Point, Polygon
+import math
+from shape import *
+
 class Entity():
     def __init__(self, cell_Y, cell_X, position, team, representation, sq_size = 1,id = None):
         global ID_GENERATOR
@@ -19,10 +23,47 @@ class Entity():
 
     
 
+        self.box_size = None
+        self.HitboxClass = None
+        self.walkable = False
     def __str__(self):
-        return f"ent<{self.representation},Y:{self.cell_Y},X:{self.cell_X},sz:{self.sq_size}>"
+        return f"ent<{self.id},{self.representation},Y:{self.cell_Y},X:{self.cell_X},sz:{self.sq_size}>"
     
-    def update(self, current_time):
+    def collide_with_shape(self, shape):
+        shape_self = self.HitboxClass(self.position.x, self.position.y, self.box_size)
+
+        return shape_self.collide_with(shape)
+    
+    def collide_with_entity(self, entity):
+        
+        self_shape = self.HitboxClass(self.position.x, self.position.y, self.box_size)
+        ent_shape = entity.HitboxClass(entity.position.x, entity.position.y, entity.box_size)
+        
+        Status = False
+        
+        """
+        alpha = self.position.alpha_angle(entity.position)
+        op_alpha = alpha + math.pi
+        if isinstance(entity, Unit):
+            if self_shape.collide_with(ent_shape):
+                Status = True 
+            if flags and Status:
+                while self_shape.collide_with(ent_shape):
+                    self.position.x += round(math.cos(op_alpha))
+                    self.position.y += round(math.sin(op_alpha))
+                    self_shape = self.ShapeClass(self.position.x, self.position.y, self.bs)
+            if pygame.time.get_ticks() - self.last_time_computed > 1:
+                self.last_time_computed = pygame.time.get_ticks()
+                return Status
+            return False
+        else:
+        """     
+        if self_shape.collide_with(ent_shape):
+            Status = True
+        # i wrote it like this on purpose incase there is some future update
+        return Status
+    
+    def update(self, current_time, camera = None, screen = None):
         return None
     def save(self):
 
@@ -42,6 +83,8 @@ class Entity():
 
         return data_to_save
     
+    
+    
     @classmethod
     def load(cls, data_to_load):
         global SAVE_MAPPING
@@ -51,7 +94,7 @@ class Entity():
             
             if (isinstance(attr_value, dict)): # has the attribute representation then we will see
                 
-                ClassLoad = SAVE_MAPPING.get(attr_value.get("representation", None), None)
+                ClassLoad = CLASS_MAPPING.get(attr_value.get("representation", None), None)
                 if (ClassLoad): # has a load method in the method specified in it
                     
                     current_attr_value = ClassLoad.load(attr_value)

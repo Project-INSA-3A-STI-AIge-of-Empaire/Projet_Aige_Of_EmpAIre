@@ -10,6 +10,7 @@ class GameLoop:
         pygame.init()
 
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
+        self.screen.set_alpha(None)
         pygame.display.set_caption("Age Of Empaire II")
 
         pygame.mouse.set_visible(False)
@@ -58,6 +59,7 @@ class GameLoop:
         self.state.map.add_entity(keep)
         self.state.map.add_entity(camp)
         """
+
         running = True
         while running:
             move_flags = 0
@@ -87,13 +89,10 @@ class GameLoop:
                         print(p1)
                         p2 = self.state.map.players_dict.get(2)
                         print(p2)
-                        v_ids = p1.get_entities_by_class(['v'])
+                        v_ids = p1.get_entities_by_class(['ca'])
+                        group = Group(v_ids, self.state.map)
 
-                        t_ids = p2.get_entities_by_class(['T'])
-                        town_id = t_ids[0]
-
-                        for id in v_ids:
-                            self.state.map.get_entity_by_id(id).attack_entity(town_id)
+                        group.formation.display()
                         self.state.states = PLAY
                 if self.state.states == PAUSE:
                      if event.type == pygame.MOUSEBUTTONDOWN:
@@ -101,17 +100,29 @@ class GameLoop:
 
                 else:
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
-
-                        if event.button == LEFT_CLICK:
-                            self.state.mouse_held = True
+                        if self.state.states == PLAY:
+                            x, y = self.state.camera.convert_from_isometric_2d(mouse_x, mouse_y)
                             
-                            #villager.drop_to_entity(entity_id)
+                           
+                            
+                                #self.state.map.get_entity_by_id(id).attack_entity(entity_id)
+                            if event.button == LEFT_CLICK:
+                                self.state.mouse_held = True
+                                #entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
+                                group.move_to(PVector2(x, y))
+                                #for id in v_ids:
+                                #    self.state.map.get_entity_by_id(id).attack_entity(entity_id)
+                                #villager.drop_to_entity(entity_id)
 
-                            #ar.train_unit(player, current_time, 'v')
-                        elif event.button == RIGHT_CLICK:
-                            print("a")
-                            #villager.collect_entity(entity_id)
+                                #ar.train_unit(player, current_time, 'v')
+                            elif event.button == RIGHT_CLICK:
+                                Y, X = math.floor(y/TILE_SIZE_2D), math.floor(x/TILE_SIZE_2D)
+                                
+                                house = ArcheryRange(Y, X, None, 2)
+                                print(house)
+                                self.state.map.add_entity(house)
+                                print("a")
+                                #villager.collect_entity(entity_id)
 
 
                         print(f"screen( width:{SCREEN_WIDTH}, {SCREEN_HEIGHT}), mouse( x:{mouse_x}, y:{mouse_y})")
@@ -217,7 +228,8 @@ class GameLoop:
                 elif (self.state.display_mode == TERMINAL):
                     self.state.map.terminal_display(current_time, self.state.terminal_camera)
 
-                self.state.map.update_all_events(current_time)
+                self.state.map.update_all_events(current_time, self.state.camera, self.screen)
+                group.update()
                 """
                 villager.try_to_attack(current_time, self.state.camera)
                 villager.try_to_drop(current_time, self.state.camera)

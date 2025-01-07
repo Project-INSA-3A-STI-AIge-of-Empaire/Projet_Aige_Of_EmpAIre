@@ -22,7 +22,7 @@ class Villager(MeleeUnit):
         self.collect_frame = 26
 
         self.animation_speed = [60, 30, 60, 30, 60/self.collect_speed]
-        
+        self.adapte_attack_delta_time()
         
     def drop_gathered(self, entity):
         for resource, amount in self.resources.items():
@@ -40,7 +40,7 @@ class Villager(MeleeUnit):
                             print(entity)
                             if (entity.representation in ["C", "T"]  ):
                                 print("yesss")
-                                if (self.check_collision_with(entity)):
+                                if (self.collide_with_entity(entity)):
                                     
                                     self.drop_gathered(entity)
                                     self.drop_target_id = None
@@ -50,10 +50,13 @@ class Villager(MeleeUnit):
                                 else:
                                     if not(self.state == UNIT_WALKING):
                                         self.change_state(UNIT_WALKING)
+
+                                    self._entity_optional_target_id = entity.id
+
                                     self.move_position.x = entity.position.x
                                     self.move_position.y = entity.position.y
-
-                                    self.try_to_move(current_time, entity)
+                                    
+                                    self.try_to_move(current_time)
                             else:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
@@ -111,7 +114,7 @@ class Villager(MeleeUnit):
                             if (entity.is_dead() == False):
                                 print(entity)
                                 if (isinstance(entity, Resources) or (isinstance(entity, Farm) and not(entity.is_empty())) ):
-                                    if (self.check_collision_with(entity)):
+                                    if (self.collide_with_entity(entity)):
                                         
                                         
                                         self.try_to_gather(current_time, entity)
@@ -119,10 +122,11 @@ class Villager(MeleeUnit):
                                     else:
                                         if not(self.state == UNIT_WALKING):
                                             self.change_state(UNIT_WALKING)
+                                            
                                         self.move_position.x = entity.position.x
                                         self.move_position.y = entity.position.y
-
-                                        self.try_to_move(current_time, entity)
+                                        self._entity_optional_target_id = entity.id
+                                        self.try_to_move(current_time)
                                 else:
                                     if not(self.state == UNIT_IDLE):
                                         self.change_state(UNIT_IDLE)      
@@ -132,12 +136,8 @@ class Villager(MeleeUnit):
                         else:
                             if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
-                    else:
-                        if not(self.state == UNIT_IDLE):
-                            self.change_state(UNIT_IDLE)
-                else:        
-                    if not(self.state == UNIT_IDLE):
-                        self.change_state(UNIT_IDLE)
+                    
+                
     
     def collect_entity(self, resource_target_id):
         self.entity_target_id = None # if attacking we stop and collect
@@ -154,6 +154,6 @@ class Villager(MeleeUnit):
         self.entity_target_id = None  
         self.drop_target_id = drop_target_id 
 
-    def update(self, current_time):
-        super().update(current_time)
+    def update(self, current_time, camera = None, screen = None):
+        super().update(current_time, camera, screen)
         self.try_to_collect(current_time)
