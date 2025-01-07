@@ -107,6 +107,7 @@ class GameState:
             self.last_switch_time = current_time
 
     def generate_html_file(self):
+        
         with open("Game/generate.html", "r") as template_file:
             html_content = template_file.read()
     
@@ -116,11 +117,24 @@ class GameState:
         # for i, position in enumerate(buildings_positions, start=1):  # Utiliser enumerate pour avoir un index
         #     building_list_html += f"""<li class="building">Building {i} : {position}</li>"""
 
+        insert_index = 0
+        for i, line in enumerate(html_content):
+            if '<div>' in line and '<button' in html_content[i + 1]:  # Locate button section
+                insert_index = i + 1
+                break
+
+        
         team_dict = {}
         for player in self.map.players_dict.values():
             team = player.team
             if team not in team_dict:
                 team_dict[team] = {'representation': ''}
+                
+                # Generate a new button for the team
+                new_button_html = f'        <button onclick="toggleTeam({team})">Show Team {team}</button>\n'
+                html_content.insert(insert_index + 1, new_button_html)
+                insert_index += 1
+
             team_dict[team]['representation'] += get_html(player)
 
         # Write the modified HTML content to a new file
