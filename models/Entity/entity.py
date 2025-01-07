@@ -19,7 +19,23 @@ class Entity():
             self.id = ID_GENERATOR.give_ticket()
         self.sq_size = sq_size
         self.image = None
-        self.dict_repr = {}
+        self.dict_repr = {
+            'W':"Wood",
+            'G':"Gold",
+            'F':"Food",
+            'v':"Villager",
+            's':"Swordsman",
+            'h':"Horseman",
+            'a':"Archer",
+            'T':"TownCenter",
+            'H':"House",
+            'C':"Camp",
+            'F':"Farm",
+            'B':"Barracks",
+            'S':"Stable",
+            'A':"ArcheryRange",
+            'K':"Keep"
+            }
 
     
 
