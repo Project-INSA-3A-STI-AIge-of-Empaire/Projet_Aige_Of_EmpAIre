@@ -107,12 +107,20 @@ class GameState:
             self.last_switch_time = current_time
 
     def generate_html_file(self):
+        
         with open("Game/generate.html", "r") as template_file:
             html_content = template_file.read()
 
         unit_list_html = ""
         building_list_html = ""
         resource_list_html = ""
+        insert_index = 0
+        for i, line in enumerate(html_content):
+            if '<div>' in line and '<button' in html_content[i + 1]:  # Locate button section
+                insert_index = i + 1
+                break
+
+        
         team_dict = {}
         for player in self.map.players_dict.values():
             team = player.team
