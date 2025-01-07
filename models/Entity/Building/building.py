@@ -1,3 +1,6 @@
+from GLOBAL_VAR import *
+from idgen import *
+from AITools.player import *
 from Entity.entity import * 
 class Building(Entity):
 

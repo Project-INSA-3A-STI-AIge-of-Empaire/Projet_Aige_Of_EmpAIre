@@ -1,5 +1,7 @@
 from Entity.entity import *
-from AITools.a_star import *
+from GLOBAL_VAR import *
+from idgen import *
+from AITools import *
 from math import floor
 
 class Unit(Entity):
@@ -302,7 +304,9 @@ class Unit(Entity):
         self.update_animation_frame(current_time)
         self.try_to_attack(current_time)
         
-
+    def get_html(self):
+        archeryrange1_list_html += f'<li class="building">ArcheryRange {i} : {position}</li>'
+        return
 
     
  

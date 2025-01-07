@@ -46,11 +46,12 @@ class Player:
         
         for representation in representations:
             entity_dict = self.entities_matrix.get(representation, None)
+            print(f"Entity Dict for '{representation}': {entity_dict}")
 
             if entity_dict:
 
                 for entity_id in entity_dict:
                     id_list.append(entity_id)
+            print(f"ID List so far: {id_list}")
         
         return id_list
-    

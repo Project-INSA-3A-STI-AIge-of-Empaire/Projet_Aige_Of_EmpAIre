@@ -15,6 +15,7 @@ class Entity():
             self.id = ID_GENERATOR.give_ticket()
         self.sq_size = sq_size
         self.image = None
+        self.dict_repr = {}
 
     
 
