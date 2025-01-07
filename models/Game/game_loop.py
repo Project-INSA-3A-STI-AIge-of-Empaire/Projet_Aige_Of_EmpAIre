@@ -221,7 +221,7 @@ class GameLoop:
                     fps = int(self.clock.get_fps())
                     fps_text = self.font.render(f"FPS: {fps}", True, (255, 255, 255))
                     screen.blit(fps_text, (10, 10))
-                    self.state.ui.draw_resources(self.state.map.entity_matrix)
+                    self.state.ui.draw_resources(self.state.map.players_dict)
                     
                     # Rafraîchissement de l'affichage
                    
