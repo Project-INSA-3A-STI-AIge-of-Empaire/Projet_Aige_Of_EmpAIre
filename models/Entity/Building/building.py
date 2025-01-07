@@ -79,4 +79,4 @@ class Building(Entity):
         self.update_animation_frame(current_time)
 
     def get_building_html(self):
-        return f'<li class="building">f"{self.dict_repr.get(self.representation)} : {self.position}</li>'
+        return f'<li class="building">{self.dict_repr.get(self.representation)} : {self.position}</li>'

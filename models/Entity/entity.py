@@ -20,9 +20,9 @@ class Entity():
         self.sq_size = sq_size
         self.image = None
         self.dict_repr = {
-            'W':"Wood",
-            'G':"Gold",
-            'F':"Food",
+            'wood':"Wood",
+            'gold':"Gold",
+            'food':"Food",
             'v':"Villager",
             's':"Swordsman",
             'h':"Horseman",

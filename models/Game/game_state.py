@@ -6,6 +6,7 @@ from ImageProcessingDisplay import UserInterface, StartMenu, PauseMenu, Camera, 
 from GameField.map import *
 from GLOBAL_VAR import *
 from Entity import *
+from yattag import Doc
 
 class GameState:
     def __init__(self, screen):
@@ -104,15 +105,6 @@ class GameState:
             self.last_switch_time = current_time
 
     def generate_html_file(self):
-        
-        with open("Game/generate.html", "r") as template_file:
-            html_content = template_file.read()
-
-        insert_index = 0
-        for i, line in enumerate(html_content):
-            if '<div>' in line and '<button' in html_content[i + 1]:  # Locate button section
-                insert_index = i + 1
-                break
 
         team_dict = {}
         for player in self.map.players_dict.values():
@@ -120,35 +112,71 @@ class GameState:
             if team not in team_dict:
                 team_dict[team] = {}
 
-                new_button_html = f'        <button onclick="toggleTeam({team})">Show Team {team}</button>\n'
-                html_content.insert(insert_index + 1, new_button_html)
-                insert_index += 1
-
-            for repr in player.entities_dict:
-                if repr not in team_dict[team]:
-                    team_dict[team][repr] = ""
-                for ent in repr.values():
+            for repr_key in player.entities_dict:
+                if repr_key not in team_dict[team]:
+                    team_dict[team][repr_key] = ""
+                for ent in player.entities_dict[repr_key].values():
                     match ent:
                         case Unit():
-                            team_dict[team][repr] += ent.get_unit_html()
+                            team_dict[team][repr_key] += ent.get_unit_html()
                         case Building():
-                            team_dict[team][repr] += ent.get_building_html()
-            for repr in player.resources: 
-                if repr not in team_dict[team]:
-                    team_dict[team][repr] = ""
-                team_dict[team][repr] += repr.get_resource_html()
-
-            for team, entities in team_dict.items():
-                for repr, html in entities.items():
-                    # Switch placeholder and html
-                    placeholder = f"{{{{{repr}_{team}}}}}"
-                    html_content = html_content.replace(placeholder, html)
+                            team_dict[team][repr_key] += ent.get_building_html()
+                for repr_key in player.resources: 
+                    if repr_key not in team_dict[team]:
+                        team_dict[team][repr_key] = ""
+                    total_value = 0
+                    for repr_value in player.resources.values():
+                        if isinstance(repr_value, int):  
+                            total_value += repr_value
+                        else:
+                            team_dict[team][repr_key] += str(repr_value) 
+                    team_dict[team][repr_key] += str(total_value)
             
+                # Creation of the HTML file the  yattag library
+            doc, tag, text = Doc().tagtext()
 
-            # Write the modified HTML content to a new file
-            with open("overview.html", "w") as output_file:
-                output_file.write(html_content)
-            webbrowser.open_new_tab('overview.html')      
+            doc.asis('<!DOCTYPE html>')
+            with tag('html', lang='en'):
+                with tag('head'):
+                    with tag('script'):
+                        text('''
+            function toggleTeam(teamId) {
+                var teamDiv = document.getElementById("team-" + teamId);
+                if (teamDiv.style.display === "none") {
+                    teamDiv.style.display = "block";
+                } else {
+                    teamDiv.style.display = "none";
+                }
+            }
+                        ''')
+                    with tag('title'):
+                        text('Age of Empires - Overview')
+                with tag('body'):
+                    with tag('h1'):
+                        text('Age of Empires - Overview')
+                    for team in team_dict.keys():
+                        with tag('button', onclick=f"toggleTeam({team})"):
+                            text(f"Show Team {team}")
+                    for team, entities in team_dict.items():
+                        with tag('div', id=f"team-{team}", style="display:none;"):
+                            with tag('h2'):
+                                text(f"Team {team}")
+                            for entity_type, html_content in entities.items():
+                                with tag('h3'):
+                                    text(entity_type)  # Titre du type d'entité (Unit, Building, Resource)
+                                with tag('ul'):
+                                    if html_content.strip():  # Si le contenu n'est pas vide
+                                        with tag('li'):
+                                            doc.asis(html_content)
+                                    else:
+                                        with tag('li'):
+                                            text(f"No {entity_type}s available")
+
+            # Sauvegarder le fichier HTML généré
+            print("HTML content to write:", doc.getvalue())
+            with open('overview.html', 'w') as f:
+                f.write(doc.getvalue())
+            webbrowser.open_new_tab('overview.html')   
 
     # def draw_pause_text(self, screen):
     #     """Affiche le texte 'Jeu en pause' au centre de l'écran."""

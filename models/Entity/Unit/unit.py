@@ -473,5 +473,5 @@ class Unit(Entity):
                 self.direction %= (2 * math.pi)  # Normalize within [0, 2π]
     
     def get_unit_html(self):
-        return f'<li class="unit">f"{self.dict_repr.get(self.representation)} : {self.position}</li>'
+        return f'<li class="unit">{self.dict_repr.get(self.representation)} : {self.position}</li>'
         
