@@ -77,3 +77,8 @@ class Building(Entity):
 
     def update(self, current_time, camera = None, screen = None):
         self.update_animation_frame(current_time)
+
+    def get_building_html(self):
+        building_list_html = ""
+        building_list_html += f'<li class="unit">f"{self.dict_repr.get(self.representation)} : {self.position}</li>'
+        return building_list_html
