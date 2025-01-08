@@ -11,6 +11,7 @@ class GameLoop:
 
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
         self.screen.set_alpha(None)
+        self.screen_width, self.screen_height = self.screen.get_width(), self.screen.get_height()
         pygame.display.set_caption("Age Of Empaire II")
 
         pygame.mouse.set_visible(False)
@@ -39,6 +40,8 @@ class GameLoop:
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = self.state.camera.convert_from_isometric_2d(mouse_x, mouse_y)
             if event.button == LEFT_CLICK:
+                entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
+                
                 self.state.mouse_held = True
             elif event.button == RIGHT_CLICK:
                 Y, X = math.floor(y / TILE_SIZE_2D), math.floor(x / TILE_SIZE_2D)
@@ -116,7 +119,7 @@ class GameLoop:
         elif self.state.states == PLAY:
             self.screen.fill((0, 0, 0))
             if self.state.display_mode == ISO2D:
-                self.state.map.display(current_time, self.state.screen, self.state.camera, SCREEN_WIDTH, SCREEN_HEIGHT)
+                self.state.map.display(current_time, self.state.screen, self.state.camera, self.screen_width, self.screen_height)
                 fps = int(self.clock.get_fps())
                 fps_text = self.font.render(f"FPS: {fps}", True, (255, 255, 255))
                 self.screen.blit(fps_text, (10, 10))
@@ -129,7 +132,7 @@ class GameLoop:
     def run(self):
         running = True
         while running:
-            
+            self.screen_width, self.screen_height = self.screen.get_width(), self.screen.get_height()
             move_flags = 0
             mouse_x, mouse_y = pygame.mouse.get_pos()
             current_time = pygame.time.get_ticks()
