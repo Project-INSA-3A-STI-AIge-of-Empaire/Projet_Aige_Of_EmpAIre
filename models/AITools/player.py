@@ -51,6 +51,6 @@ class Player:
 
                 for entity_id in entity_dict:
                     id_list.append(entity_id)
+            print(f"ID List so far: {id_list}")
         
         return id_list
-    

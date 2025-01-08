@@ -1,3 +1,6 @@
+from GLOBAL_VAR import *
+from idgen import *
+from AITools.player import *
 from Entity.entity import * 
 class Building(Entity):
 
@@ -74,3 +77,6 @@ class Building(Entity):
 
     def update(self, current_time, camera = None, screen = None):
         self.update_animation_frame(current_time)
+
+    def get_building_html(self):
+        return f'<li class="building">{self.dict_repr.get(self.representation)} : {self.position}</li>'

@@ -20,4 +20,3 @@ class rayCastingRange:
             for current_X in range(min_X, max_X + 1):
                 if self.polygon.contains(Point(current_X, current_Y)):
                     yield current_Y, current_X
-

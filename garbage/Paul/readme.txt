@@ -58,6 +58,9 @@ Create conditionNode class (inherits LeafNode)
 Sequence, Fallback (or selector, idk what name you prefer) all inherit control
 UntilSuccess, UntilFail, ForceSuccess, ForceFail, Invert all inherit deco
 
+for the actual tree, select(hah) which node to use when making the tree depending on the aggressivity
+(case match) 
+
 
 
 

@@ -19,6 +19,29 @@ class Entity():
             self.id = ID_GENERATOR.give_ticket()
         self.sq_size = sq_size
         self.image = None
+        self.dict_repr = {
+            'wood':"Wood",
+            'gold':"Gold",
+            'food':"Food",
+            'v':"Villager",
+            's':"Swordsman",
+            'h':"Horseman",
+            'a':"Archer",
+            'am':"AxeMan",
+            'ca':"CavalryArcher",
+            'sm':"SpearMan",
+            'T':"TownCenter",
+            'H':"House",
+            'C':"Camp",
+            'F':"Farm",
+            'B':"Barracks",
+            'S':"Stable",
+            'A':"ArcheryRange",
+            'K':"Keep"
+            }
+
+    
+
         self.box_size = None
         self.HitboxClass = None
         self.walkable = False
