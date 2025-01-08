@@ -177,7 +177,8 @@ class GameState:
             with open('overview.html', 'w') as f:
                 f.write(doc.getvalue())
             webbrowser.open_new_tab('overview.html')   
-
+    def update(self):
+        pass
     # def draw_pause_text(self, screen):
     #     """Affiche le texte 'Jeu en pause' au centre de l'écran."""
     #     font = pygame.font.SysFont('Arial', 48)

@@ -22,6 +22,7 @@ class GameLoop:
 
         self.state = GameState(self.screen)
 
+        
     def handle_start_events(self, event):
         if pygame.key.get_pressed()[pygame.K_F12]:
             pass
@@ -56,9 +57,9 @@ class GameLoop:
 
         # Zoom de la caméra
         if keys[pygame.K_KP_PLUS] or keys[pygame.K_k]:
-            self.state.camera.adjust_zoom(current_time, 0.1, SCREEN_WIDTH, SCREEN_HEIGHT)
+            self.state.camera.adjust_zoom(current_time, 0.1, self.screen_width, self.screen_height)
         elif keys[pygame.K_KP_MINUS] or keys[pygame.K_j]:
-            self.state.camera.adjust_zoom(current_time, -0.1, SCREEN_WIDTH, SCREEN_HEIGHT)
+            self.state.camera.adjust_zoom(current_time, -0.1, self.screen_width, self.screen_height)
 
         # Basculer le mode d'affichage
         if keys[pygame.K_F10]:
@@ -124,6 +125,7 @@ class GameLoop:
                 fps_text = self.font.render(f"FPS: {fps}", True, (255, 255, 255))
                 self.screen.blit(fps_text, (10, 10))
                 self.state.ui.draw_resources(self.state.map.players_dict)
+                
             elif self.state.display_mode == TERMINAL:
                 self.state.map.terminal_display(current_time, self.state.terminal_camera)
         self.screen.blit(CURSOR_IMG, (mouse_x, mouse_y))
