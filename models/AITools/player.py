@@ -3,7 +3,7 @@ class Player:
     def __init__(self, team, resources = {"gold":0,"wood":0,"food":0}):
         self.team = team
         self.resources = resources
-        self.entities_matrix = {}
+        self.entities_dict = {}
         self.linked_map = None
 
     def add_resources(self, resources):
@@ -20,22 +20,22 @@ class Player:
     
     def add_entity(self, entity):
 
-        entity_dict = self.entities_matrix.get(entity.representation, None)
+        entity_dict = self.entities_dict.get(entity.representation, None)
 
         if entity_dict == None:
-            self.entities_matrix[entity.representation] = {}
-            entity_dict = self.entities_matrix.get(entity.representation, None)
+            self.entities_dict[entity.representation] = {}
+            entity_dict = self.entities_dict.get(entity.representation, None)
         
         entity_dict[entity.id] = entity
 
     def remove_entity(self, entity):
 
-        entity_dict = self.entities_matrix.get(entity.representation, None)
+        entity_dict = self.entities_dict.get(entity.representation, None)
         if entity_dict:
             entity_dict.pop(entity.id, None)
 
             if not entity_dict: # if empty remove 
-                self.entities_matrix.pop(entity.representation, None)
+                self.entities_dict.pop(entity.representation, None)
 
             return 1
         return 0
@@ -45,7 +45,7 @@ class Player:
         id_list = []
         
         for representation in representations:
-            entity_dict = self.entities_matrix.get(representation, None)
+            entity_dict = self.entities_dict.get(representation, None)
 
             if entity_dict:
 

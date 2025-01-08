@@ -25,7 +25,7 @@ class GameLoop:
 
     def run(self):
         print("------------------------------")
-        print(self.state.map.players_dict)
+        
         print("------------------------------")
         """
         p1 = self.state.map.players_dict.get(1)
@@ -62,6 +62,7 @@ class GameLoop:
 
         running = True
         while running:
+            
             move_flags = 0
             
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -89,10 +90,13 @@ class GameLoop:
                         print(p1)
                         p2 = self.state.map.players_dict.get(2)
                         print(p2)
+                        player =self.state.map.players_dict.get(1,None)
+                        if player:
+                            print(player.entities_dict )
                         v_ids = p1.get_entities_by_class(['ca'])
                         group = Group(v_ids, self.state.map)
 
-                        group.formation.display()
+                        #group.formation.display()
                         self.state.states = PLAY
                 if self.state.states == PAUSE:
                      if event.type == pygame.MOUSEBUTTONDOWN:
@@ -108,8 +112,8 @@ class GameLoop:
                                 #self.state.map.get_entity_by_id(id).attack_entity(entity_id)
                             if event.button == LEFT_CLICK:
                                 self.state.mouse_held = True
-                                #entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
-                                group.move_to(PVector2(x, y))
+                                entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
+                                group.attack_entity(entity_id)
                                 #for id in v_ids:
                                 #    self.state.map.get_entity_by_id(id).attack_entity(entity_id)
                                 #villager.drop_to_entity(entity_id)

@@ -22,7 +22,8 @@ class Entity():
         self.box_size = None
         self.HitboxClass = None
         self.walkable = False
-    def __str__(self):
+        
+    def __repr__(self):
         return f"ent<{self.id},{self.representation},Y:{self.cell_Y},X:{self.cell_X},sz:{self.sq_size}>"
     
     def collide_with_shape(self, shape):

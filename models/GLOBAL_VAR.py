@@ -68,7 +68,6 @@ MODE_GENERATION = {
             "T":1,
             "v":3
         }
-
     },
     MEAN:{
         "resources":{"gold":2000, "wood":2000, "food":2000},
@@ -80,9 +79,8 @@ MODE_GENERATION = {
     MARINES:{
         "resources":{"gold":20000, "wood":20000, "food":20000},
         "entities":{
-            
             "T":3,
-            "ca":35,
+            "ca":20,
             "B":2,
             "S":2,
             "A":2
@@ -100,12 +98,18 @@ UNIT_ATTACKING = 2
 UNIT_DYING = 3
 UNIT_TASK = 4
 
+GROUP_IDLE = 0 
+GROUP_WALKING = 1
+GROUP_ATTACKING = 2
+
+
 UNIT_LEADER = 0
 UNIT_FOLLOWER = 1
 
 BUILDING_INPROGRESS= 0
 BUILDING_ACTIVE = 1
 BUILDING_DYING = 2
+
 
 TREE_CAPACITY = 100
 GOLD_CAPACITY = 800
@@ -263,6 +267,7 @@ SPRITES = {
     'ca': CAVARLYARCHER_ARRAY_3D,
     'sm':SPEARMAN_ARRAY_3D,
     'am':AXEMAN_ARRAY_3D,
+
     'pa': ARROW_ARRAY_2D,
     'fpa': FIREARROW_ARRAY_2D,
     'ps': SPEAR_ARRAY_2D,

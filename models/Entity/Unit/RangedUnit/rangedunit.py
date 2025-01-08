@@ -64,7 +64,7 @@ class RangedUnit(Unit):
                                 if (self.check_in_range_with(entity)):
                                     
                                     self.check_range_with_target = True
-                                    
+                                    self.locked_with_target = True
                                     
                                     
                                 else:
@@ -78,7 +78,7 @@ class RangedUnit(Unit):
                                     
 
                                     
-
+                                    self.locked_with_target = False
                                     self.first_time_pass = True
                                     self.try_to_move(current_time,camera,screen)
                             else: # enemy in range  
@@ -96,6 +96,8 @@ class RangedUnit(Unit):
                         else:
                             if not(self.state == UNIT_IDLE):
                                 self.change_state(UNIT_IDLE)
+                            self.entity_target_id = None
+                            self.locked_with_target = False
                     else:
                         if not(self.state == UNIT_IDLE):
                                 self.change_state(UNIT_IDLE)

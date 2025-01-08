@@ -24,7 +24,7 @@ class Unit(Entity):
         
         self.check_range_with_target = False
         self.first_time_pass = True
-
+        self.locked_with_target = False
         self.speed=speed
         self.last_time_moved = pygame.time.get_ticks()
         self.move_per_sec = TILE_SIZE_2D # 1 tile per speed of each unit ( tile size in the 2d mechanics plane)
@@ -45,6 +45,7 @@ class Unit(Entity):
         self.linked_group = None # we need it if leader
         self.role_in_group = None # specify the role in the group
         self.group_node = None # if follower we node the node to move to it
+        self.leader_reached_position = True
 
         #animation attributes
         self.image = None
@@ -295,8 +296,9 @@ class Unit(Entity):
         if (self.state != UNIT_DYING):
             if self.state == UNIT_WALKING:
                 if self.position == self.move_position:
-                    if not(self.state == UNIT_IDLE):
-                        self.change_state(UNIT_IDLE)
+                    if self.leader_reached_position:
+                        if not(self.state == UNIT_IDLE):
+                            self.change_state(UNIT_IDLE)
                 else:
                     if not(self.state == UNIT_WALKING):
                         self.change_state(UNIT_WALKING)
@@ -391,6 +393,7 @@ class Unit(Entity):
                 self.change_state(UNIT_IDLE)
         #self.last_time_attacked = pygame.time.get_ticks()
         self.check_range_with_target = False
+        self.locked_with_target = False
 
     def display(self, current_time, screen, camera, g_width, g_height):
         
@@ -472,3 +475,6 @@ class Unit(Entity):
 
                 self.direction %= (2 * math.pi)  # Normalize within [0, 2π]
     
+    def get_unit_html(self):
+        return f'<li class="unit">f"{self.dict_repr.get(self.representation)} : {self.position}</li>'
+        

@@ -194,6 +194,7 @@ class Formation:
                 update_position(node.right, scale)
         update_position(self.leader, scale)
     
+
     def units_follow_formation(self):
         
         def node_follow(node):
@@ -204,12 +205,73 @@ class Formation:
                         unit.move_to(PVector2(node.position.x, node.position.y))
                     elif unit.state == UNIT_IDLE:
                         unit.target_direction = node.direction
+
                 node_follow(node.right)
                 node_follow(node.middle)
                 node_follow(node.left)
 
         node_follow(self.leader)
+    
+    
+    def update_target(self, entity_target_id):
+        def update_target_node(node, entity_target_id):
+            if node != None:
+                if node.is_leader == False:
+                    node_unit = self.linked_map.get_entity_by_id(node.unit_id)
+                    if node_unit != None:
+                        node_unit.entity_target_id = entity_target_id
+                        
+                        if entity_target_id == None:
+                            node_unit.check_range_with_target = False
+                        
+                
+                update_target_node(node.left, entity_target_id)
+                update_target_node(node.middle, entity_target_id)
+                update_target_node(node.right, entity_target_id)
+
+        update_target_node(self.leader, entity_target_id)
         
+    def update_followers_state(self):
+        def update_state(node, bool_state):
+            if node != None:
+                if node.is_leader == False:
+                    if node.unit_id != None:
+                        unit = self.linked_map.get_entity_by_id(node.unit_id)
+                    
+                        unit.leader_reached_position = bool_state
+                
+                update_state(node.left, bool_state)
+                update_state(node.middle, bool_state)
+                update_state(node.right, bool_state)
+
+        leader = self.linked_map.get_entity_by_id(self.leader.unit_id)
+
+        bool_state = True
+        if leader.state != UNIT_IDLE:
+            bool_state = False
+        
+        update_state(self.leader, bool_state)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def display(self):
         def recursive_node(node):
             if node != None:

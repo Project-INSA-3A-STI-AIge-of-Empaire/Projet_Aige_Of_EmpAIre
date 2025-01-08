@@ -36,6 +36,8 @@ class MeleeUnit(Unit):
     def try_to_attack(self,current_time, camera, screen):
         if (self.state != UNIT_DYING):
             if self.entity_target_id != None:
+                print("asfd")
+                print(self.entity_target_id)
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
                 
                 if (entity != None): 
@@ -45,6 +47,7 @@ class MeleeUnit(Unit):
                             if not(self.check_range_with_target):
                                 if (self.collide_with_entity(entity)):
                                     self.check_range_with_target = True
+                                    self.locked_with_target = True
                                         
                                 else:
                                     if not(self.state == UNIT_WALKING):
@@ -54,7 +57,7 @@ class MeleeUnit(Unit):
                                     self.move_position.x = entity.position.x
                                     self.move_position.y = entity.position.y
                                     
-
+                                    self.locked_with_target = False
                                     self.first_time_pass = True
                                     self.try_to_move(current_time, camera, screen )
                             else: # collided 
@@ -62,15 +65,18 @@ class MeleeUnit(Unit):
                                 dist_to_entity = self.position.abs_distance(entity.position)
 
                                 if (dist_to_entity <= ((entity.sq_size) * TILE_SIZE_2D + entity.box_size + self.box_size)):
-                                    
+                                    print("asdf ")
                                     self.try_to_damage(current_time, entity)
                                 else:
                                     self.check_range_with_target = False
+                                    
                                     if not(self.state == UNIT_IDLE):
                                         self.change_state(UNIT_IDLE)
                         else:
                             if not(self.state == UNIT_IDLE):
                                 self.change_state(UNIT_IDLE)
+                            self.entity_target_id = None
+                            self.locked_with_target = False
                     else:
                         if not(self.state == UNIT_IDLE):
                             self.change_state(UNIT_IDLE)
