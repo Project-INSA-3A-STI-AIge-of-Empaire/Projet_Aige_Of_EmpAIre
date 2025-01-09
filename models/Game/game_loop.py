@@ -79,8 +79,9 @@ class GameLoop:
             self.state.toggle_pause()
 
         # Pause
-        if keys[pygame.K_p]:
+        if keys[pygame.K_p] or keys[pygame.K_ESCAPE]:
             self.state.toggle_pause()
+
 
         # Mouvement de la caméra
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
