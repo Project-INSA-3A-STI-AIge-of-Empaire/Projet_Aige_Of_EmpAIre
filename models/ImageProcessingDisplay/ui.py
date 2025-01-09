@@ -102,6 +102,11 @@ class UserInterface:
         self.display_builds = not self.display_builds
     
     def toggle_all(self):
-        self.display_resources = not self.display_resources
-        self.display_units = not self.display_units
-        self.display_builds = not self.display_builds
+        if (self.display_resources + self.display_units + self.display_builds > 0):
+            self.display_resources = False
+            self.display_units = False
+            self.display_builds = False
+        else:
+            self.display_resources = True
+            self.display_units = True
+            self.display_builds = True
