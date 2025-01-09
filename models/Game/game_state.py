@@ -32,7 +32,7 @@ class GameState:
 
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""
-        self.map.generate_map()
+        self.map.generate_map(self.selected_mode)
 
     def set_map_type(self, map_type):
         self.selected_map_type = map_type
