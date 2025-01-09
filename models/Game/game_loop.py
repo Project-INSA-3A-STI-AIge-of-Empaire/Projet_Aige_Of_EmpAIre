@@ -77,7 +77,7 @@ class GameLoop:
 
         # Générer fichier HTML
         if keys[pygame.K_TAB]:
-            self.state.generate_html_file()
+            self.state.generate_html_file(self.state.map.players_dict)
             self.state.toggle_pause()
 
         # Pause
