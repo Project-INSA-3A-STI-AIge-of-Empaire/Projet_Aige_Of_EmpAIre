@@ -34,6 +34,8 @@ class GameLoop:
             self.state.set_players(self.state.startmenu.selected_player_count_index)
             self.state.start_game()
             self.state.states = PLAY
+            if self.state.display_mode == TERMINAL:
+                pygame.display.set_mode((20, 20), pygame.HWSURFACE | pygame.DOUBLEBUF )
 
     def handle_pause_events(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
