@@ -7,6 +7,9 @@ from GameField.map import *
 from GLOBAL_VAR import *
 from Entity import *
 from yattag import Doc
+import tkinter as tk
+from tkinter import filedialog, messagebox
+import pickle
 
 class GameState:
     def __init__(self, screen):
@@ -19,10 +22,12 @@ class GameState:
         self.speed = 1
         self.selected_map_type = MAP_NORMAL
         self.selected_mode = LEAN
+        self.selected_players = 2
         self.camera = Camera()
         self.terminal_camera = TerminalCamera()
         self.map = Map(MAP_CELLX,MAP_CELLY)
         self.display_mode = ISO2D # Mode d'affichage par défaut
+        self.savegamefile = None
         # Pour gérer le délai de basculement d'affichage
         self.last_switch_time = 0
         self.switch_cooldown = ONE_SEC*(0.2)  # Délai de 200ms (0,2 secondes)
@@ -32,7 +37,7 @@ class GameState:
 
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""
-        self.map.generate_map(self.selected_mode)
+        self.map.generate_map(self.selected_mode, self.selected_players)
 
     def set_map_type(self, map_type):
         self.selected_map_type = map_type
@@ -43,6 +48,8 @@ class GameState:
     def set_display_mode(self, mode):
         self.display_mode = mode
 
+    def set_players(self, players):
+        self.selected_players = players
     def toggle_pause(self):
         """Activer/désactiver la pause avec un délai pour éviter le spam."""
         current_time = pygame.time.get_ticks()
@@ -177,6 +184,28 @@ class GameState:
             with open('overview.html', 'w') as f:
                 f.write(doc.getvalue())
             webbrowser.open_new_tab('overview.html')   
+
+
+
+        def select_save_file(self):
+            # Initialise la fenêtre Tkinter
+            root = tk.Tk()
+            root.withdraw()  # Masquer la fenêtre principale
+
+            # Ouvrir la boîte de dialogue pour sélectionner un fichier
+            file_path = filedialog.askopenfilename(
+                title="Sélectionner un fichier de sauvegarde",
+                filetypes=[("Fichiers de sauvegarde", "*.save"), ("Tous les fichiers", "*.*")]
+            )
+
+            if file_path:
+                # Affiche le chemin du fichier sélectionné
+                print(f"Fichier sélectionné : {file_path}")
+                messagebox.showinfo("Fichier sélectionné", f"Vous avez sélectionné : {file_path}")
+            else:
+                # Affiche un message si aucun fichier n'a été sélectionné
+                print("Aucun fichier sélectionné.")
+                messagebox.showwarning("Aucun fichier", "Vous n'avez pas sélectionné de fichier.")
 
     # def draw_pause_text(self, screen):
     #     """Affiche le texte 'Jeu en pause' au centre de l'écran."""

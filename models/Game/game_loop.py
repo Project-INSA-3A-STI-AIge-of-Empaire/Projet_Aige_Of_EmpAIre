@@ -31,6 +31,7 @@ class GameLoop:
             self.state.set_map_type(self.state.startmenu.map_options[self.state.startmenu.selected_map_index])
             self.state.set_difficulty_mode(self.state.startmenu.selected_mode_index)
             self.state.set_display_mode(self.state.startmenu.display_mode)
+            self.state.set_players(self.state.startmenu.selected_player_count_index)
             self.state.start_game()
             self.state.states = PLAY
 
