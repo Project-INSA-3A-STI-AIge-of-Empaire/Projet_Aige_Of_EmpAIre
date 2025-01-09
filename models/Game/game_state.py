@@ -185,27 +185,38 @@ class GameState:
                 f.write(doc.getvalue())
             webbrowser.open_new_tab('overview.html')   
 
+    def save(self):
+        # Sauvegarde l'objet dans un fichier
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".save",
+            filetypes=[("Fichiers de sauvegarde", "*.save"), ("Tous les fichiers", "*.*")]
+        )
+        if file_path:
+            with open(file_path, 'wb') as file:
+                pickle.dump(self.map, file)
+            print(f"Jeu sauvegardé dans {file_path}")
+            messagebox.showinfo("Sauvegarde réussie", f"Jeu sauvegardé dans {file_path}")
+        else:
+            print("Sauvegarde annulée.")
+            messagebox.showwarning("Aucune sauvegarde", "Sauvegarde annulée.")
 
+    def load(self):
+        # Charge une sauvegarde depuis un fichier
+        file_path = filedialog.askopenfilename(
+            title="Sélectionner un fichier de sauvegarde",
+            filetypes=[("Fichiers de sauvegarde", "*.save"), ("Tous les fichiers", "*.*")]
+        )
 
-        def select_save_file(self):
-            # Initialise la fenêtre Tkinter
-            root = tk.Tk()
-            root.withdraw()  # Masquer la fenêtre principale
-
-            # Ouvrir la boîte de dialogue pour sélectionner un fichier
-            file_path = filedialog.askopenfilename(
-                title="Sélectionner un fichier de sauvegarde",
-                filetypes=[("Fichiers de sauvegarde", "*.save"), ("Tous les fichiers", "*.*")]
-            )
-
-            if file_path:
-                # Affiche le chemin du fichier sélectionné
-                print(f"Fichier sélectionné : {file_path}")
-                messagebox.showinfo("Fichier sélectionné", f"Vous avez sélectionné : {file_path}")
-            else:
-                # Affiche un message si aucun fichier n'a été sélectionné
-                print("Aucun fichier sélectionné.")
-                messagebox.showwarning("Aucun fichier", "Vous n'avez pas sélectionné de fichier.")
+        if file_path:
+            with open(file_path, 'rb') as file:
+                self.map = pickle.load(file)
+                print(f"Jeu chargé depuis {file_path}")
+                messagebox.showinfo("Chargement réussi", f"Jeu chargé depuis {file_path}")
+                  # Retourne l'objet chargé
+        else:
+            print("Aucun fichier sélectionné.")
+            messagebox.showwarning("Aucun fichier", "Vous n'avez pas sélectionné de fichier.")
+            return None  # Retourne None si aucune sauvegarde n'est chargée
 
     # def draw_pause_text(self, screen):
     #     """Affiche le texte 'Jeu en pause' au centre de l'écran."""

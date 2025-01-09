@@ -26,7 +26,7 @@ class GameLoop:
     
     def handle_start_events(self, event):
         if pygame.key.get_pressed()[pygame.K_F12]:
-            pass
+            self.state.load()
         if event.type == pygame.MOUSEBUTTONDOWN and self.state.startmenu.handle_click(event.pos):
             self.state.set_map_type(self.state.startmenu.map_options[self.state.startmenu.selected_map_index])
             self.state.set_difficulty_mode(self.state.startmenu.selected_mode_index)
@@ -71,9 +71,9 @@ class GameLoop:
 
         # Sauvegarder et charger
         if keys[pygame.K_F11]:
-            pass
+            self.state.save()
         if keys[pygame.K_F12]:
-            pass
+            self.state.load()
 
         # Générer fichier HTML
         if keys[pygame.K_TAB]:
