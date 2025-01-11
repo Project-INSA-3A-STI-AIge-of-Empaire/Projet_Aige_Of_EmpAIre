@@ -38,8 +38,6 @@ def buildings_insufficient(context):
 def has_enough_military(context):
     return context['military_units'] >= 10
 
-def enemy_visible(context):
-    return context['enemy_visible']
 
 # ---- Actions ----
 def defend(context):
