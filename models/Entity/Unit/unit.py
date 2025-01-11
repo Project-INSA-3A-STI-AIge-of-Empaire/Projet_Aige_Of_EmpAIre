@@ -482,5 +482,6 @@ class Unit(Entity):
 
         # Y offsets distincts pour chaque joueur
         y_offset = 0
-        return f'<li class="unit">{self.dict_repr.get(self.representation)} : {self.position} , {self.hp}</li>'
+        return f'<li class="unit">{self.dict_repr.get(self.representation)}<br>Position : {self.position}<br>HP : {self.hp}</li>'
+
         

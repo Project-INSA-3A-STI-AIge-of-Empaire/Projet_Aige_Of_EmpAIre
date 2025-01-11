@@ -2,6 +2,7 @@ from GameField.cell import *
 from GLOBAL_IMPORT import *
 from ImageProcessingDisplay.minimap import *
 from AITools.isorange import *
+from AITools import *
 
 import random 
 import math
@@ -140,8 +141,11 @@ class Map:
 
         self.entity_id_dict[_entity.id] = _entity
 
-        # if _entity.team != 0:
-        #     self.player_dict[_entity.team].add_entity(_entity)
+        if _entity.team != 0:
+            if _entity.team not in self.players_dict:
+                self.players_dict[_entity.team] = Player(_entity.team)  # Initialisation si nécessaire
+            self.players_dict[_entity.team].add_entity(_entity)
+            print(f"Entity {str(_entity)} added to player {str(self.players_dict[_entity.team])}")
 
         return 1 # added the entity succesfully
     
@@ -466,7 +470,10 @@ class Map:
 
                 gen_option = MODE_GENERATION.get(mode)
                 
-                current_player.resources = gen_option.get("resources").copy() # we dont want togive it as a pointer else all players will share the same resources haha
+                resources = gen_option.get("resources")
+                print(f"Resources for player {i + 1}: {resources}")
+                current_player.resources = resources.copy()
+
                 entities_gen = gen_option.get("entities")
                 for entity_type, number in entities_gen.items():
 
@@ -477,13 +484,25 @@ class Map:
                         
                         entity_instance = EntityClass(None, None, None, current_player.team)
                         print(f"the {i}th entity:{entity_instance}")
-                        current_player.add_entity(entity_instance)
+                        # self.add_entity_to_closest(entity_instance, entity_instance.cell_Y, entity_instance.cell_X)
                         self.add_entity_to_closest(entity_instance, center_Y, center_X, random_padding=0x01)
-
-            self.players_dict[current_player.team] = current_player
+                        
+            if current_player.team not in self.players_dict:
+                self.players_dict[current_player.team] = current_player
+            else:
+                existing_player = self.players_dict[current_player.team]
+                for resource, amount in current_player.resources.items():
+                    existing_player.resources[resource] = amount
+                existing_player.entities_dict.update(current_player.entities_dict)
+                # print(f"Updated resources for team {current_player.team}: {current_player.resources}")
         
-
         print(self.players_dict)
+        # print("Final players_dict with resources:")
+        # for team, player in self.players_dict.items():
+        #     print(f"Team {team}: {player}")
+        #     print(f"  Resources: {player.resources}")
+        #     print(f"  Entities: {player.entities_dict}")
+
 
 
     def _add_starting_resources(self, center_Y, center_X):
