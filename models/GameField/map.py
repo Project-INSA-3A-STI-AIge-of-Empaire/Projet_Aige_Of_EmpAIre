@@ -139,6 +139,10 @@ class Map:
         # at the end add the entity pointer to the id dict with the id dict 
 
         self.entity_id_dict[_entity.id] = _entity
+
+        # if _entity.team != 0:
+        #     self.player_dict[_entity.team].add_entity(_entity)
+
         return 1 # added the entity succesfully
     
     def add_entity_to_closest(self, entity, cell_Y, cell_X, random_padding = 0x00, min_spacing = 4, max_spacing = 5):

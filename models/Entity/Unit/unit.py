@@ -1,6 +1,7 @@
 from Entity.entity import *
 from AITools.a_star import *
 from math import floor, sqrt
+from GLOBAL_VAR import * 
 import random
 
 class Unit(Entity):
@@ -476,5 +477,10 @@ class Unit(Entity):
                 self.direction %= (2 * math.pi)  # Normalize within [0, 2π]
     
     def get_html(self):
+        # Position des joueurs
+        pos = (30,50)
+
+        # Y offsets distincts pour chaque joueur
+        y_offset = 0
         return f'<li class="unit">{self.dict_repr.get(self.representation)} : {self.position} , {self.hp}</li>'
         

@@ -247,7 +247,7 @@ FIREARROW_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/fire_arrow.webp",32, 
 SPEAR_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/spear.webp",32, 10, skip_row = 2, limit_col = 1)
 FIRESPEAR_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/fire_spear.webp",32, 10, skip_row = 2, limit_col = 1)
 
-
+                     
 SPRITES = {
     'g': GRASS,
     'A': ARCHERYRANGE_ARRAY_3D,
@@ -385,6 +385,24 @@ ICONS = {
     "hi":HORSEMAN_ICON,
     "si":SWORDSMAN_ICON,
     "vi":VILLAGER_ICON
+}
+
+ICONS_HTML = {
+    "goldi":"Icons/Resources/Aoe2de_gold.png",
+    "woodi":"Icons/Resources/Aoe2de_wood.png",
+    "foodi":"Icons/Resources/Aoe2de_food.png",
+    "Ai":"Icons/Building/Archery_range_aoe2DE.png",
+    "Bi":"Icons/Building/Barracks_aoe2DE.png",
+    "Fi":"Icons/Building/FarmDE.png",
+    "Hi":"Icons/Building/House_aoe2DE.png",
+    "Ki":"Icons/Building/Keep_icon_AoE2DE.png",
+    "Ci":"Icons/Building/Lumber_camp_aoe2de.png",
+    "Si":"Icons/Building/Stable_aoe2DE.png",
+    "Ti":"Icons/Building/Towncenter_aoe2DE.png",
+    "ai":"Icons/Unit/Archer_aoe2DE.png",
+    "hi":"Icons/Unit/Knight_aoe2DE.png",
+    "si":"Icons/Unit/Longswordsman_aoe2DE.png",
+    "vi":"Icons/Unit/MaleVillDE.png"
 }
 
 ICON_WIDTH, ICON_HEIGHT =  3*TILE_SIZE_2ISO, 3*TILE_SIZE_2ISO

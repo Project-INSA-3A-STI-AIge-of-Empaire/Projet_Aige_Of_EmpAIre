@@ -113,35 +113,8 @@ class GameState:
             self.last_switch_time = current_time
 
     def generate_html_file(self, players_dict):
-        # team_dict = {}
-        # for player in players_dict.values():
-        #     team = player.team
-        #     if team not in team_dict:
-        #         team_dict[team] = {}
-
-        #     for repr_key in player.entities_dict:
-        #         if repr_key not in team_dict[team]:
-        #             team_dict[team][repr_key] = ""
-        #         for ent in player.entities_dict[repr_key].values():
-        #             match ent:
-        #                 case Unit():
-        #                     team_dict[team][repr_key] += ent.get_unit_html()
-        #                 case Building():
-        #                     team_dict[team][repr_key] += ent.get_building_html()
-        #         for repr_key in player.resources: 
-        #             if repr_key not in team_dict[team]:
-        #                 team_dict[team][repr_key] = ""
-        #             total_value = 0
-        #             for repr_value in player.resources.values():
-        #                 if isinstance(repr_value, int):  
-        #                     total_value += repr_value
-        #                 else:
-        #                     team_dict[team][repr_key] += str(repr_value) 
-        #             team_dict[team][repr_key] += str(total_value)
-
         # Creation of the HTML file using yattag
-
-        
+     
         doc, tag, text = Doc().tagtext()
 
         doc.asis('<!DOCTYPE html>')
@@ -167,29 +140,33 @@ class GameState:
             }
                     ''')
             with tag('body'):
-                with tag('h1'):
-                    text('Age of Empires - Overview')
-                for team in players_dict.keys():
-                    with tag('button', onclick=f"toggleTeam({team})"):
-                        text(f"Show Team {team}")
-                for team, player in players_dict.items():
-                    with tag('div', id=f"team-{team}", klass="team-section", style="display:none;"):
-                        with tag('h2'):
-                            text(f"Team {team}")
-                            with tag('h3'):
-                                text("Ressources : ")  # Titre du type d'entité (Unit, Building, Resource)
-                            for resource_type, amount in player.resources.items():
-                                with tag('h4'):
-                                    text(resource_type)  # Titre du type d'entité (Unit, Building, Resource)
-                                with tag('ul'):
-                                    text(f"{amount}")
-                            with tag('h3'):
-                                text("Entities : ")  # Titre du type d'entité (Unit, Building, Resource)
-                            for entity_repr, entities in player.entities_dict.items():
-                                for entity in entities.values():
-                                    with tag('ul'):
-                                        with tag('li'):
-                                            doc.asis(entity.get_html())  # Ajoute le contenu HTML de l'entité
+                        with tag('h1'):
+                            text('Age of Empires - Overview')
+                        for team in players_dict.keys():
+                            with tag('button', onclick=f"toggleTeam({team})"):
+                                text(f"Show Team {team}")
+                        for team, player in players_dict.items():
+                            with tag('div', id=f"team-{team}", klass="team-section", style="display:none;"):
+                                with tag('h2'):
+                                    text(f"Team {team}")
+                                    with tag('h3'):
+                                        text("Ressources : ")  # Titre du type d'entité (Unit, Building, Resource)
+                                    for resource_type, amount in player.resources.items():
+                                        with tag('ul', klass= 'resource-item'):
+                                            icons_path = ICONS_HTML.get(resource_type+"i", "default_image.png")
+                                            doc.stag('img', src=f"{icons_path}",klass  ="photo", width =50, height =50)
+                                            text(resource_type+" : ")
+                                            text(f"{amount} ")  # Ajoute le contenu HTML de l'entité
+                                    with tag('h3'):
+                                        text("Entities : ")  # Titre du type d'entité (Unit, Building, Resource)
+                                    for entity_repr, in player.entities_dict.keys():
+                                        with tag('h4'):
+                                            icons_path = ICONS_HTML.get(entity_repr+"i", "default_image.png")
+                                            doc.stag('img', src=f"{icons_path}",klass  ="photo", width =50, height =50)
+                                        for id in player.get_entities_by_class(entity_repr):
+                                                with tag('ul'):
+                                                    with tag('li'):
+                                                        doc.asis(player.entities_dict[entity_repr][id].get_html())  # Ajoute le contenu HTML de l'entité
                                             
 
         # Save the HTML content
@@ -200,27 +177,31 @@ class GameState:
 
         # Generate CSS file
         css_content = """
+        @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            font-family:'MedievalSharp';
+            background-color: #ffebcd;
             margin: 0;
             padding: 0;
         }
 
         h1 {
+            font-family:'MedievalSharp';
             text-align: center;
             color: #333;
             padding: 20px;
-            background: #0077cc;
+            background: #8b0000;
             color: white;
             margin: 0;
         }
 
         button {
+            font-family:'MedievalSharp';
             margin: 10px;
             padding: 10px 20px;
-            background: #0077cc;
-            color: white;
+            background: #deb887;
+            color: black;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -228,14 +209,14 @@ class GameState:
         }
 
         button:hover {
-            background: #005fa3;
+            background: #fffafa;
         }
 
         .team-section {
             margin: 20px auto;
             padding: 15px;
             max-width: 800px;
-            background: white;
+            background: #deb887;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
@@ -247,6 +228,13 @@ class GameState:
         ul {
             padding: 0;
             list-style: none;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
         }
 
         ul li {
