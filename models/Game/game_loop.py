@@ -22,7 +22,6 @@ class GameLoop:
 
         self.state = GameState(self.screen)
 
-        
     def handle_start_events(self, event):
         if pygame.key.get_pressed()[pygame.K_F12]:
             pass
@@ -130,36 +129,6 @@ class GameLoop:
                 self.state.map.terminal_display(current_time, self.state.terminal_camera)
         self.screen.blit(CURSOR_IMG, (mouse_x, mouse_y))
         pygame.display.flip()
-
-    def run(self):
-        running = True
-        while running:
-            self.screen_width, self.screen_height = self.screen.get_width(), self.screen.get_height()
-            move_flags = 0
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            current_time = pygame.time.get_ticks()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                if self.state.states == START:
-                    self.handle_start_events(event)
-                elif self.state.states == PAUSE:
-                    self.handle_pause_events(event)
-                elif self.state.states == PLAY:
-                    self.handle_play_events(event, mouse_x, mouse_y)
-
-            if self.state.mouse_held:
-                self.state.map.minimap.update_camera(self.state.camera, mouse_x, mouse_y)
-
-            if not (self.state.states == START):
-                self.handle_keyboard_inputs(move_flags, current_time)
-
-            self.update_game_state(current_time)
-            self.render_display(current_time, mouse_x, mouse_y)
-            self.clock.tick(FPS)
-
-        pygame.quit()
 
 
 if __name__ == "__main__":
