@@ -1,12 +1,16 @@
 import pygame
 import random 
 import webbrowser
+import os
 #from Game.savegame import *
 from ImageProcessingDisplay import UserInterface, StartMenu, PauseMenu, Camera, TerminalCamera 
 from GameField.map import *
 from GLOBAL_VAR import *
 from Entity import *
 from yattag import Doc
+import tkinter as tk
+from tkinter import filedialog, messagebox
+import pickle
 
 class GameState:
     def __init__(self, screen):
@@ -19,10 +23,12 @@ class GameState:
         self.speed = 1
         self.selected_map_type = MAP_NORMAL
         self.selected_mode = LEAN
+        self.selected_players = 2
         self.camera = Camera()
         self.terminal_camera = TerminalCamera()
         self.map = Map(MAP_CELLX,MAP_CELLY)
         self.display_mode = ISO2D # Mode d'affichage par défaut
+        self.savegamefile = None
         # Pour gérer le délai de basculement d'affichage
         self.last_switch_time = 0
         self.switch_cooldown = ONE_SEC*(0.2)  # Délai de 200ms (0,2 secondes)
@@ -32,7 +38,7 @@ class GameState:
 
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""
-        self.map.generate_map()
+        self.map.generate_map(self.selected_mode, self.selected_players)
 
     def set_map_type(self, map_type):
         self.selected_map_type = map_type
@@ -43,6 +49,8 @@ class GameState:
     def set_display_mode(self, mode):
         self.display_mode = mode
 
+    def set_players(self, players):
+        self.selected_players = players
     def toggle_pause(self):
         """Activer/désactiver la pause avec un délai pour éviter le spam."""
         current_time = pygame.time.get_ticks()
@@ -104,42 +112,24 @@ class GameState:
             self.ui.toggle_all()
             self.last_switch_time = current_time
 
-    def generate_html_file(self):
+    def generate_html_file(self, players_dict):
+        # Creation of the HTML file using yattag
+     
+        doc, tag, text = Doc().tagtext()
 
-        team_dict = {}
-        for player in self.map.players_dict.values():
-            team = player.team
-            if team not in team_dict:
-                team_dict[team] = {}
-
-            for repr_key in player.entities_dict:
-                if repr_key not in team_dict[team]:
-                    team_dict[team][repr_key] = ""
-                for ent in player.entities_dict[repr_key].values():
-                    match ent:
-                        case Unit():
-                            team_dict[team][repr_key] += ent.get_unit_html()
-                        case Building():
-                            team_dict[team][repr_key] += ent.get_building_html()
-                for repr_key in player.resources: 
-                    if repr_key not in team_dict[team]:
-                        team_dict[team][repr_key] = ""
-                    total_value = 0
-                    for repr_value in player.resources.values():
-                        if isinstance(repr_value, int):  
-                            total_value += repr_value
-                        else:
-                            team_dict[team][repr_key] += str(repr_value) 
-                    team_dict[team][repr_key] += str(total_value)
-            
-                # Creation of the HTML file the  yattag library
-            doc, tag, text = Doc().tagtext()
-
-            doc.asis('<!DOCTYPE html>')
-            with tag('html', lang='en'):
-                with tag('head'):
-                    with tag('script'):
-                        text('''
+        doc.asis('<!DOCTYPE html>')
+        with tag('html', lang='en'):
+            with tag('head'):
+                with tag('meta', charset='UTF-8'):
+                    pass
+                with tag('meta', name='viewport', content='width=device-width, initial-scale=1.0'):
+                    pass
+                with tag('title'):
+                    text('Age of Empires - Overview')
+                with tag('link', rel='stylesheet', href='styles.css'):
+                    pass
+                with tag('script'):
+                    text('''
             function toggleTeam(teamId) {
                 var teamDiv = document.getElementById("team-" + teamId);
                 if (teamDiv.style.display === "none") {
@@ -148,37 +138,152 @@ class GameState:
                     teamDiv.style.display = "none";
                 }
             }
-                        ''')
-                    with tag('title'):
-                        text('Age of Empires - Overview')
-                with tag('body'):
-                    with tag('h1'):
-                        text('Age of Empires - Overview')
-                    for team in team_dict.keys():
-                        with tag('button', onclick=f"toggleTeam({team})"):
-                            text(f"Show Team {team}")
-                    for team, entities in team_dict.items():
-                        with tag('div', id=f"team-{team}", style="display:none;"):
-                            with tag('h2'):
-                                text(f"Team {team}")
-                            for entity_type, html_content in entities.items():
-                                with tag('h3'):
-                                    text(entity_type)  # Titre du type d'entité (Unit, Building, Resource)
-                                with tag('ul'):
-                                    if html_content.strip():  # Si le contenu n'est pas vide
-                                        with tag('li'):
-                                            doc.asis(html_content)
-                                    else:
-                                        with tag('li'):
-                                            text(f"No {entity_type}s available")
+                    ''')
+            with tag('body'):
+                        with tag('h1'):
+                            text('Age of Empires - Overview')
+                        for team in players_dict.keys():
+                            with tag('button', onclick=f"toggleTeam({team})"):
+                                text(f"Show Team {team}")
+                        for team, player in players_dict.items():
+                            with tag('div', id=f"team-{team}", klass="team-section", style="display:none;"):
+                                with tag('h2'):
+                                    text(f"Team {team}")
+                                    with tag('h3'):
+                                        text("Ressources : ")  # Titre du type d'entité (Unit, Building, Resource)
+                                    for resource_type, amount in player.resources.items():
+                                        with tag('ul', klass= 'resource-item'):
+                                            icons_path = ICONS_HTML.get(resource_type+"i", "default_image.png")
+                                            doc.stag('img', src=f"{icons_path}",klass  ="photo", width =50, height =50)
+                                            text(resource_type+" : ")
+                                            text(f"{amount} ")  # Ajoute le contenu HTML de l'entité
+                                    with tag('h3'):
+                                        text("Entities : ")  # Titre du type d'entité (Unit, Building, Resource)
+                                    for entity_repr, in player.entities_dict.keys():
+                                        with tag('h4'):
+                                            icons_path = ICONS_HTML.get(entity_repr+"i", "default_image.png")
+                                            doc.stag('img', src=f"{icons_path}",klass  ="photo", width =50, height =50)
+                                        for id in player.get_entities_by_class(entity_repr):
+                                                with tag('ul'):
+                                                    with tag('li'):
+                                                        doc.asis(player.entities_dict[entity_repr][id].get_html())  # Ajoute le contenu HTML de l'entité
+                                            
 
-            # Sauvegarder le fichier HTML généré
-            print("HTML content to write:", doc.getvalue())
-            with open('overview.html', 'w') as f:
-                f.write(doc.getvalue())
-            webbrowser.open_new_tab('overview.html')   
-    def update(self):
-        pass
+        # Save the HTML content
+        html_content = doc.getvalue()
+
+        with open('overview.html', 'w') as f:
+            f.write(html_content)
+
+        # Generate CSS file
+        css_content = """
+        @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
+        body {
+            font-family:'MedievalSharp';
+            background-color: #ffebcd;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-family:'MedievalSharp';
+            text-align: center;
+            color: #333;
+            padding: 20px;
+            background: #8b0000;
+            color: white;
+            margin: 0;
+        }
+
+        button {
+            font-family:'MedievalSharp';
+            margin: 10px;
+            padding: 10px 20px;
+            background: #deb887;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #fffafa;
+        }
+
+        .team-section {
+            margin: 20px auto;
+            padding: 15px;
+            max-width: 800px;
+            background: #deb887;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2, h3 {
+            color: #444;
+        }
+
+        ul {
+            padding: 0;
+            list-style: none;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+        }
+
+        ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        ul li:last-child {
+            border-bottom: none;
+        }
+        """
+        with open('styles.css', 'w') as f:
+            f.write(css_content)
+
+        webbrowser.open_new_tab('overview.html')   
+
+    def save(self):
+        # Sauvegarde l'objet dans un fichier
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".save",
+            filetypes=[("Fichiers de sauvegarde", "*.save"), ("Tous les fichiers", "*.*")]
+        )
+        if file_path:
+            with open(file_path, 'wb') as file:
+                pickle.dump(self.map, file)
+            print(f"Jeu sauvegardé dans {file_path}")
+            messagebox.showinfo("Sauvegarde réussie", f"Jeu sauvegardé dans {file_path}")
+        else:
+            print("Sauvegarde annulée.")
+            messagebox.showwarning("Aucune sauvegarde", "Sauvegarde annulée.")
+
+    def load(self):
+        # Charge une sauvegarde depuis un fichier
+        file_path = filedialog.askopenfilename(
+            title="Sélectionner un fichier de sauvegarde",
+            filetypes=[("Fichiers de sauvegarde", "*.save"), ("Tous les fichiers", "*.*")]
+        )
+
+        if file_path:
+            with open(file_path, 'rb') as file:
+                self.map = pickle.load(file)
+                print(f"Jeu chargé depuis {file_path}")
+                messagebox.showinfo("Chargement réussi", f"Jeu chargé depuis {file_path}")
+                  # Retourne l'objet chargé
+        else:
+            print("Aucun fichier sélectionné.")
+            messagebox.showwarning("Aucun fichier", "Vous n'avez pas sélectionné de fichier.")
+            return None  # Retourne None si aucune sauvegarde n'est chargée
+
     # def draw_pause_text(self, screen):
     #     """Affiche le texte 'Jeu en pause' au centre de l'écran."""
     #     font = pygame.font.SysFont('Arial', 48)

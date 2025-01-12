@@ -15,55 +15,48 @@ class UserInterface:
         for player_id, player_object in players_dict.items():
             player_offset = -12
             player_pos = (100*player_id, 50)
+            # Représentations attendues des unités avec leur offset respectif
+            expected_unit_representations = [
+                    ('v', 0),
+                    ('s', 50),
+                    ('h', 100),
+                    ('a', 150)
+                ]
+            # Représentations attendues des constructions avec leur offset respectif
+            expected_build_representations = [
+                ('T', 0),
+                ('H', 50),
+                ('C', 100),
+                ('F', 150),
+                ('B', 200),
+                ('S', 250),
+                ('K', 300),
+                ('A', 350)
+            ]
+            
             if self.display_resources:
                 for resource in player_object.resources.values():
                     texte = self.font.render(str(resource), True, WHITE_COLOR)  # Crée un rendu de texte
                     self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset))    # Affiche à la position (x=50, y=y_offset)
                     player_offset += 50
             if self.display_units:
-                for unit_representation, unit in player_object.entities_dict.items():
-                    match unit_representation:
-                        case 'v':
-                            texte = self.font.render(str(len(unit)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset))
-                        case 's':
-                            texte = self.font.render(str(len(unit)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+50))
-                        case 'h':
-                            texte = self.font.render(str(len(unit)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+100))
-                        case 'a':
-                            texte = self.font.render(str(len(unit)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+150))
-                player_offset += 200
+                for unit_representation, unit_offset in expected_unit_representations:
+                    # Vérifie si la représentation d'unité existe dans entities_dict
+                    unit = player_object.entities_dict.get(unit_representation, [])
+                    texte = self.font.render(str(len(unit) if unit else 0), True, WHITE_COLOR)
+                    self.screen.blit(texte, (player_pos[0], player_pos[1] + player_offset + unit_offset))
+
+                # Mise à jour de l'offset global après les unités
+                player_offset += 200  # Ajustez l'offset global si nécessaire
             if self.display_builds:
-                for build_representation, build in player_object.entities_dict.items():
-                    match build_representation:
-                        case 'T':
-                            texte = self.font.render(str(len(build)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset))
-                        case 'H':
-                            texte = self.font.render(str(len(build)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+50))
-                        case 'C':
-                            texte = self.font.render(str(len(build)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+100))
-                        case 'F':
-                            texte = self.font.render(str(len(build)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+150))
-                        case 'B':
-                            texte = self.font.render(str(len(build)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+200))
-                        case 'S':
-                            texte = self.font.render(str(len(build)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+250))
-                        case 'K':
-                            texte = self.font.render(str(len(build)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+300))
-                        case 'A':
-                            texte = self.font.render(str(len(build)), True, WHITE_COLOR)
-                            self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset+350))
-                player_offset += 400
+                for build_representation, build_offset in expected_build_representations:
+                    # Vérifie si la représentation de construction existe dans entities_dict
+                    build = player_object.entities_dict.get(build_representation, [])
+                    texte = self.font.render(str(len(build) if build else 0), True, WHITE_COLOR)
+                    self.screen.blit(texte, (player_pos[0], player_pos[1] + player_offset + build_offset))
+
+                # Mise à jour de l'offset global après les constructions
+                player_offset += 400  # Ajustez l'offset global si nécessaire
              
         
 
@@ -109,6 +102,11 @@ class UserInterface:
         self.display_builds = not self.display_builds
     
     def toggle_all(self):
-        self.display_resources = not self.display_resources
-        self.display_units = not self.display_units
-        self.display_builds = not self.display_builds
+        if (self.display_resources + self.display_units + self.display_builds > 0):
+            self.display_resources = False
+            self.display_units = False
+            self.display_builds = False
+        else:
+            self.display_resources = True
+            self.display_units = True
+            self.display_builds = True
