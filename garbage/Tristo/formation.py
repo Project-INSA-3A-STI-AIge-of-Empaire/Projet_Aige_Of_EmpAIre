@@ -111,37 +111,9 @@ class FormationNode:
         return f"left{self.left}, right{self.right}, middle{self.middle}"
         
 
-    @staticmethod
-    def update_direction(node):
-
-        if node != None:
-            print(node.is_leader)
-            if node.is_leader == False:
-
-                print(node)
-                
-                node.position.rotate_with_respect_to(node.leader.direction - node.direction, node.leader.position)
-                node.direction = node.leader.direction
-            FormationNode.update_direction(node.left)
-            FormationNode.update_direction(node.middle)
-            FormationNode.update_direction(node.right)
     
-    @staticmethod
-    def update_position(node, scale):
-
-        if node != None:
-            
-
-            amountx = math.cos(node.direction) * scale
-            amounty = math.sin(node.direction) * scale
-
-            node.position.x += amountx
-            node.position.y += amounty
-                
-                
-            FormationNode.update_position(node.left, scale)
-            FormationNode.update_position(node.middle, scale)
-            FormationNode.update_position(node.right, scale)
+    
+     
     
     def adjust_direction(self, amount):
         self.direction = (self.direction + amount + 2*math.pi) % (2*math.pi)
@@ -185,11 +157,26 @@ class Formation:
             new_node.link_to(current_node, neighbor)
             current_node = new_node  # Move to the newly created node
 
-    def update_formation(self):
-        FormationNode.update_direction(self.leader)
     
-    def update_formation_position(self, scale):
-        FormationNode.update_position(self.leader, scale)
+    
+    def update_formation_position(self):
+        def update_position(node):
+
+            if node != None:
+                
+                if node.is_leader == False:
+                    parent = node.parent
+                    node.direction = parent.direction
+                    if parent.left == node:
+                        node.position.x = parent.position.x - padding*math.cos(parent.direction)
+                        node.position.y = parent.position.y - padding*math.sin(parent.direction)
+                        
+                    elif parent.right == node:
+                        node.position.x = parent.position.x - padding*math.cos(parent.direction)
+                        node.position.y = parent.position.y + padding*math.sin(parent.direction)
+                    elif parent.middle == node:
+                        node.position.x = parent.position.x - padding*math.cos(parent.direction)
+                        node.position.y = parent.position.y 
         
 
         
@@ -254,12 +241,13 @@ def main():
             last_time =pygame.time.get_ticks()
             if keys[pygame.K_w]:
                 formation.leader.adjust_direction(-math.radians(1))
-                formation.update_formation()
+                
             if keys[pygame.K_a]:
                 formation.leader.adjust_direction(math.radians(1))
-                formation.update_formation()
+                
             if keys[pygame.K_s]:
-                formation.update_formation_position(2)
+                formation.leader.position.x += math.cos(formation.leader.direction)
+                formation.leader.position.y += math.sin(formation.leader.direction)
         print(formation.leader.direction)
         # Draw formation
         draw_formation(screen, formation)

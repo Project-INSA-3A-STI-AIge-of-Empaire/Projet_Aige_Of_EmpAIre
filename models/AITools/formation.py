@@ -6,6 +6,7 @@ from shape import *
 FORMATION_PADDING = 20
 
 BOX_DEFAULT = 10
+"""
 class FormationNode:
 
     def __init__(self, position, direction = None):
@@ -42,7 +43,7 @@ class FormationNode:
         self.direction = parent.direction
 
         # this does all the linking to the nodes so they follow the leader
-    """
+    
     def avoid_others(self, _map):
             if self != None:
                 cell_Y, cell_X = math.floor(self.position.y/_map.tile_size_2d), math.floor(self.position.x/_map.tile_size_2d)
@@ -86,7 +87,7 @@ class FormationNode:
 
                 return collided, avoidance_force
             return None, None
-        """
+        
 
 
 class Formation:
@@ -251,38 +252,131 @@ class Formation:
             bool_state = False
         
         update_state(self.leader, bool_state)
+"""
 
+class FormationNode:
+    def __init__(self, position, direction=None, unit_id=None, is_leader=False):
+        self.position = position
+        self.direction = direction
+        self.unit_id = unit_id
+        self.is_leader = is_leader
 
+class Formation:
+    def __init__(self, leader_position, leader_direction, units_id_list, linked_map):
+        self.nodes = []  # Flat list of nodes
+        self.linked_map = linked_map
 
+        # Create the leader node
+        leader_node = FormationNode(leader_position, leader_direction, units_id_list.pop(0), is_leader=True)
+        self.nodes.append(leader_node)
 
+        # Add follower nodes in a simple grid pattern
+        self.init_formation(leader_node, units_id_list)
 
+    def init_formation(self, leader_node, units_id_list):
+        rows = int(len(units_id_list) ** 0.5) + 1
+        cols = (len(units_id_list) // rows) + 1
+        offset_x = FORMATION_PADDING
+        offset_y = FORMATION_PADDING
 
+        for row in range(rows):
+            for col in range(cols):
+                if not units_id_list:
+                    return
 
+                position = PVector2(
+                    leader_node.position.x + col * offset_x,
+                    leader_node.position.y + row * offset_y
+                )
+                direction = leader_node.direction
 
+                unit_id = units_id_list.pop(0)
+                follower_node = FormationNode(position, direction, unit_id, is_leader=False)
+                self.nodes.append(follower_node)
 
+    def update_leader_on_death(self):
+        # Find a new leader from the remaining nodes
+        remaining_nodes = [node for node in self.nodes if node.unit_id is not None]
+        if not remaining_nodes:
+            print("Formation has no remaining units.")
+            self.nodes = []
+            return
 
+        new_leader_node = remaining_nodes[0]
+        new_leader_node.is_leader = True
+        self.nodes.remove(new_leader_node)
+        self.nodes.insert(0, new_leader_node)
 
+        print(f"New leader assigned: {new_leader_node.unit_id}")
 
+    def update_formation_direction(self):
+        leader_node = self.nodes[0]
+        for node in self.nodes[1:]:
+            node.direction = leader_node.direction
 
+    def update_formation_position(self, scale):
+        leader_node = self.nodes[0]
+        for node in self.nodes:
+            if node != leader_node:
+                direction_vector = PVector2(
+                    math.cos(node.direction),
+                    math.sin(node.direction)
+                )
+                node.position.x += direction_vector.x * scale
+                node.position.y += direction_vector.y * scale
 
+    def units_follow_formation(self):
+        for node in self.nodes:
+            unit = self.linked_map.get_entity_by_id(node.unit_id)
+            if unit is not None:
+                unit.move_to(PVector2(node.position.x, node.position.y))
+                unit.target_direction = node.direction
 
+    def update_target(self, entity_target_id):
+        for node in self.nodes:
+            if not node.is_leader:
+                unit = self.linked_map.get_entity_by_id(node.unit_id)
+                if unit is not None:
+                    unit.entity_target_id = entity_target_id
 
+    def update_followers_state(self):
+        leader = self.linked_map.get_entity_by_id(self.nodes[0].unit_id)
+        leader_idle = leader.state == UNIT_IDLE if leader else False
 
-
-
-
+        for node in self.nodes[1:]:
+            unit = self.linked_map.get_entity_by_id(node.unit_id)
+            if unit is not None:
+                unit.leader_reached_position = leader_idle
 
     def display(self):
-        def recursive_node(node):
-            if node != None:
-                print("------")
-                print(f"node:{node.position},{node.direction},unit_id:{node.unit_id}")
+        print("Formation:")
+        for node in self.nodes:
+            print(f"Node: Position={node.position}, Direction={node.direction}, UnitID={node.unit_id}, IsLeader={node.is_leader}")
 
-                recursive_node(node.left)
-                recursive_node(node.middle)
-                recursive_node(node.right)
 
-        recursive_node(self.leader)
+
+    
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
         

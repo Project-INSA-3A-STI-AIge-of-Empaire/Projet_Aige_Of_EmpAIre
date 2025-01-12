@@ -13,7 +13,7 @@ class Unit(Entity):
         self.cost=cost
 
 
-        
+        self.last = pygame.time.get_ticks()
         self.attack = attack
         self.attack_speed = attack_speed
         self.range= _range
@@ -59,11 +59,11 @@ class Unit(Entity):
         self._entity_optional_target_id = None
         
     def adapte_attack_delta_time(self):
-        if self.attack_speed >= 1:
-            self.attack_delta_time = (self.attack_speed - 1) * ONE_SEC
+        if self.attack_speed > 1:
+            self.attack_delta_time = (self.attack_speed) * ONE_SEC
         else:
             self.attack_delta_time = self.attack_speed * ONE_SEC
-            self.animation_speed[2] = self.animation_speed[2]/self.attack_speed
+            self.animation_speed[2] = self.animation_speed[2]/self.attack_speed*1.5
 
     def set_direction_index(self):
         self.animation_direction = MAP_ANGLE_INDEX(self.direction, UNIT_ANGLE_MAPPING) # map the animation index for the direction with repect to the sprites sheet
@@ -196,89 +196,64 @@ class Unit(Entity):
             if collided:
                 self.position += avoidance_force
 
-            if self.role_in_group == UNIT_FOLLOWER:
-                self.target_direction = self.position.alpha_angle(self.move_position)
-
-                amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+             
             
-                self.position.x += amount_x
-                self.position.y += amount_y 
-            else:
-                if self.path_to_position != None and self.current_to_position == self.move_position:
+            if self.path_to_position != None and self.current_to_position == self.move_position:
 
-                    to_target_directly = False
+                to_target_directly = False
 
-                    if self.path_to_position == {}:
-                        to_target_directly = True
-                    elif len(self.path_to_position) == 1:
-                        # if we entered the last last cell we dont go to the center of the cell, straight to the position
-                        
-                        last_node, _ = next(iter(self.path_to_position.items())) 
-                        to_target_directly = (self.cell_X == last_node[1] and self.cell_Y == last_node[0])
+                if self.path_to_position == {}:
+                    to_target_directly = True
+                elif len(self.path_to_position) == 1:
+                    # if we entered the last last cell we dont go to the center of the cell, straight to the position
+                    
+                    last_node, _ = next(iter(self.path_to_position.items())) 
+                    to_target_directly = (self.cell_X == last_node[1] and self.cell_Y == last_node[0])
 
-                    if to_target_directly:
-                        self.target_direction = self.position.alpha_angle(self.move_position)
-                        
-                        amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                        amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                        self.position.x += amount_x
-                        self.position.y += amount_y
+                if to_target_directly:
+                    self.target_direction = self.position.alpha_angle(self.move_position)
+                    
+                    amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+                    amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+                    self.position.x += amount_x
+                    self.position.y += amount_y    
 
-                        if self.role_in_group == UNIT_LEADER:
-
-                            self.linked_group.formation.leader.direction = self.target_direction
-                            if collided:
-                                self.linked_group.formation.update_formation_avoidance(avoidance_force)
-                            self.linked_group.formation.update_formation_direction()
-                            self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)
-
-                        
-
-                        if self.position == self.move_position:
-                            self.path_to_position = None
-                    else:
-                        
-                        dbg_kl = list(self.path_to_position.keys())
-                        # for debugging purposes
-                        for i in range(len(dbg_kl) - 1):
-                            
-                            (Y1, X1) = dbg_kl[i]
-                            (Y2, X2) = dbg_kl[i + 1]
-                            
-                            
-                            iso_x1, iso_y1 = camera.convert_to_isometric_2d(X1 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y1 * TILE_SIZE_2D + TILE_SIZE_2D/2)
-                            iso_x2, iso_y2 = camera.convert_to_isometric_2d(X2 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y2 * TILE_SIZE_2D + TILE_SIZE_2D/2)
-                            
-                            # Draw a line between these two points
-                            pygame.draw.line(screen, (255, 0, 0), (iso_x1, iso_y1), (iso_x2, iso_y2), 2)
-                        
-
-
-                        current_node, _ = next(iter(self.path_to_position.items()))
-
-                        current_path_node_position = PVector2(current_node[1] * TILE_SIZE_2D + TILE_SIZE_2D/2, current_node[0] * TILE_SIZE_2D + TILE_SIZE_2D/2)
-                        self.target_direction = self.position.alpha_angle(current_path_node_position)
-                        
-
-                        amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                        amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                        
-                        self.position.x += amount_x
-                        self.position.y += amount_y 
-                        if self.role_in_group == UNIT_LEADER:
-
-                            self.linked_group.formation.leader.direction = self.target_direction
-                            if collided:
-                                self.linked_group.formation.update_formation_avoidance(avoidance_force)
-                            
-                            self.linked_group.formation.update_formation_direction()
-                            self.linked_group.formation.update_formation_position(TILE_SIZE_2D/self.move_per_sec)
-
-                        if self.position == current_path_node_position:
-                            self.path_to_position.pop(current_node)
+                    if self.position == self.move_position:
+                        self.path_to_position = None
                 else:
-                    self.check_and_set_path()
+                    
+                    dbg_kl = list(self.path_to_position.keys())
+                    # for debugging purposes
+                    for i in range(len(dbg_kl) - 1):
+                        
+                        (Y1, X1) = dbg_kl[i]
+                        (Y2, X2) = dbg_kl[i + 1]
+                        
+                        
+                        iso_x1, iso_y1 = camera.convert_to_isometric_2d(X1 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y1 * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                        iso_x2, iso_y2 = camera.convert_to_isometric_2d(X2 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y2 * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                        
+                        # Draw a line between these two points
+                        pygame.draw.line(screen, (255, 0, 0), (iso_x1, iso_y1), (iso_x2, iso_y2), 2)
+                    
+
+
+                    current_node, _ = next(iter(self.path_to_position.items()))
+
+                    current_path_node_position = PVector2(current_node[1] * TILE_SIZE_2D + TILE_SIZE_2D/2, current_node[0] * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                    self.target_direction = self.position.alpha_angle(current_path_node_position)
+                    
+
+                    amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+                    amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
+                    
+                    self.position.x += amount_x
+                    self.position.y += amount_y 
+                
+                    if self.position == current_path_node_position:
+                        self.path_to_position.pop(current_node)
+            else:
+                self.check_and_set_path()
 
             self.track_cell_position()
 
@@ -402,12 +377,13 @@ class Unit(Entity):
         px, py = camera.convert_to_isometric_2d(self.cell_X*TILE_SIZE_2D + TILE_SIZE_2D/2, self.cell_Y*TILE_SIZE_2D + TILE_SIZE_2D/2)
         if (camera.check_in_point_of_view(iso_x, iso_y, g_width, g_height)):
             
-            camera.draw_box(screen, self)
+            #camera.draw_box(screen, self)
             self.set_direction_index()
             display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = [self.representation, self.state, self.animation_direction, self.animation_frame], camera = camera), iso_x, iso_y, screen, 0x04, 1)
-            if not(self.is_dead()):
-                draw_percentage_bar(screen, camera, iso_x, iso_y, self.hp, self.max_hp, self.sq_size, self.team)
+            #if not(self.is_dead()):
+            #    draw_percentage_bar(screen, camera, iso_x, iso_y, self.hp, self.max_hp, self.sq_size, self.team)
             draw_point(screen, (0, 0, 0), px, py, radius=5)
+            draw_isometric_circle(camera, screen, self.position.x, self.position.y, self.box_size, RED_COLOR)
 
      
 

@@ -1,8 +1,5 @@
 import math
-import random
-import os
-import sys
-import json
+
 
 INITIAL_ZOOM = 1
 MIN_ZOOM = 1
@@ -79,11 +76,12 @@ MODE_GENERATION = {
     MARINES:{
         "resources":{"gold":20000, "wood":20000, "food":20000},
         "entities":{
-            "T":3,
-            "ca":20,
+            #"T":3,
+            "c":5,
             "B":2,
-            "S":2,
-            "A":2
+            #"S":2,
+            #"A":2,
+            "K":1
         }
     }
 }
@@ -264,9 +262,9 @@ SPRITES = {
     'a': ARCHER_ARRAY_3D,
     's': SWORDMAN_ARRAY_3D,
     'v': VILLAGER_ARRAY_3D,
-    'ca': CAVARLYARCHER_ARRAY_3D,
-    'sm':SPEARMAN_ARRAY_3D,
-    'am':AXEMAN_ARRAY_3D,
+    'c': CAVARLYARCHER_ARRAY_3D,
+    'm':SPEARMAN_ARRAY_3D,
+    'x':AXEMAN_ARRAY_3D,
 
     'pa': ARROW_ARRAY_2D,
     'fpa': FIREARROW_ARRAY_2D,
@@ -294,9 +292,9 @@ STATES = {
     'a': UNIT_SATES,
     's': UNIT_SATES,
     'v': UNIT_SATES,
-    'ca': UNIT_SATES,
-    'sm': UNIT_SATES,
-    'am':UNIT_SATES
+    'c': UNIT_SATES,
+    'm': UNIT_SATES,
+    'x':UNIT_SATES
 }
 
 WATER_MARK_SKIP = {

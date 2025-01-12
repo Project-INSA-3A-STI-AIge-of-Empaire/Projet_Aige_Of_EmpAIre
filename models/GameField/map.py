@@ -2,7 +2,7 @@ from GameField.cell import *
 from GLOBAL_IMPORT import *
 from ImageProcessingDisplay.minimap import *
 from AITools.isorange import *
-
+#from Entity.Building.DefensiveBuilding.keep import Keep
 import random 
 import math
 
@@ -21,9 +21,9 @@ CLASS_MAPPING = {
     'a': Archer,
     's': SwordMan,
     'v': Villager,
-    'ca': CavalryArcher,
-    'sm':SpearMan,
-    'am':AxeMan,
+    'c': CavalryArcher,
+    'm':SpearMan,
+    'x':AxeMan,
     'p': Projectile,
     'pa': Arrow,
     'ps':Spear,

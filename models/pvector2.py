@@ -67,6 +67,16 @@ class PVector2:
         
         self.x = px_rot
         self.y = py_rot
+
+    def translate_with_respect_to(self, other):
+
+        px_translated = other.x + self.x
+        py_translated = other.y + self.y
+
+        self.x = px_translated 
+        self.y = py_translated 
+
+    
     @staticmethod
     def random_direction():
         # Generate a random angle in radians

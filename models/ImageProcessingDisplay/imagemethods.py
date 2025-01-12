@@ -168,25 +168,16 @@ def draw_text(text, x, y, screen, font_size=30, col=(255, 255, 255)):
  
     screen.blit(text_to_display, (int(x), int(y)))
 
-def draw_isometric_circle(screen, x, y, radius, color = WHITE_COLOR):
-    """
-    Draw an isometric circle on the given surface.
-    """
-    # Scale down the height (Y-axis in isometric projection)
-    ellipse_width = 2 * radius
-    ellipse_height = radius  # Scale the height down for isometric view
-    
-    # Project the center to isometric space
 
-    
-    # Draw the ellipse (isometric circle)
-    pygame.draw.ellipse(
-        screen,
-        color,
-        pygame.Rect(
-            int(x - ellipse_width // 2),
-            int(y - ellipse_height // 2),
-            int(ellipse_width),
-            int(ellipse_height)
-        )
-    )
+def draw_isometric_circle(camera, screen, x, y, radius, color):
+    radius_iso = radius*( camera.tile_size_2iso/camera.tile_size_2d)* camera.zoom/math.cos(math.radians(45)) * 2
+    iso_x, iso_y = camera.convert_to_isometric_2d(x,y)
+    width = radius_iso 
+    height = radius_iso/2
+
+    dx = iso_x - width//2
+
+    dy = iso_y - height//2
+
+    pygame.draw.ellipse(screen, color, (dx, dy,width,height),1)
+    #pygame.draw.rect(screen, (0, 255, 0), (dx, dy, width, height),1)
