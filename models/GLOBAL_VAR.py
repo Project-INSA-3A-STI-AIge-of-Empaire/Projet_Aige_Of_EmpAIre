@@ -7,7 +7,7 @@ MAX_ZOOM = 7
 TILE_SIZE_2ISO = 15
 TILE_SIZE_2D = 40
 RANDOM_JITTER_FORCE = TILE_SIZE_2D / 20
-COLLISION_THRESHOLD = TILE_SIZE_2D/5
+COLLISION_THRESHOLD = TILE_SIZE_2D/ 6.2
 ONE_SEC = 1000 # 1000 millisec
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 800
@@ -18,13 +18,12 @@ REGION_DIVISION = 5
 MINIMAP_WIDTH = 220
 MINIMAP_HEIGHT = MINIMAP_WIDTH
 #colors
-FPS = 240
+FPS = 250
 BLACK_COLOR = (0, 0, 0)
 WHITE_COLOR = (255, 255, 255)
 RED_COLOR = (255, 0, 0)
 GREEN_COLOR = (0,255, 0)
 BLUE_COLOR = (0, 0, 255)
-PURPLE_COLOR = (128, 0, 128)
 
 GOLD_COLOR = (255, 215, 0) 
 BROWN_TREE_COLOR = (139, 69, 19)
@@ -34,8 +33,8 @@ TEAM_COLORS = {
     0: WHITE_COLOR, # white is for no one ( for all teams )
     1: BLUE_COLOR,
     2: RED_COLOR,
-    3: GREEN_COLOR,
-    4: PURPLE_COLOR    
+    3:GREEN_COLOR
+    # ....
 }
 
 LEFT_CLICK = 1 
@@ -77,12 +76,12 @@ MODE_GENERATION = {
     MARINES:{
         "resources":{"gold":20000, "wood":20000, "food":20000},
         "entities":{
-            #"T":3,
-            "c":5,
+            "T":3,
             "B":2,
-            #"S":2,
-            #"A":2,
-            "K":1
+            "S":2,
+            "A":2,
+            "v":3,
+            "c":2
         }
     }
 }
@@ -97,18 +96,23 @@ UNIT_ATTACKING = 2
 UNIT_DYING = 3
 UNIT_TASK = 4
 
+MAX_UNIT_POPULATION = 200
+
 GROUP_IDLE = 0 
 GROUP_WALKING = 1
 GROUP_ATTACKING = 2
 
 
-UNIT_LEADER = 0
-UNIT_FOLLOWER = 1
+TRAIN_NOT_AFFORDABLE = 0
+TRAIN_BUSY = 1
+TRAIN_NOT_ACTIVE = 2
+TRAIN_NOT_FOUND_UNIT = 3
+TRAIN_POPULATION_MAX_LIMIT = 4
 
 BUILDING_INPROGRESS= 0
 BUILDING_ACTIVE = 1
 BUILDING_DYING = 2
-
+BUILDING_POPULATION_MAX_LIMIT = 3
 
 TREE_CAPACITY = 100
 GOLD_CAPACITY = 800
@@ -246,7 +250,7 @@ FIREARROW_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/fire_arrow.webp",32, 
 SPEAR_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/spear.webp",32, 10, skip_row = 2, limit_col = 1)
 FIRESPEAR_ARRAY_2D = load_sprite_sheet("Sprites/Projectile/fire_spear.webp",32, 10, skip_row = 2, limit_col = 1)
 
-                     
+
 SPRITES = {
     'g': GRASS,
     'A': ARCHERYRANGE_ARRAY_3D,
@@ -266,7 +270,7 @@ SPRITES = {
     'c': CAVARLYARCHER_ARRAY_3D,
     'm':SPEARMAN_ARRAY_3D,
     'x':AXEMAN_ARRAY_3D,
-
+    
     'pa': ARROW_ARRAY_2D,
     'fpa': FIREARROW_ARRAY_2D,
     'ps': SPEAR_ARRAY_2D,
@@ -367,6 +371,9 @@ ARCHER_ICON = pygame.image.load("Icons/Unit/Archer_aoe2DE.png").convert_alpha()
 HORSEMAN_ICON = pygame.image.load("Icons/Unit/Knight_aoe2DE.png").convert_alpha()
 SWORDSMAN_ICON = pygame.image.load("Icons/Unit/Longswordsman_aoe2DE.png").convert_alpha()
 VILLAGER_ICON = pygame.image.load("Icons/Unit/MaleVillDE.png").convert_alpha()
+CAVARLYARCHER_ICON = pygame.image.load("Icons/Unit/Cavalryarcher_aoe2DE.png").convert_alpha()
+SPEARMAN_ICON = pygame.image.load("Icons/Unit/Spearman_aoe2DE.png").convert_alpha()
+AXEMAN_ICON = pygame.image.load("Icons/Unit/Axeman_aoe2DE.png").convert_alpha()
 
 ICONS = {
     "Gi":GOLD_ICON,
@@ -383,7 +390,10 @@ ICONS = {
     "ai":ARCHER_ICON,
     "hi":HORSEMAN_ICON,
     "si":SWORDSMAN_ICON,
-    "vi":VILLAGER_ICON
+    "vi":VILLAGER_ICON,
+    "ci":CAVARLYARCHER_ICON,
+    "mi":SPEARMAN_ICON,
+    "xi":AXEMAN_ICON
 }
 
 ICONS_HTML = {
@@ -401,7 +411,10 @@ ICONS_HTML = {
     "ai":"Icons/Unit/Archer_aoe2DE.png",
     "hi":"Icons/Unit/Knight_aoe2DE.png",
     "si":"Icons/Unit/Longswordsman_aoe2DE.png",
-    "vi":"Icons/Unit/MaleVillDE.png"
+    "vi":"Icons/Unit/MaleVillDE.png",
+    "ci":"Icons/Unit/Cavalryarcher_aoe2DE.png",
+    "mi":"Icons/Unit/Spearman_aoe2DE.png",
+    "xi":"Icons/Unit/Axeman_aoe2DE.png"
 }
 
 ICON_WIDTH, ICON_HEIGHT =  3*TILE_SIZE_2ISO, 3*TILE_SIZE_2ISO

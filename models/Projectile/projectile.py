@@ -4,14 +4,14 @@ from math import floor
 
 class Projectile:
     
-    def __init__(self, cell_Y, cell_X, position, entity_target, _map, damage, representation = 'p', element =""):
+    def __init__(self, cell_Y, cell_X, position, entity_target, _map, team, damage, representation = 'p', element =""):
         global ONE_SEC
         global PROJECTILE_ANGLE_MAPPING
         self.cell_Y = cell_Y
         self.cell_X = cell_X
 
         self.position = position 
-        
+        self.team = team
         self.damage = damage
         self.entity_target = entity_target
         self.reached_target = False
@@ -20,11 +20,10 @@ class Projectile:
         self.time_to_get_target = (ONE_SEC/5.3) * self.distance_left/_map.tile_size_2d
         
         self.time_left = self.time_to_get_target
-        self.last_time_changed_pos = pygame.time.get_ticks()
         self.direction = self.position.alpha_angle(entity_target.position)
         
         self.image = None
-        self.last_animation_time = pygame.time.get_ticks()
+        self.animation_time_acc = 0
         self.animation_direction = MAP_ANGLE_INDEX(self.direction, PROJECTILE_ANGLE_MAPPING)
         self.animation_frame = 0
         
@@ -33,11 +32,11 @@ class Projectile:
         
         self.linked_map = _map
 
-    def update_event(self, current_time):
-        time_elapsed = current_time - self.last_time_changed_pos
+    def update_event(self, dt):
+        
         
         self.update_cell_on_map()
-        if time_elapsed > 0:
+        if dt > 0:
             
             # Calculate the angle to the target
             if (self.entity_target):
@@ -47,6 +46,17 @@ class Projectile:
                     self.reached_target = True
                     self.entity_target.hp -= self.damage
                     if self.entity_target.is_dead():
+                        if self.entity_target.representation in ['C','T','v']:
+                            if self.entity_target.state != STATES.get(self.entity_target.representation, None).get("dying", None):
+                                resources = {}
+                                if self.entity_target.representation == 'v':
+                                    resources = self.entity_target.resources
+                                else:
+                                    resources = self.entity_target.storage.lose_resource()
+                                print(self.team)
+                                player_gained = self.linked_map.players_dict.get(self.team,None)
+                                player_gained.add_resources(resources)
+
                         self.linked_map.dead_entities[self.entity_target.id] = self.entity_target
                         print(STATES.get(self.entity_target.representation, None).get("dying", None))
                         self.entity_target.change_state(STATES.get(self.entity_target.representation, None).get("dying", None))
@@ -59,7 +69,7 @@ class Projectile:
                     self.reached_target = True
 
                 if self.time_left > 0 and not(self.reached_target):
-                    distance_to_add = self.distance_left / (self.time_left / time_elapsed)
+                    distance_to_add = self.distance_left / (self.time_left / dt)
                     self.position.x = self.position.x + math.cos(self.direction) * distance_to_add 
                     self.position.y = self.position.y + math.sin(self.direction) * distance_to_add
                     
@@ -74,9 +84,8 @@ class Projectile:
                     
                     #self.position.z = self.projectile_peak * math.sqrt(1 - (progress_ratio - 0.5)**2 / 0.25)
                     
-                    self.time_left -= time_elapsed
+                    self.time_left -= dt
                     self.distance_left = - self.distance_left - distance_to_add
-                    self.last_time_changed_pos = current_time
                 else:
                     distance_to_add = self.distance_left   
 
@@ -107,15 +116,15 @@ class Projectile:
         self.cell_X = live_cell_X
 
     
-    def update_animation_frame(self, current_time):
-
-        if current_time - self.last_animation_time > self.time_to_get_target/10:
-            self.last_animation_time = current_time
-            self.animation_frame = (self.animation_frame + 1)%len(self.image.get(0,None))
+    def update_animation_frame(self, dt):
+        self.animation_time_acc += dt
+        if self.animation_time_acc > self.time_to_get_target/10:
+            self.animation_time_acc = 0
+            self.animation_frame = (self.animation_frame + 1)%len(SPRITES.get(self.representation, None).get(0,None))
         
-    def display(self, current_time, screen, camera, g_width, g_height):
+    def display(self, dt, screen, camera, g_width, g_height):
         
-        self.update_animation_frame(current_time)
+        self.update_animation_frame(dt)
         iso_x, iso_y = camera.convert_to_isometric_3d(self.position.x, self.position.y, self.position.z)
         display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = [self.representation, self.animation_direction, self.animation_frame], camera = camera),iso_x, iso_y, screen, 0x04)
         if self.element != "":

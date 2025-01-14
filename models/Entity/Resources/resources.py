@@ -1,7 +1,7 @@
 from Entity.entity import *
 from GLOBAL_VAR import *
 from idgen import *
-from AITools.player import *
+#from AITools.player import *
 
 class Resources(Entity):
 
@@ -13,7 +13,7 @@ class Resources(Entity):
         self.display_choice = 0
         self.linked_map = None
         self.HitboxClass = RoundedSquare
-    def display(self, current_time, screen, camera, g_width, g_height):
+    def display(self, dt, screen, camera, g_width, g_height):
         iso_x, iso_y = camera.convert_to_isometric_2d(self.position.x, self.position.y)
         camera.draw_box(screen, self)
         #if (camera.check_in_point_of_view(iso_x, iso_y, g_width, g_height)):

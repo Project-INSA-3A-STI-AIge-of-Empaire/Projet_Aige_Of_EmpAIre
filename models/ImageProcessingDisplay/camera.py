@@ -11,13 +11,13 @@ class Camera:
 
         self.img_scale = _tile_size_2iso/50# img_scale is a value to scale the loaded images so the tiles are aligned, 50 is the choosen value after many tries
         
-        self.last_time_adjusted_zoom = pygame.time.get_ticks()
+        self.adjust_zoom_time_acc = 0
         self.num_zoom_per_sec = 30
-        
+        self.move_time_acc = 0
         self.position = position
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
-        self.last_time_moved = pygame.time.get_ticks()
+        self.adjust_zoom_time_acc = 0
         self.num_move_per_sec = 60
         self.move_flags = 0
 
@@ -83,16 +83,17 @@ class Camera:
         if (-TILE_SIZE_2ISO * (self.zoom + 1) * 3 < x_to_check and x_to_check<g_width + TILE_SIZE_2ISO * (self.zoom + 1)* 3  and -TILE_SIZE_2ISO * (self.zoom + 1)* 3 <y_to_check and y_to_check < g_height + TILE_SIZE_2ISO * (self.zoom + 1)* 3 ):
             return True
 
-    def adjust_zoom(self, current_time, amount, g_width, g_height):
-
-        if current_time - self.last_time_adjusted_zoom > ONE_SEC/self.num_zoom_per_sec:
-            self.last_time_adjusted_zoom = current_time
+    def adjust_zoom(self, dt, amount, g_width, g_height):
+        self.adjust_zoom_time_acc += dt
+        if self.adjust_zoom_time_acc > ONE_SEC/self.num_zoom_per_sec:
+            self.adjust_zoom_time_acc = 0
             self.zoom = max(MIN_ZOOM, min(MAX_ZOOM, self.zoom + amount))
             self.width = g_width/self.zoom
             self.height = g_height/self.zoom
 
-    def move(self, current_time, amount):
-        if (current_time - self.last_time_moved > ONE_SEC/self.num_move_per_sec):
+    def move(self, dt, amount):
+        self.move_time_acc += dt
+        if (self.move_time_acc > ONE_SEC/self.num_move_per_sec):
             if (self.move_flags & 0b0001):
                 self.position.x -= amount
             
@@ -105,7 +106,7 @@ class Camera:
             if (self.move_flags & 0b1000):
                 self.position.y -= amount
                 
-            self.last_time_moved = current_time
+            self.move_time_acc = 0
             self.move_flags = 0 # reset flags
 
 

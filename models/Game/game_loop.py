@@ -37,7 +37,7 @@ class GameLoop:
             if self.state.display_mode == TERMINAL:
                 pygame.display.set_mode((20, 20), pygame.HWSURFACE | pygame.DOUBLEBUF )
 
-    def handle_pause_events(self, event):
+    def handle_pause_events(self,dt, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.state.pausemenu.handle_click(event.pos, self.state)
 
@@ -55,15 +55,15 @@ class GameLoop:
         elif event.type == pygame.MOUSEBUTTONUP:
             self.state.mouse_held = False
 
-    def handle_keyboard_inputs(self, move_flags, current_time):
+    def handle_keyboard_inputs(self, move_flags, dt):
         keys = pygame.key.get_pressed()
         scale = 2 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT] else 1
 
         # Zoom de la caméra
         if keys[pygame.K_KP_PLUS] or keys[pygame.K_k]:
-            self.state.camera.adjust_zoom(current_time, 0.1, SCREEN_WIDTH, SCREEN_HEIGHT)
+            self.state.camera.adjust_zoom(dt, 0.1, SCREEN_WIDTH, SCREEN_HEIGHT)
         elif keys[pygame.K_KP_MINUS] or keys[pygame.K_j]:
-            self.state.camera.adjust_zoom(current_time, -0.1, SCREEN_WIDTH, SCREEN_HEIGHT)
+            self.state.camera.adjust_zoom(dt, -0.1, SCREEN_WIDTH, SCREEN_HEIGHT)
 
         # Basculer le mode d'affichage
         if keys[pygame.K_F10]:
@@ -110,28 +110,27 @@ class GameLoop:
 
         self.state.camera.move_flags = move_flags
         self.state.terminal_camera.move_flags = move_flags
-        self.state.terminal_camera.move(current_time)
-        self.state.camera.move(current_time, 5 * scale)
+        self.state.terminal_camera.move(dt)
+        self.state.camera.move(dt, 5 * scale)
 
-    def update_game_state(self, current_time):
+    def update_game_state(self, dt):
         if not (self.state.states == PAUSE):
-            self.state.map.update_all_events(current_time, self.state.camera, self.screen)
+            self.state.map.update_all_events(dt*self.state.speed, self.state.camera, self.screen)
 
-    def render_display(self, current_time, mouse_x, mouse_y):
+    def render_display(self, dt, mouse_x, mouse_y):
         if self.state.states == START:
             self.state.startmenu.draw()
         elif self.state.states == PAUSE:
             self.state.pausemenu.draw()
         elif self.state.states == PLAY:
-            self.screen.fill((0, 0, 0))
             if self.state.display_mode == ISO2D:
-                self.state.map.display(current_time, self.state.screen, self.state.camera, self.screen_width, self.screen_height)
+                self.state.map.display(dt, self.state.screen, self.state.camera, self.screen_width, self.screen_height)
                 fps = int(self.clock.get_fps())
                 fps_text = self.font.render(f"FPS: {fps}", True, (255, 255, 255))
                 self.screen.blit(fps_text, (10, 10))
                 self.state.ui.draw_resources(self.state.map.players_dict)
             elif self.state.display_mode == TERMINAL:
-                self.state.map.terminal_display(current_time, self.state.terminal_camera)
+                self.state.map.terminal_display(dt, self.state.terminal_camera)
         self.screen.blit(CURSOR_IMG, (mouse_x, mouse_y))
         pygame.display.flip()
 
@@ -139,6 +138,7 @@ class GameLoop:
     def run(self):
         running = True
         while running:
+            dt = self.clock.tick(FPS)
             self.screen_width, self.screen_height = self.screen.get_width(), self.screen.get_height()
             move_flags = 0
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -150,7 +150,7 @@ class GameLoop:
                 if self.state.states == START:
                     self.handle_start_events(event)
                 elif self.state.states == PAUSE:
-                    self.handle_pause_events(event)
+                    self.handle_pause_events(dt, event)
                 elif self.state.states == PLAY:
                     self.handle_play_events(event, mouse_x, mouse_y)
 
@@ -158,11 +158,11 @@ class GameLoop:
                 self.state.map.minimap.update_camera(self.state.camera, mouse_x, mouse_y)
 
             if not (self.state.states == START):
-                self.handle_keyboard_inputs(move_flags, current_time)
+                self.handle_keyboard_inputs(move_flags, dt)
 
-            self.update_game_state(current_time)
-            self.render_display(current_time, mouse_x, mouse_y)
-            self.clock.tick(FPS)
+            self.update_game_state(dt)
+            self.render_display(dt, mouse_x, mouse_y)
+            
 
         pygame.quit()
 

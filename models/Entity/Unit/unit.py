@@ -1,7 +1,6 @@
 from Entity.entity import *
 from AITools.a_star import *
 from math import floor, sqrt
-from GLOBAL_VAR import * 
 import random
 
 class Unit(Entity):
@@ -13,12 +12,12 @@ class Unit(Entity):
         self.training_time=training_time
         self.cost=cost
 
-
+        self.distance_acc = 0
         self.last = pygame.time.get_ticks()
         self.attack = attack
         self.attack_speed = attack_speed
         self.range= _range
-        self.last_time_attacked = pygame.time.get_ticks()
+        self.attack_time_acc = 0
         self.will_attack = False
         self.attack_frame = 0
         self.entity_target_id= None
@@ -27,8 +26,7 @@ class Unit(Entity):
         self.first_time_pass = True
         self.locked_with_target = False
         self.speed=speed
-        self.last_time_moved = pygame.time.get_ticks()
-        self.move_per_sec = TILE_SIZE_2D # 1 tile per speed of each unit ( tile size in the 2d mechanics plane)
+        
         
         self.move_position = PVector2(0, 0)
         self.path_to_position = None
@@ -36,41 +34,36 @@ class Unit(Entity):
 
         self.direction = 0
         self.target_direction = None
-        self.last_time_update_direction = pygame.time.get_ticks()
+        self.direction_update_time_acc = 0
 
         #self.last_time_collided = pygame.time.get_ticks()
         self.walkable = True
         self.state = UNIT_IDLE
         self.attack_delta_time = None
 
-        self.linked_group = None # we need it if leader
-        self.role_in_group = None # specify the role in the group
-        self.group_node = None # if follower we node the node to move to it
-        self.leader_reached_position = True
 
         #animation attributes
         self.image = None
         self.animation_frame = 0
         self.animation_direction = 0 # direction index for display
-        self.last_animation_time = pygame.time.get_ticks()
+        self.animation_time_acc = 0
         self.animation_speed = []  # Animation frame interval in milliseconds for each unit_state
         self.linked_map = None
         self.HitboxClass = Circle
 
         self._entity_optional_target_id = None
-        
+     
     def adapte_attack_delta_time(self):
-        if self.attack_speed > 1:
-            self.attack_delta_time = (self.attack_speed) * ONE_SEC
-        else:
-            self.attack_delta_time = self.attack_speed * ONE_SEC
-            self.animation_speed[2] = self.animation_speed[2]/self.attack_speed*1.5
+        self.attack_delta_time = (self.attack_speed) * ONE_SEC
+        if self.attack_speed < 1:
+            self.animation_speed[2] = self.animation_speed[2]/self.attack_speed
 
+    
     def set_direction_index(self):
         self.animation_direction = MAP_ANGLE_INDEX(self.direction, UNIT_ANGLE_MAPPING) # map the animation index for the direction with repect to the sprites sheet
 
-    def affordable_by(self, player):
-        for resource, amount in player.resources.items():
+    def affordable_by(self, resources):
+        for resource, amount in resources.items():
             if amount < self.cost.get(resource, None):
                 return False
         
@@ -127,14 +120,26 @@ class Unit(Entity):
 
             
     def len_current_animation_frames(self):
-        return len(self.image.get(self.state,None).get(0, None)) #the length changes with respect to the state but the zoom and direction does not change the animation frame count
+        return len(SPRITES.get(self.representation, None).get(self.state,None).get(0, None)) #the length changes with respect to the state but the zoom and direction does not change the animation frame count
  
-    def update_animation_frame(self, current_time):
-        global ONE_SEC
-        if current_time - self.last_animation_time > ONE_SEC/self.animation_speed[self.state]:
-            self.last_animation_time = current_time
+    def update_animation_frame(self, dt):
+        global ONE_SEC  # Assuming ONE_SEC = 1.0 for simplicity
+        
+        # Add the elapsed time to the accumulator
+        self.animation_time_acc += dt
 
-            self.animation_frame = (self.animation_frame + 1)%(self.len_current_animation_frames()) #the length changes with respect to the state but the zoom and direction does not change the animation frame count
+        # Calculate the time per frame based on the current state's animation speed
+        time_per_frame = ONE_SEC / self.animation_speed[self.state]  # Duration of a single frame in seconds
+
+        # Determine how many frames should have passed
+        frames_to_advance = int(self.animation_time_acc / time_per_frame)
+
+        # Update the animation frame, ensuring it loops correctly
+        if frames_to_advance > 0:
+            self.animation_frame = (self.animation_frame + frames_to_advance) % self.len_current_animation_frames()
+
+            # Remove the time accounted for by the advanced frames
+            self.animation_time_acc %= time_per_frame
 
     def changed_cell_position(self):
         topleft = PVector2(self.cell_X*self.linked_map.tile_size_2d, self.cell_Y*self.linked_map.tile_size_2d)
@@ -187,76 +192,81 @@ class Unit(Entity):
 
 
 
-    def move_to_position(self,current_time, camera, screen):
-        if (current_time - self.last_time_moved > ONE_SEC/(self.move_per_sec*self.speed)):
+    def move_to_position(self,dt, camera, screen):
+        #if pygame.time.get_ticks() - self.last > ONE_SEC:
+        #    self.last = pygame.time.get_ticks()
+        #    print(f"distance:{self.distance_acc}")
+        #    self.distance_acc = 0
+        
+        
+        
 
-            self.last_time_moved = current_time
-            collided, avoidance_force = self.avoid_others()
+        
+        collided, avoidance_force = self.avoid_others()
 
-            # Apply avoidance force if collision is detected
-            if collided:
-                self.position += avoidance_force
+        # Apply avoidance force if collision is detected
+        if collided:
+            self.position += avoidance_force
 
-             
             
-            if self.path_to_position != None and self.current_to_position == self.move_position:
+        
+        if self.path_to_position != None and self.current_to_position == self.move_position:
 
-                to_target_directly = False
+            to_target_directly = False
 
-                if self.path_to_position == {}:
-                    to_target_directly = True
-                elif len(self.path_to_position) == 1:
-                    # if we entered the last last cell we dont go to the center of the cell, straight to the position
-                    
-                    last_node, _ = next(iter(self.path_to_position.items())) 
-                    to_target_directly = (self.cell_X == last_node[1] and self.cell_Y == last_node[0])
-
-                if to_target_directly:
-                    self.target_direction = self.position.alpha_angle(self.move_position)
-                    
-                    amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                    amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                    self.position.x += amount_x
-                    self.position.y += amount_y    
-
-                    if self.position == self.move_position:
-                        self.path_to_position = None
-                else:
-                    
-                    dbg_kl = list(self.path_to_position.keys())
-                    # for debugging purposes
-                    for i in range(len(dbg_kl) - 1):
-                        
-                        (Y1, X1) = dbg_kl[i]
-                        (Y2, X2) = dbg_kl[i + 1]
-                        
-                        
-                        iso_x1, iso_y1 = camera.convert_to_isometric_2d(X1 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y1 * TILE_SIZE_2D + TILE_SIZE_2D/2)
-                        iso_x2, iso_y2 = camera.convert_to_isometric_2d(X2 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y2 * TILE_SIZE_2D + TILE_SIZE_2D/2)
-                        
-                        # Draw a line between these two points
-                        pygame.draw.line(screen, (255, 0, 0), (iso_x1, iso_y1), (iso_x2, iso_y2), 2)
-                    
-
-
-                    current_node, _ = next(iter(self.path_to_position.items()))
-
-                    current_path_node_position = PVector2(current_node[1] * TILE_SIZE_2D + TILE_SIZE_2D/2, current_node[0] * TILE_SIZE_2D + TILE_SIZE_2D/2)
-                    self.target_direction = self.position.alpha_angle(current_path_node_position)
-                    
-
-                    amount_x = math.cos(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                    amount_y = math.sin(self.target_direction)*(TILE_SIZE_2D/self.move_per_sec)
-                    
-                    self.position.x += amount_x
-                    self.position.y += amount_y 
+            if self.path_to_position == {}:
+                to_target_directly = True
+            elif len(self.path_to_position) == 1:
+                # if we entered the last last cell we dont go to the center of the cell, straight to the position
                 
-                    if self.position == current_path_node_position:
-                        self.path_to_position.pop(current_node)
-            else:
-                self.check_and_set_path()
+                last_node, _ = next(iter(self.path_to_position.items())) 
+                to_target_directly = (self.cell_X == last_node[1] and self.cell_Y == last_node[0])
 
-            self.track_cell_position()
+            if to_target_directly:
+                self.target_direction = self.position.alpha_angle(self.move_position)
+                
+                amount_x = math.cos(self.target_direction)* (dt/ONE_SEC) * self.speed * self.linked_map.tile_size_2d
+                amount_y = math.sin(self.target_direction)* (dt/ONE_SEC) * self.speed * self.linked_map.tile_size_2d
+                self.position.x += amount_x
+                self.position.y += amount_y    
+
+                if self.position == self.move_position:
+                    self.path_to_position = None
+            else:
+                
+                dbg_kl = list(self.path_to_position.keys())
+                # for debugging purposes
+                for i in range(len(dbg_kl) - 1):
+                    
+                    (Y1, X1) = dbg_kl[i]
+                    (Y2, X2) = dbg_kl[i + 1]
+                    
+                    
+                    iso_x1, iso_y1 = camera.convert_to_isometric_2d(X1 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y1 * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                    iso_x2, iso_y2 = camera.convert_to_isometric_2d(X2 * TILE_SIZE_2D + TILE_SIZE_2D/2, Y2 * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                    
+                    # Draw a line between these two points
+                    pygame.draw.line(screen, (255, 0, 0), (iso_x1, iso_y1), (iso_x2, iso_y2), 2)
+                
+
+
+                current_node, _ = next(iter(self.path_to_position.items()))
+
+                current_path_node_position = PVector2(current_node[1] * TILE_SIZE_2D + TILE_SIZE_2D/2, current_node[0] * TILE_SIZE_2D + TILE_SIZE_2D/2)
+                self.target_direction = self.position.alpha_angle(current_path_node_position)
+                
+
+                amount_x = math.cos(self.target_direction) * (dt/ONE_SEC) * self.speed * self.linked_map.tile_size_2d/2
+                amount_y = math.sin(self.target_direction) * (dt/ONE_SEC) * self.speed * self.linked_map.tile_size_2d/2
+                self.position.x += amount_x
+                self.position.y += amount_y 
+            
+                if self.position == current_path_node_position:
+                    self.path_to_position.pop(current_node)
+        else:
+            self.check_and_set_path()
+
+        self.track_cell_position()
 
     def check_and_set_path(self):
         self.path_to_position = A_STAR(self.cell_X, self.cell_Y, math.floor(self.move_position.x/TILE_SIZE_2D), math.floor(self.move_position.y/TILE_SIZE_2D), self.linked_map,self)
@@ -268,17 +278,18 @@ class Unit(Entity):
         else : 
             self.change_state(UNIT_IDLE)
 
-    def try_to_move(self, current_time,camera, screen):
+    def try_to_move(self, dt,camera, screen):
         if (self.state != UNIT_DYING):
             if self.state == UNIT_WALKING:
+                print(f"self:{self.position}, mov:{self.move_position}")
                 if self.position == self.move_position:
-                    if self.leader_reached_position:
-                        if not(self.state == UNIT_IDLE):
-                            self.change_state(UNIT_IDLE)
+                    print("hello")
+                    if not(self.state == UNIT_IDLE):
+                        self.change_state(UNIT_IDLE)
                 else:
                     if not(self.state == UNIT_WALKING):
                         self.change_state(UNIT_WALKING)
-                    self.move_to_position(current_time, camera, screen )
+                    self.move_to_position(dt, camera, screen )
     
     def avoid_others(self):
         collided = False
@@ -309,7 +320,7 @@ class Unit(Entity):
                                         # Calculate the direction to push the unit away from the other
                                         diff = self.position - entity.position
                                         diff.normalize()  # Normalize to get direction
-                                        diff *= 1/distance  # Stronger force the closer the units are
+                                        diff *= 0.2/distance  # Stronger force the closer the units are
                                         avoidance_force += diff
                                         collided = True
                                 elif not(entity.walkable):
@@ -371,7 +382,7 @@ class Unit(Entity):
         self.check_range_with_target = False
         self.locked_with_target = False
 
-    def display(self, current_time, screen, camera, g_width, g_height):
+    def display(self, dt, screen, camera, g_width, g_height):
         
         iso_x, iso_y = camera.convert_to_isometric_2d(self.position.x, self.position.y)
         
@@ -424,34 +435,38 @@ class Unit(Entity):
     def will_vanish(self):
         return self.is_dead() and self.animation_frame == self.len_current_animation_frames() - 1
     
-    def update(self, current_time, camera, screen):
-        self.update_animation_frame(current_time)
-        self.try_to_attack(current_time, camera, screen)
-        self.try_to_move(current_time, camera, screen)
-        self.update_direction(current_time)
+    def update(self, dt, camera, screen):
+        self.update_animation_frame(dt)
+        self.try_to_attack(dt, camera, screen)
+        self.try_to_move(dt, camera, screen)
+        self.update_direction(dt)
 
-    def update_direction(self, current_time):
+    def update_direction(self, dt):
+        if self.target_direction is not None:
+            self.direction_update_time_acc += dt
 
-        if self.target_direction != None:
+            time_per_update = ONE_SEC/50
 
-            if current_time - self.last_time_update_direction > ONE_SEC/120:
-                self.last_time_update_direction = current_time
+            while self.direction_update_time_acc >= time_per_update:
+                self.direction_update_time_acc -= time_per_update
 
-                # Get the delta angle
                 delta_angle = (self.target_direction - self.direction) % (2 * math.pi)
                 if delta_angle > math.pi:
                     delta_angle -= 2 * math.pi
 
-                # Determine rotation speed
                 rotation_speed = math.radians(7)  # Speed in radians per update
-                if abs(delta_angle) < rotation_speed:
-                    self.direction = self.target_direction  # Snap to target if close
-                    self.target_direction = None
-                else:
-                    self.direction += max(-rotation_speed, min(rotation_speed, delta_angle))
 
-                self.direction %= (2 * math.pi)  # Normalize within [0, 2π]
-    
+                if abs(delta_angle) <= rotation_speed:
+                    self.direction = self.target_direction
+                    self.target_direction = None
+                    break  # Exit as we've reached the target direction
+                else:
+                    # Rotate towards the target direction, respecting the rotation speed
+                    self.direction += rotation_speed if delta_angle > 0 else -rotation_speed
+
+                # Normalize direction within [0, 2π]
+                self.direction %= (2 * math.pi)
+
     def get_html(self):
         # Position des joueurs
         pos = (30,50)

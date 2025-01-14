@@ -1,43 +1,11 @@
 from GameField.cell import *
-from GLOBAL_IMPORT import *
 from ImageProcessingDisplay.minimap import *
 from AITools.isorange import *
-from AITools import *
-
 import random 
 import math
-
-CLASS_MAPPING = {
-    'A': ArcheryRange,
-    'B': Barracks,
-    'C': Camp,
-    'K': Keep,
-    'T': TownCenter,
-    'F': Farm,
-    'G': Gold,
-    'W': Tree,
-    'S': Stable,
-    'H': House,
-    'h': HorseMan,
-    'a': Archer,
-    's': SwordMan,
-    'v': Villager,
-    'c': CavalryArcher,
-    'm':SpearMan,
-    'x':AxeMan,
-    'p': Projectile,
-    'pa': Arrow,
-    'ps':Spear,
-    'fpa':FireArrow,
-    'fps':FireSpear,
-    'V': PVector2
-}
+from AITools.player import *
 
 
-
-
-
-#from AITools.raycastingrange import *
 
 class Map:
 
@@ -54,7 +22,9 @@ class Map:
         self.dead_entities = {}
 
         self.projectile_set = set()
-        self.last_time_refershed = pygame.time.get_ticks() # refresh for the terminal display
+
+        self.refresh_time_acc = 0 # refresh for the terminal display
+        self.iso_refresh_time_acc = 0 # refresh for the iso
 
         self.players_dict = {} # each element is a player, and the key is the team number 1 : team1 2 : team2
 
@@ -95,8 +65,8 @@ class Map:
         if not(isinstance(_entity, Unit)):
             cell_padding = 1
         
-        for Y_to_check in range(_entity.cell_Y,_entity.cell_Y - _entity.sq_size - cell_padding, -1): # we add minus 1 cause we need at least one cell free so that the units can reach this target
-            for X_to_check in range(_entity.cell_X,_entity.cell_X - _entity.sq_size - cell_padding, -1):
+        for Y_to_check in range(_entity.cell_Y + cell_padding,_entity.cell_Y - _entity.sq_size - cell_padding, -1): # we add minus 1 cause we need at least one cell free so that the units can reach this target
+            for X_to_check in range(_entity.cell_X + cell_padding,_entity.cell_X - _entity.sq_size - cell_padding, -1):
                 
                 if self.check_cell(Y_to_check, X_to_check):
                     return 0 # not all the cells are free to put the entity 
@@ -134,19 +104,16 @@ class Map:
                 
             else:
                 _entity.box_size += TILE_SIZE_2D/(2 * 1.5) # the factors used the box_size lines are to choosen values for a well scaled collision system with respec to the type and size of the entity
-            
+        if _entity.team != 0:
+            player = self.players_dict.get(_entity.team, None)
+
+            if player:
+                player.add_entity(_entity)
         _entity.linked_map = self
 
         # at the end add the entity pointer to the id dict with the id dict 
 
         self.entity_id_dict[_entity.id] = _entity
-
-        if _entity.team != 0:
-            if _entity.team not in self.players_dict:
-                self.players_dict[_entity.team] = Player(_entity.team)  # Initialisation si nécessaire
-            self.players_dict[_entity.team].add_entity(_entity)
-            print(f"Entity {str(_entity)} added to player {str(self.players_dict[_entity.team])}")
-
         return 1 # added the entity succesfully
     
     def add_entity_to_closest(self, entity, cell_Y, cell_X, random_padding = 0x00, min_spacing = 4, max_spacing = 5):
@@ -203,9 +170,9 @@ class Map:
     def remove_projectile(self, _projectile):
         self.projectile_set.discard(_projectile)
 
-    def update_all_projectiles(self, current_time):
+    def update_all_projectiles(self, dt):
         for proj in self.projectile_set.copy():
-            proj.update_event(current_time)
+            proj.update_event(dt)
 
             if proj.reached_target:
                 self.remove_projectile(proj)
@@ -232,126 +199,132 @@ class Map:
 
                     if not region:  # Remove empty regions
                         self.entity_matrix.pop((REG_Y, REG_X), None)
-
-        player = self.players_dict.get(_entity.team, None)
-        player.remove_entity(_entity)
+        
         self.entity_id_dict.pop(_entity.id, None)
 
+        if _entity.team != 0:
+            player = self.players_dict.get(_entity.team, None)
+
+            if player:
+                player.remove_entity(_entity)
         return _entity  # Return the entity if needed elsewhere
 
 
     
-    def display(self, current_time, screen, camera, g_width, g_height):
+    def display(self, dt, screen, camera, g_width, g_height):
         
+        self.iso_refresh_time_acc += dt
+        if self.iso_refresh_time_acc >= ONE_SEC/60:
+            screen.fill(BLACK_COLOR)
+            self.iso_refresh_time_acc = 0
+            tmp_cell = Cell(0, 0, PVector2(0,0))
+            tmp_topleft = PVector2(0, 0)
+            tmp_bottomright = PVector2(0, 0)
 
-        tmp_cell = Cell(0, 0, PVector2(0,0))
-        tmp_topleft = PVector2(0, 0)
-        tmp_bottomright = PVector2(0, 0)
+            (top_Y, top_X), (left_Y, left_X), (right_Y, right_X), (bottom_Y, bottom_X) = camera.indexes_in_point_of_view(g_width, g_height)
+            
+            top_Xt = max(0, min(top_X, self.nb_CellX - 1))
+            top_Yt = max(0, min(top_Y, self.nb_CellY - 1))
 
-        (top_Y, top_X), (left_Y, left_X), (right_Y, right_X), (bottom_Y, bottom_X) = camera.indexes_in_point_of_view(g_width, g_height)
-        
-        top_Xt = max(0, min(top_X, self.nb_CellX - 1))
-        top_Yt = max(0, min(top_Y, self.nb_CellY - 1))
+            right_Xt = max(0, min(right_X, self.nb_CellX - 1))
+            right_Yt = max(0, min(right_Y, self.nb_CellY - 1))
 
-        right_Xt = max(0, min(right_X, self.nb_CellX - 1))
-        right_Yt = max(0, min(right_Y, self.nb_CellY - 1))
+            left_Xt = max(0, min(left_X, self.nb_CellX - 1))
+            left_Yt = max(0, min(left_Y, self.nb_CellY - 1))
 
-        left_Xt = max(0, min(left_X, self.nb_CellX - 1))
-        left_Yt = max(0, min(left_Y, self.nb_CellY - 1))
+            bottom_Xt = max(0, min(bottom_X, self.nb_CellX - 1))
+            bottom_Yt  = max(0, min(bottom_Y, self.nb_CellY - 1))
+            
+            top = (top_Yt, top_Xt)
+            left = (left_Yt, left_Xt)
+            right = (right_Yt, right_Xt)
+            bottom = (bottom_Yt, bottom_Xt)
 
-        bottom_Xt = max(0, min(bottom_X, self.nb_CellX - 1))
-        bottom_Yt  = max(0, min(bottom_Y, self.nb_CellY - 1))
-        
-        top = (top_Yt, top_Xt)
-        left = (left_Yt, left_Xt)
-        right = (right_Yt, right_Xt)
-        bottom = (bottom_Yt, bottom_Xt)
+            range_top = (top[0] // self.region_division, top[1] // self.region_division)
+            range_left = (left[0] // self.region_division, left[1] // self.region_division)
+            range_right = (right[0] // self.region_division, right[1] // self.region_division) 
+            range_bottom = (bottom[0] // self.region_division, bottom[1] // self.region_division) 
+    
+            #print(f"top:{top}, left:{left}, right:{right}")
 
-        range_top = (top[0] // self.region_division, top[1] // self.region_division)
-        range_left = (left[0] // self.region_division, left[1] // self.region_division)
-        range_right = (right[0] // self.region_division, right[1] // self.region_division) 
-        range_bottom = (bottom[0] // self.region_division, bottom[1] // self.region_division) 
- 
-        #print(f"top:{top}, left:{left}, right:{right}")
+            entity_to_display = set()
+            
 
-        entity_to_display = set()
-        
+            min_X, min_Y = range_left[1], range_top[0]
+            max_X, max_Y = range_right[1], range_bottom[0]
 
-        min_X, min_Y = range_left[1], range_top[0]
-        max_X, max_Y = range_right[1], range_bottom[0]
-
-        for proj in self.projectile_set:
-            if min_Y <= proj.cell_Y//self.region_division <= max_Y and \
-                min_X <= proj.cell_X//self.region_division <= max_X :
-                    entity_to_display.add(proj)
+            for proj in self.projectile_set:
+                if min_Y <= proj.cell_Y//self.region_division <= max_Y and \
+                    min_X <= proj.cell_X//self.region_division <= max_X :
+                        entity_to_display.add(proj)
 
 
-        for region_Y_to_display, region_X_to_display in isoRange(range_top, range_left, range_right, range_bottom):
+            for region_Y_to_display, region_X_to_display in isoRange(range_top, range_left, range_right, range_bottom):
 
-                if region_Y_to_display >= 0 and region_Y_to_display < self.nb_CellY//self.region_division \
-                    and region_X_to_display>=0 and region_X_to_display < self.nb_CellX//self.region_division:
-                    #print(f"REG_Y: {region_Y_to_display}, REG_X: {region_X_to_display}")
+                    if region_Y_to_display >= 0 and region_Y_to_display < self.nb_CellY//self.region_division \
+                        and region_X_to_display>=0 and region_X_to_display < self.nb_CellX//self.region_division:
+                        #print(f"REG_Y: {region_Y_to_display}, REG_X: {region_X_to_display}")
 
-                    # these are the real X Y of the region in the sparse matrix
+                        # these are the real X Y of the region in the sparse matrix
 
-                    REG_X, REG_Y = region_X_to_display * (self.region_division ), region_Y_to_display * (self.region_division )
+                        REG_X, REG_Y = region_X_to_display * (self.region_division ), region_Y_to_display * (self.region_division )
+                        
+                        tmp_topleft.x = TILE_SIZE_2D/2 + REG_X*TILE_SIZE_2D
+                        tmp_topleft.y = TILE_SIZE_2D/2 + REG_Y*TILE_SIZE_2D
+
+                        tmp_bottomright.x = TILE_SIZE_2D/2 + (REG_X + (self.region_division - 1))*TILE_SIZE_2D
+                        tmp_bottomright.y = TILE_SIZE_2D/2 + (REG_Y + (self.region_division - 1))*TILE_SIZE_2D
+
+                        tmp_cell.position = (tmp_bottomright + tmp_topleft) * (0.5)
+
+                        tmp_cell.display(screen, camera)
+
+                        #check if this region contains entity
+                        region_entities = self.entity_matrix.get((region_Y_to_display, region_X_to_display), None)
+                        if region_entities != None:
+
+                            for entities in region_entities.values(): # each value the region is a dict of the cells
+                                for entity in entities:
+                                    entity_to_display.add(entity)
+            """             
+            for Y_to_display in range(start_Y, end_Y + 1):
+                for X_to_display in range(start_X, end_X + 1):
                     
-                    tmp_topleft.x = TILE_SIZE_2D/2 + REG_X*TILE_SIZE_2D
-                    tmp_topleft.y = TILE_SIZE_2D/2 + REG_Y*TILE_SIZE_2D
+                    tmp_cell.position.x = X_to_display*camera.tile_size_2d + camera.tile_size_2d/2
+                    tmp_cell.position.y = Y_to_display*camera.tile_size_2d + camera.tile_size_2d/2
+                    iso_x, iso_y = camera.convert_to_isometric_2d(tmp_cell.position.x, tmp_cell.position.y)
 
-                    tmp_bottomright.x = TILE_SIZE_2D/2 + (REG_X + (self.region_division - 1))*TILE_SIZE_2D
-                    tmp_bottomright.y = TILE_SIZE_2D/2 + (REG_Y + (self.region_division - 1))*TILE_SIZE_2D
-
-                    tmp_cell.position = (tmp_bottomright + tmp_topleft) * (0.5)
-
-                    tmp_cell.display(screen, camera)
-
-                    #check if this region contains entity
-                    region_entities = self.entity_matrix.get((region_Y_to_display, region_X_to_display), None)
-                    if region_entities != None:
-
-                        for entities in region_entities.values(): # each value the region is a dict of the cells
-                            for entity in entities:
-                                entity_to_display.add(entity)
-        """             
-        for Y_to_display in range(start_Y, end_Y + 1):
-            for X_to_display in range(start_X, end_X + 1):
-                
-                tmp_cell.position.x = X_to_display*camera.tile_size_2d + camera.tile_size_2d/2
-                tmp_cell.position.y = Y_to_display*camera.tile_size_2d + camera.tile_size_2d/2
-                iso_x, iso_y = camera.convert_to_isometric_2d(tmp_cell.position.x, tmp_cell.position.y)
-
-                pygame.draw.circle(screen, (255, 0, 0), (iso_x, iso_y), 1, 0) 
-        """ # debug purposes 
-        
-                                                                                # priority to the farm ( they are like grass so the ground is displayed first) then the normal deep sort 
-        for current_entity in sorted(entity_to_display, key=lambda entity: (isinstance(entity,Villager),not(isinstance(entity, Farm)), entity.position.z, entity.position.y + entity.position.x, entity.position.y)):
-        
-            current_entity.display(current_time, screen, camera, g_width, g_height)
-        
-        
+                    pygame.draw.circle(screen, (255, 0, 0), (iso_x, iso_y), 1, 0) 
+            """ # debug purposes 
+            
+                                                                                    # priority to the farm ( they are like grass so the ground is displayed first) then the normal deep sort 
+            for current_entity in sorted(entity_to_display, key=lambda entity: (isinstance(entity,Villager),not(isinstance(entity, Farm)), entity.position.z, entity.position.y + entity.position.x, entity.position.y)):
+            
+                current_entity.display(dt, screen, camera, g_width, g_height)
+            
+            
 
 
 
-        # minimap display 
-        self.minimap.update_position(g_width, g_height)
-        
-        self.minimap.display_ground(screen)
+            # minimap display 
+            self.minimap.update_position(g_width, g_height)
+            
+            self.minimap.display_ground(screen)
 
-        for current_region in self.entity_matrix.values():
-            for entity_set in current_region.values():
-                for entity in entity_set:
-                    if not(isinstance(entity, Building)):
-                        self.minimap.display_on_cart(screen, entity)
-        
-        self.minimap.display_camera(screen, top_X, top_Y, bottom_X, bottom_Y)
+            for current_region in self.entity_matrix.values():
+                for entity_set in current_region.values():
+                    for entity in entity_set:
+                        if not(isinstance(entity, Building)):
+                            self.minimap.display_on_cart(screen, entity)
+            
+            self.minimap.display_camera(screen, top_X, top_Y, bottom_X, bottom_Y)
 
         
 
-    def terminal_display(self, current_time, terminal_camera):
-
-        if current_time - self.last_time_refershed >= ONE_SEC*(0.05):
-
+    def terminal_display(self, dt, terminal_camera):
+        self.refresh_time_acc += dt
+        if self.refresh_time_acc >= ONE_SEC*(0.05):
+            self.refresh_time_acc = 0
             startX, startY, endX, endY = terminal_camera.indexes_in_point_of_view_terminal()
 
             # Clear the terminal screen for animation
@@ -387,23 +360,33 @@ class Map:
                 
                 sys.stdout.flush()
                    
-            self.last_time_refershed = current_time
                                 
         
+    def generate_gold_center(self, num_players):
+        center_Y, center_X = self.nb_CellY//2, self.nb_CellX//2
 
-    def generate_map(self, mode = MARINES ,num_players=3):
+        number_gold = num_players*self.region_division
+
+        for _ in range(number_gold**2):
+            current_gold = Gold(center_Y, center_X, None)
+            self.add_entity_to_closest(current_gold, center_Y, center_X, random_padding=0x1)
+
+    def generate_map(self,gen_mode = MAP_NORMAL , mode = MARINES ,num_players=3):
         
+        print(f"mode:{gen_mode}, res:{mode}")
         # Ensure consistent random generation
         random.seed(0xba)
         
-        
+        if gen_mode == "Carte Centrée":
+            self.generate_gold_center(num_players)
         self._place_player_starting_areas(mode, num_players)
         
         self._generate_forests()
-        self._generate_gold()
+        if gen_mode == "Carte Normal":
+            self._generate_gold()
 
     
-    def _generate_forests(self, forest_count=20, forest_size_range=(7, 17)):
+    def _generate_forests(self, forest_count=30, forest_size_range=(14, 28)):
         
         for _ in range(forest_count):
             # Randomly pick a forest center
@@ -425,7 +408,7 @@ class Map:
                         tree = Tree(tree_Y, tree_X, None)
                         self.add_entity(tree)
     
-    def _generate_gold(self, gold_veins=16, vein_size_range=(4, 15)):
+    def _generate_gold(self, gold_veins=30, vein_size_range=(8, 20)):
         
         for _ in range(gold_veins):
             # Randomly pick a vein center
@@ -449,12 +432,14 @@ class Map:
                         gold = Gold(gold_Y, gold_X, None)
                         self.add_entity(gold)
     
+
+
+
+
     def _place_player_starting_areas(self, mode, num_players):
         
         spacing = self.nb_CellX // num_players 
         for i in range(num_players):
-
-            current_player = Player(i + 1)
             
             # Base position for this player's starting area
             base_X = spacing * i + spacing // 2
@@ -466,14 +451,14 @@ class Map:
             center_X = max(0, min(self.nb_CellX - 1, base_X + offset_X))  # Keep within bounds
             center_Y = max(0, min(self.nb_CellY - 1, base_Y + offset_Y))  
 
-            if not(self.check_cell(center_Y, center_X)) :
+            current_player = Player(center_Y, center_X, i + 1)
+            current_player.linked_map = self
+            self.players_dict[current_player.team] = current_player
 
+            if not(self.check_cell(center_Y, center_X)) :
+                print(mode)
                 gen_option = MODE_GENERATION.get(mode)
                 
-                resources = gen_option.get("resources")
-                print(f"Resources for player {i + 1}: {resources}")
-                current_player.resources = resources.copy()
-
                 entities_gen = gen_option.get("entities")
                 for entity_type, number in entities_gen.items():
 
@@ -483,27 +468,18 @@ class Map:
                     for i in range(number):
                         
                         entity_instance = EntityClass(None, None, None, current_player.team)
-                        print(f"the {i}th entity:{entity_instance}")
-                        # self.add_entity_to_closest(entity_instance, entity_instance.cell_Y, entity_instance.cell_X)
-                        self.add_entity_to_closest(entity_instance, center_Y, center_X, random_padding=0x01)
-                        
-            if current_player.team not in self.players_dict:
-                self.players_dict[current_player.team] = current_player
-            else:
-                existing_player = self.players_dict[current_player.team]
-                for resource, amount in current_player.resources.items():
-                    existing_player.resources[resource] = amount
-                existing_player.entities_dict.update(current_player.entities_dict)
-                # print(f"Updated resources for team {current_player.team}: {current_player.resources}")
+                        if isinstance(entity_instance, Unit):
+                            current_player.add_population()
+                            current_player.current_population += 1
+
+                        self.add_entity_to_closest(entity_instance, current_player.cell_Y, current_player.cell_X, random_padding=0x01)
+            
+            current_player_resources = gen_option.get("resources").copy() # we dont want togive it as a pointer else all players will share the same resources haha
+            current_player.add_resources(current_player_resources)
+            
+            for type, set in current_player.entities_dict.items():
+                print(f"type:{type} dict:{set}")
         
-        print(self.players_dict)
-        # print("Final players_dict with resources:")
-        # for team, player in self.players_dict.items():
-        #     print(f"Team {team}: {player}")
-        #     print(f"  Resources: {player.resources}")
-        #     print(f"  Entities: {player.entities_dict}")
-
-
 
     def _add_starting_resources(self, center_Y, center_X):
 
@@ -545,7 +521,7 @@ class Map:
         
         return res_entity
             
-    def update_all_dead_entities(self, current_time):
+    def update_all_dead_entities(self, dt):
         for key in list(self.dead_entities.keys()):
             entity = self.dead_entities.get(key, None)
             if entity:
@@ -553,16 +529,23 @@ class Map:
                     self.dead_entities.pop(key, 0)
                     self.remove_entity(entity)
 
-    def update_all_entities(self, current_time, camera, sceen):
+    def update_all_entities(self, dt, camera, screen):
         for id in list(self.entity_id_dict.keys()):
             
             entity = self.entity_id_dict.get(id)
             if entity:
-                entity.update(current_time, camera, screen)
+                entity.update(dt, camera, screen)
                 
 
+    def update_all_events(self, dt, camera, screen):
+        self.update_all_entities(dt, camera, screen)
+        self.update_all_projectiles(dt)
+        self.update_all_dead_entities(dt)
 
-    def update_all_events(self, current_time, camera, screen):
-        self.update_all_entities(current_time, camera, screen)
-        self.update_all_projectiles(current_time)
-        self.update_all_dead_entities(current_time)
+
+    
+
+
+
+
+    

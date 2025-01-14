@@ -4,5 +4,4 @@ class Keep(DefensiveBuilding):
         global KEEP_ARRAY_3D
         print(cell_Y, cell_X, position, team, representation, sq_size, hp, cost, build_time, attack, _range, projectile_type)
         super().__init__(cell_Y, cell_X, position, team, representation, sq_size, hp, cost, build_time, attack,attack_speed, _range, projectile_type)
-        self.image = KEEP_ARRAY_3D
         self.projetctile_padding =TILE_SIZE_2D*3

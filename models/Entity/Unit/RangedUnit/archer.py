@@ -5,7 +5,6 @@ class Archer(RangedUnit):
 
     def __init__(self, cell_Y, cell_X, position, team, representation = 'a', hp = 30, cost = {"gold":45,"wood":25,"food":0}, training_time = 5, speed = 1, attack = 4, attack_speed = 1.2, _range = 5, _projectile_type = "pa"):
         super().__init__(cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed, _range, _projectile_type)
-        self.image = ARCHER_ARRAY_3D
         self.last_time_sent_arrow = pygame.time.get_ticks()
         self.projetctile_padding = TILE_SIZE_2D/2
         self.animation_speed = [60,30,30,30]

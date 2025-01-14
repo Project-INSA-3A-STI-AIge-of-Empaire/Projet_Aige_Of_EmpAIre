@@ -1,5 +1,5 @@
 from GLOBAL_VAR import *
-from Entity.entity import Entity 
+
 
 class Cell:
 

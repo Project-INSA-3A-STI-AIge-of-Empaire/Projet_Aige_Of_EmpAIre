@@ -35,7 +35,7 @@ class UserInterface:
             ]
             
             if self.display_resources:
-                for resource in player_object.resources.values():
+                for resource in player_object.get_current_resources().values():
                     texte = self.font.render(str(resource), True, WHITE_COLOR)  # Crée un rendu de texte
                     self.screen.blit(texte, (player_pos[0], player_pos[1]+player_offset))    # Affiche à la position (x=50, y=y_offset)
                     player_offset += 50

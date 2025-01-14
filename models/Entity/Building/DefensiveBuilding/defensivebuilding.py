@@ -20,7 +20,7 @@ class DefensiveBuilding(Building):
         self.range = _range
         self.projectile_type = projectile_type
         self.entity_target_id = None
-        self.last_time_attacked = pygame.time.get_ticks()
+        self.attack_time_acc = 0
         self.projetctile_padding = None
     
     def detect_unit_around(self):
@@ -47,8 +47,8 @@ class DefensiveBuilding(Building):
                                     shortest_dist = current_distance
                                     self.entity_target_id = entity.id 
     
-    def try_to_attack(self,current_time):
-        if (self.state != BUILDING_DYING):
+    def try_to_attack(self,dt):
+        if (self.state == BUILDING_ACTIVE):
             
             if self.entity_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
@@ -62,7 +62,7 @@ class DefensiveBuilding(Building):
                             range_status = self.linked_map.tile_size_2d * self.range + entity.box_size >= current_distance
                             
                             if range_status:
-                                self.try_to_damage(current_time, entity)
+                                self.try_to_damage(dt, entity)
                             else:
                                 self.detect_unit_around()
                         else:
@@ -77,11 +77,12 @@ class DefensiveBuilding(Building):
 
 
     
-    def try_to_damage(self, current_time, _entity):
+    def try_to_damage(self, dt, _entity):
         global PROJECTILE_TYPE_MAPPING
-        if (current_time - self.last_time_attacked > self.attack_speed * ONE_SEC):
+        self.attack_time_acc += dt
+        if (self.attack_time_acc > self.attack_speed * ONE_SEC):
             
-            self.last_time_attacked = current_time
+            self.attack_time_acc = 0
             
             ProjectileClass = PROJECTILE_TYPE_MAPPING.get(self.projectile_type, None)
             
@@ -89,14 +90,14 @@ class DefensiveBuilding(Building):
             self.linked_map.add_projectile(arrow)
 
             
-    def update(self, current_time, camera = None, screen = None):
-        super().update(current_time, camera, screen)
-        self.try_to_attack(current_time)
+    def update(self, dt, camera = None, screen = None):
+        super().update(dt, camera, screen)
+        self.try_to_attack(dt)
 
-    def display(self, current_time, screen, camera, g_width, g_height):
+    def display(self, dt, screen, camera, g_width, g_height):
         draw_isometric_circle(camera, screen, self.position.x, self.position.y, self.range*TILE_SIZE_2D, TEAM_COLORS.get(self.team)) 
 
-        super().display(current_time, screen, camera, g_width, g_height)        
+        super().display(dt, screen, camera, g_width, g_height)        
                             
         
     

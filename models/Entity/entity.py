@@ -1,6 +1,6 @@
 from GLOBAL_VAR import *
 from idgen import *
-from AITools.player import *
+#from AITools.player import *
 from shapely.geometry import Point, Polygon
 import math
 from shape import *
@@ -83,7 +83,7 @@ class Entity():
         # i wrote it like this on purpose incase there is some future update
         return Status
     
-    def update(self, current_time, camera = None, screen = None):
+    def update(self, dt, camera = None, screen = None):
         return None
     def save(self):
 

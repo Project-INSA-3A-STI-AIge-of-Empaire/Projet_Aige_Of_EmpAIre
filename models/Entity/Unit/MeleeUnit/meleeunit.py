@@ -3,41 +3,55 @@ from Entity.Unit.unit import *
 class MeleeUnit(Unit):
     def __init__(self, cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed):
         super().__init__(cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed)
-
-    def try_to_damage(self, current_time, entity):
+        self.start = pygame.time.get_ticks()
+    def try_to_damage(self, dt, entity):
         
-        if self.first_time_pass or (current_time - self.last_time_attacked > self.attack_delta_time):
+        self.attack_time_acc += dt 
+        if self.first_time_pass or (self.attack_time_acc > self.attack_delta_time):
+            
             if (self.first_time_pass):
                 print("using free pas")
                 self.first_time_pass = False
             if not(self.state == UNIT_ATTACKING):
+                self.start = pygame.time.get_ticks()
                 self.change_state(UNIT_ATTACKING)
-            self.last_time_attacked = current_time
+            self.attack_time_acc = 0
 
             self.will_attack = True
         
         if self.state == UNIT_ATTACKING:
-            if self.animation_frame == self.attack_frame and self.will_attack:
+            if self.animation_frame >= self.attack_frame and self.will_attack:
                 self.will_attack = False
                 entity.hp -= self.attack
-
+                print(f'time:{pygame.time.get_ticks() - self.last}')
+                self.last = pygame.time.get_ticks()
                 if entity.is_dead():
+                    if self.entity.representation in ['C','T','v']:
+                            if self.entity.state != STATES.get(self.entity.representation, None).get("dying", None):
+                                resources = {}
+                                if self.entity.representation == 'v':
+                                    resources = self.entity.resources
+                                else:
+                                    resources = self.entity.storage.lose_resource()
+                                print(self.team)
+                                player_gained = self.linked_map.players_dict.get(self.team,None)
+                                player_gained.add_resources(resources)
                     self.linked_map.dead_entities[entity.id] = entity
                     entity.change_state(STATES.get(entity.representation, None).get("dying", None))
                     self.path_to_position = None
                     
 
             elif self.animation_frame == (self.len_current_animation_frames() - 1):
+                print(f"finished attack {pygame.time.get_ticks() - self.start}")
+                
                 self.check_range_with_target = False # we need to recheck if it is still in range
                 self.change_state(UNIT_IDLE) # if the entity is killed we stop 
     
 
         
-    def try_to_attack(self,current_time, camera, screen):
+    def try_to_attack(self,dt, camera, screen):
         if (self.state != UNIT_DYING):
             if self.entity_target_id != None:
-                print("asfd")
-                print(self.entity_target_id)
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
                 
                 if (entity != None): 
@@ -59,14 +73,13 @@ class MeleeUnit(Unit):
                                     
                                     self.locked_with_target = False
                                     self.first_time_pass = True
-                                    self.try_to_move(current_time, camera, screen )
+                                    self.try_to_move(dt, camera, screen )
                             else: # collided 
                                 self.target_direction = self.position.alpha_angle(entity.position)
                                 dist_to_entity = self.position.abs_distance(entity.position)
 
                                 if (dist_to_entity <= ((entity.sq_size) * TILE_SIZE_2D + entity.box_size + self.box_size)):
-                                    print("asdf ")
-                                    self.try_to_damage(current_time, entity)
+                                    self.try_to_damage(dt, entity)
                                 else:
                                     self.check_range_with_target = False
                                     
