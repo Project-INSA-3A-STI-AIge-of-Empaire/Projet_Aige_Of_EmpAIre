@@ -13,14 +13,9 @@ from tkinter import filedialog, messagebox
 import pickle
 
 class GameState:
-    def __init__(self, screen):
+    def __init__(self):
         #self.save_manager = Savegame(self)
         self.states = START
-        self.screen = screen
-        self.startmenu = StartMenu(screen)
-        self.pausemenu = PauseMenu(screen)
-        self.ui = UserInterface(screen)
-
         self.speed = 1
         self.selected_map_type = MAP_NORMAL
         self.selected_mode = LEAN
@@ -40,7 +35,7 @@ class GameState:
 
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""
-        self.map.generate_map(self.selected_mode, self.selected_players)
+        self.map.generate_map(self.selected_map_type, self.selected_mode, self.selected_players)
 
     def set_map_type(self, map_type):
         self.selected_map_type = map_type
@@ -91,28 +86,28 @@ class GameState:
             self.last_time_switched = pygame.time.get_ticks()
 
 
-    def toggle_resources(self):
+    def toggle_resources(self, ui):
         
          
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
-            self.ui.toggle_resources()
+            ui.toggle_resources()
             self.last_time_switched = pygame.time.get_ticks()
 
-    def toggle_units(self):
+    def toggle_units(self, ui):
         
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
-            self.ui.toggle_units()
+            ui.toggle_units()
             self.last_time_switched = pygame.time.get_ticks()
 
-    def toggle_builds(self):
+    def toggle_builds(self, ui):
          
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
-            self.ui.toggle_builds()
+            ui.toggle_builds()
             self.last_time_switched = pygame.time.get_ticks()
     
-    def toggle_all(self):
+    def toggle_all(self, ui):
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
-            self.ui.toggle_all()
+            ui.toggle_all()
             self.last_time_switched = pygame.time.get_ticks()
 
     def generate_html_file(self, players_dict):
@@ -162,7 +157,7 @@ class GameState:
                                             text(f"{amount} ")  # Ajoute le contenu HTML de l'entité
                                     with tag('h3'):
                                         text("Entities : ")  # Titre du type d'entité (Unit, Building, Resource)
-                                    for entity_repr, in player.entities_dict.keys():
+                                    for entity_repr in player.entities_dict.keys():
                                         with tag('h4'):
                                             icons_path = ICONS_HTML.get(entity_repr+"i", "default_image.png")
                                             doc.stag('img', src=f"{icons_path}",klass  ="photo", width =50, height =50)
@@ -252,7 +247,7 @@ class GameState:
         with open('styles.css', 'w') as f:
             f.write(css_content)
 
-        webbrowser.open_new_tab('overview.html')   
+        webbrowser.open('overview.html', 1, True)
 
     def save(self):
         # Sauvegarde l'objet dans un fichier

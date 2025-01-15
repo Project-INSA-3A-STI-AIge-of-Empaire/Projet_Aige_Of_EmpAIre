@@ -20,18 +20,21 @@ class GameLoop:
 
         self.clock = pygame.time.Clock()
 
-        self.state = GameState(self.screen)
+        self.state = GameState()
+        self.startmenu = StartMenu(self.screen)
+        self.pausemenu = PauseMenu(self.screen)
+        self.ui = UserInterface(self.screen)
 
 
     
     def handle_start_events(self, event):
         if pygame.key.get_pressed()[pygame.K_F12]:
             self.state.load()
-        if event.type == pygame.MOUSEBUTTONDOWN and self.state.startmenu.handle_click(event.pos):
-            self.state.set_map_type(self.state.startmenu.map_options[self.state.startmenu.selected_map_index])
-            self.state.set_difficulty_mode(self.state.startmenu.selected_mode_index)
-            self.state.set_display_mode(self.state.startmenu.display_mode)
-            self.state.set_players(self.state.startmenu.selected_player_count_index)
+        if event.type == pygame.MOUSEBUTTONDOWN and self.startmenu.handle_click(event.pos):
+            self.state.set_map_type(self.startmenu.map_options[self.startmenu.selected_map_index])
+            self.state.set_difficulty_mode(self.startmenu.selected_mode_index)
+            self.state.set_display_mode(self.startmenu.display_mode)
+            self.state.set_players(self.startmenu.selected_player_count_index)
             self.state.start_game()
             self.state.states = PLAY
             if self.state.display_mode == TERMINAL:
@@ -39,7 +42,7 @@ class GameLoop:
 
     def handle_pause_events(self,dt, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            self.state.pausemenu.handle_click(event.pos, self.state)
+            self.pausemenu.handle_click(event.pos, self.state)
 
     def handle_play_events(self, event, mouse_x, mouse_y):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -100,13 +103,13 @@ class GameLoop:
 
         # Overlays
         if keys[pygame.K_F1]:
-            self.state.toggle_resources()
+            self.state.toggle_resources(self.ui)
         if keys[pygame.K_F2]:
-            self.state.toggle_units()
+            self.state.toggle_units(self.ui)
         if keys[pygame.K_F3]:
-            self.state.toggle_builds()
+            self.state.toggle_builds(self.ui)
         if keys[pygame.K_F4]:
-            self.state.toggle_all()
+            self.state.toggle_all(self.ui)
 
         self.state.camera.move_flags = move_flags
         self.state.terminal_camera.move_flags = move_flags
@@ -119,16 +122,16 @@ class GameLoop:
 
     def render_display(self, dt, mouse_x, mouse_y):
         if self.state.states == START:
-            self.state.startmenu.draw()
+            self.startmenu.draw()
         elif self.state.states == PAUSE:
-            self.state.pausemenu.draw()
+            self.pausemenu.draw()
         elif self.state.states == PLAY:
             if self.state.display_mode == ISO2D:
-                self.state.map.display(dt, self.state.screen, self.state.camera, self.screen_width, self.screen_height)
+                self.state.map.display(dt, self.screen, self.state.camera, self.screen_width, self.screen_height)
                 fps = int(self.clock.get_fps())
                 fps_text = self.font.render(f"FPS: {fps}", True, (255, 255, 255))
                 self.screen.blit(fps_text, (10, 10))
-                self.state.ui.draw_resources(self.state.map.players_dict)
+                self.ui.draw_resources(self.state.map.players_dict)
             elif self.state.display_mode == TERMINAL:
                 self.state.map.terminal_display(dt, self.state.terminal_camera)
         self.screen.blit(CURSOR_IMG, (mouse_x, mouse_y))
