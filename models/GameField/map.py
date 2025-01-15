@@ -19,6 +19,7 @@ class Map:
         self.entity_matrix = {} #sparse matrix
 
         self.entity_id_dict = {} # each element of this is an id
+        self.resource_id_dict = {} # specially for the resources so the bots can easily decide to go to the closest resource ...
         self.dead_entities = {}
 
         self.projectile_set = set()
@@ -35,6 +36,8 @@ class Map:
 
     def get_entity_by_id(self, _entity_id):
         return self.entity_id_dict.get(_entity_id, None)
+    def get_player_by_team(self, _player_team):
+        return self.players_dict.get(_player_team, None)
     
     def check_cell(self, Y_to_check, X_to_check):
         if 0<=Y_to_check<self.nb_CellY and 0<=X_to_check<self.nb_CellX:
@@ -109,11 +112,21 @@ class Map:
 
             if player:
                 player.add_entity(_entity)
+        else:
+            resource_set = self.resource_id_dict.get(_entity.representation, None)
+
+            if resource_set == None:
+                self.resource_id_dict[_entity.representation] = set()
+                resource_set = self.resource_id_dict.get(_entity.representation, None)
+
+            resource_set.add(_entity.id)
+            
         _entity.linked_map = self
 
         # at the end add the entity pointer to the id dict with the id dict 
 
         self.entity_id_dict[_entity.id] = _entity
+
         return 1 # added the entity succesfully
     
     def add_entity_to_closest(self, entity, cell_Y, cell_X, random_padding = 0x00, min_spacing = 4, max_spacing = 5):
@@ -158,10 +171,7 @@ class Map:
                     if (self.add_entity(entity)):
                         added = True
                 else:
-                    break
-                        
-
-                        
+                    break               
 
 
     def add_projectile(self, _projectile):
@@ -169,14 +179,6 @@ class Map:
 
     def remove_projectile(self, _projectile):
         self.projectile_set.discard(_projectile)
-
-    def update_all_projectiles(self, dt):
-        for proj in self.projectile_set.copy():
-            proj.update_event(dt)
-
-            if proj.reached_target:
-                self.remove_projectile(proj)
-
       
     
     def remove_entity(self,_entity):
@@ -207,10 +209,22 @@ class Map:
 
             if player:
                 player.remove_entity(_entity)
+        else:
+            resource_set = self.resource_id_dict.get(_entity.representation, None)
+
+            if resource_set:
+                if _entity.id in resource_set:
+                    resource_set.remove(_entity.id)
+
+            if not(resource_set):
+                self.resource_id_dict.pop(_entity.represantation, None)
+
         return _entity  # Return the entity if needed elsewhere
 
 
     
+
+
     def display(self, dt, screen, camera, g_width, g_height):
         
         self.iso_refresh_time_acc += dt
@@ -361,7 +375,13 @@ class Map:
                 sys.stdout.flush()
                    
                                 
-        
+
+
+
+
+
+
+
     def generate_gold_center(self, num_players):
         center_Y, center_X = self.nb_CellY//2, self.nb_CellX//2
 
@@ -438,18 +458,13 @@ class Map:
 
     def _place_player_starting_areas(self, mode, num_players):
         
-        spacing = self.nb_CellX // num_players 
-        for i in range(num_players):
+        polygon = angle_distribution(self.nb_CellY, self.nb_CellX, num_players, scale=0.75, rand_rot=0x1)
+        print(polygon)
+        for i in range(len(polygon)):
             
             # Base position for this player's starting area
-            base_X = spacing * i + spacing // 2
-            base_Y = self.nb_CellY // 2
-
-            
-            offset_X = random.randint(-3, 3)  # Random horizontal offset
-            offset_Y = random.randint(-self.nb_CellY//num_players, self.nb_CellY//num_players)  # Random vertical offset
-            center_X = max(0, min(self.nb_CellX - 1, base_X + offset_X))  # Keep within bounds
-            center_Y = max(0, min(self.nb_CellY - 1, base_Y + offset_Y))  
+            center_Y, center_X = int(polygon[i][1]), int(polygon[i][0])
+ 
 
             current_player = Player(center_Y, center_X, i + 1)
             current_player.linked_map = self
@@ -501,6 +516,9 @@ class Map:
                 self.add_entity(tree)
 
 
+
+
+
     def mouse_get_entity(self, camera, iso_x, iso_y):
 
         res_entity = None
@@ -520,7 +538,14 @@ class Map:
                     break
         
         return res_entity
-            
+
+    def update_all_projectiles(self, dt):
+        for proj in self.projectile_set.copy():
+            proj.update_event(dt)
+
+            if proj.reached_target:
+                self.remove_projectile(proj)
+
     def update_all_dead_entities(self, dt):
         for key in list(self.dead_entities.keys()):
             entity = self.dead_entities.get(key, None)
@@ -542,10 +567,36 @@ class Map:
         self.update_all_projectiles(dt)
         self.update_all_dead_entities(dt)
 
+def angle_distribution(Y, X, player_number, scale=1, rand_rot=False):
+    
+    if player_number > 1:
+        polygon = []
+
+        Y_rect = Y * scale
+        X_rect = X * scale
+
+        Cx = X / 2
+        Cy = Y / 2
+
+        theta = (2 * math.pi) / player_number
+        phi = 0
+
+        if rand_rot:
+            phi += random.uniform(0, 2 * math.pi)
+
+        for i in range(player_number):
+            current_theta = i * theta + phi
+            x = Cx + X_rect / 2 * math.cos(current_theta)
+            y = Cy + Y_rect / 2 * math.sin(current_theta)
+            polygon.append((x, y))
+
+        return polygon
+    elif player_number == 1:
+        return [(X * scale / 2, Y * scale / 2)]
+    else:
+        return []
+
 
     
-
-
-
 
     

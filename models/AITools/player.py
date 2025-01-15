@@ -280,6 +280,31 @@ class Player:
                     return True
         return False
     
+    def entity_closest_to(self, ent_repr, cell_Y, cell_X): # we give the ent_repr for the entity we want and then we give a certain position and we will return the closest entity of the given type to the cell_X, cell_Y
+        closest_id = None
+        ent_ids = None
+
+        if ent_repr not in ["W", "G"]:
+            ent_ids = self.get_entities_by_class(ent_repr, None)
+        else:
+            ent_ids = self.linked_map.resource_id_dict.get(ent_repr, None)
+               
+        if ent_ids:
+
+            closest_dist = float('inf')
+
+            for ent_id in ent_ids:
+
+                current_entity = self.linked_map.get_entity_by_id(ent_id)
+                if current_entity:
+
+                    current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
+
+                    if current_dist < closest_dist:
+                        closest_id = current_entity.id
+                        closest_dist = current_dist 
+        
+        return closest_id
 
 
         
