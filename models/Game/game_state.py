@@ -247,7 +247,9 @@ class GameState:
         with open('styles.css', 'w') as f:
             f.write(css_content)
 
-        webbrowser.open('overview.html', 1, True)
+        browser = webbrowser.open('overview.html', 1, True)
+        if not browser:
+            messagebox.showinfo("Erreur", "impossible d'ouvrir le fichier html")
 
     def save(self):
         # Sauvegarde l'objet dans un fichier
