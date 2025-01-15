@@ -20,12 +20,8 @@ class GameState:
         self.selected_map_type = MAP_NORMAL
         self.selected_mode = LEAN
         self.selected_players = 2
-        self.camera = Camera()
-        self.terminal_camera = TerminalCamera()
         self.map = Map(MAP_CELLX, MAP_CELLY)
         self.display_mode = ISO2D # Mode d'affichage par défaut
-        
-        self.savegamefile = None
         # Pour gérer le délai de basculement d'affichage
         self.last_time_switched = 0
         self.switch_cooldown = ONE_SEC*(0.2)  # Délai de 200ms (0,2 secondes)
@@ -259,7 +255,7 @@ class GameState:
         )
         if file_path:
             with open(file_path, 'wb') as file:
-                pickle.dump(self.map, file)
+                pickle.dump(self, file)
             print(f"Jeu sauvegardé dans {file_path}")
             messagebox.showinfo("Sauvegarde réussie", f"Jeu sauvegardé dans {file_path}")
         else:
@@ -275,7 +271,7 @@ class GameState:
 
         if file_path:
             with open(file_path, 'rb') as file:
-                self.map = pickle.load(file)
+                self = pickle.load(file)
                 print(f"Jeu chargé depuis {file_path}")
                 messagebox.showinfo("Chargement réussi", f"Jeu chargé depuis {file_path}")
                   # Retourne l'objet chargé
