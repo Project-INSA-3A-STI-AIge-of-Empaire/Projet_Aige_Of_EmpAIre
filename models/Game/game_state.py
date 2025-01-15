@@ -27,7 +27,8 @@ class GameState:
         self.full_screen = True
         self.mouse_held = False
         self.screen_width, self.screen_height = SCREEN_WIDTH, SCREEN_HEIGHT
-
+        self.camera = Camera()
+        self.terminal_camera = TerminalCamera()
 
 
     def start_game(self):
