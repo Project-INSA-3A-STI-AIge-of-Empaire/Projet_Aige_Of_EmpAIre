@@ -33,7 +33,10 @@ class UserInterface:
                 ('K', 300),
                 ('A', 350)
             ]
-            
+            if self.display_builds or self.display_resources or self.display_units:
+                texte = self.font.render("Player "+str(player_id), True, TEAM_COLORS[player_id])  # Crée un rendu de texte
+                self.screen.blit(texte, (player_pos[0], player_pos[1]-40))  # Affiche à la position (x=50, y=y_offset)
+
             if self.display_resources:
                 for resource in player_object.get_current_resources().values():
                     texte = self.font.render(str(resource), True, WHITE_COLOR)  # Crée un rendu de texte
