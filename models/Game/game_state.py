@@ -23,11 +23,13 @@ class GameState:
         self.display_mode = ISO2D # Mode d'affichage par défaut
         # Pour gérer le délai de basculement d'affichage
         self.last_time_switched = 0
-        self.switch_cooldown = ONE_SEC*(0.2)  # Délai de 200ms (0,2 secondes)
+        self.switch_cooldown = ONE_SEC*(0.2) # Délai de 200ms (0,2 secondes)
         self.full_screen = True
         self.mouse_held = False
-        self.screen_width, self.screen_height = SCREEN_WIDTH, SCREEN_HEIGHT
-
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
+        self.camera = Camera()
+        self.terminal_camera = TerminalCamera()
 
 
     def start_game(self):
@@ -263,7 +265,7 @@ class GameState:
         )
         if file_path:
             with open(file_path, 'wb') as file:
-                pickle.dump((self.__dict__), file)
+                pickle.dump(self.__dict__, file)
             print(f"Jeu sauvegardé dans {file_path}")
             messagebox.showinfo("Sauvegarde réussie", f"Jeu sauvegardé dans {file_path}")
         else:
