@@ -26,6 +26,8 @@ class GameState:
         self.switch_cooldown = ONE_SEC*(0.2)  # Délai de 200ms (0,2 secondes)
         self.full_screen = True
         self.mouse_held = False
+        self.screen_width, self.screen_height = SCREEN_WIDTH, SCREEN_HEIGHT
+
 
 
     def start_game(self):
@@ -53,6 +55,10 @@ class GameState:
                 self.states = PAUSE
             self.last_time_switched = pygame.time.get_ticks()
 
+    def set_screen_size(self, width, height):
+        self.screen_width = width
+        self.screen_height = height
+
     def toggle_fullscreen(self, gameloop):
         if not(self.full_screen):
             self.full_screen = True
@@ -72,12 +78,15 @@ class GameState:
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
             if self.display_mode == ISO2D:
                 self.display_mode = TERMINAL
-                gameloop.screen = pygame.display.set_mode((20, 20), pygame.HWSURFACE | pygame.DOUBLEBUF )
+                
+                gameloop.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF )
                 gameloop.screen.set_alpha(None)
             elif self.display_mode == TERMINAL:
                 self.display_mode = ISO2D
-                gameloop.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
+                self.set_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT)
+                gameloop.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
                 gameloop.screen.set_alpha(None)
+            
             self.last_time_switched = pygame.time.get_ticks()
 
 
@@ -254,7 +263,7 @@ class GameState:
         )
         if file_path:
             with open(file_path, 'wb') as file:
-                pickle.dump(self, file)
+                pickle.dump((self.__dict__), file)
             print(f"Jeu sauvegardé dans {file_path}")
             messagebox.showinfo("Sauvegarde réussie", f"Jeu sauvegardé dans {file_path}")
         else:
@@ -270,14 +279,15 @@ class GameState:
 
         if file_path:
             with open(file_path, 'rb') as file:
-                self = pickle.load(file)
+                self.__dict__ = pickle.load(file)
                 print(f"Jeu chargé depuis {file_path}")
                 messagebox.showinfo("Chargement réussi", f"Jeu chargé depuis {file_path}")
                   # Retourne l'objet chargé
+            return True
         else:
             print("Aucun fichier sélectionné.")
             messagebox.showwarning("Aucun fichier", "Vous n'avez pas sélectionné de fichier.")
-            return None  # Retourne None si aucune sauvegarde n'est chargée
+            return False  # Retourne None si aucune sauvegarde n'est chargée
 
     # def draw_pause_text(self, screen):
     #     """Affiche le texte 'Jeu en pause' au centre de l'écran."""

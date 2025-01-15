@@ -1,4 +1,6 @@
 import pygame
+import tkinter as tk
+from tkinter import messagebox, Button, Tk
 
 from ImageProcessingDisplay import UserInterface
 from GLOBAL_VAR import *
@@ -11,7 +13,6 @@ class GameLoop:
 
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
         self.screen.set_alpha(None)
-        self.screen_width, self.screen_height = self.screen.get_width(), self.screen.get_height()
         pygame.display.set_caption("Age Of Empaire II")
 
         pygame.mouse.set_visible(False)
@@ -21,18 +22,20 @@ class GameLoop:
         self.clock = pygame.time.Clock()
 
         self.state = GameState()
+        self.state.set_screen_size(self.screen.get_width(), self.screen.get_height())
         self.startmenu = StartMenu(self.screen)
         self.pausemenu = PauseMenu(self.screen)
         self.ui = UserInterface(self.screen)
         self.camera = Camera()
         self.terminal_camera = TerminalCamera()
 
-
     
     def handle_start_events(self, event):
         if pygame.key.get_pressed()[pygame.K_F12]:
-            self.state.load()
-        if event.type == pygame.MOUSEBUTTONDOWN and self.startmenu.handle_click(event.pos):
+            loaded = self.state.load()
+            # if loaded:
+            #     self.state.states = PLAY
+        elif event.type == pygame.MOUSEBUTTONDOWN and self.startmenu.handle_click(event.pos):
             self.state.set_map_type(self.startmenu.map_options[self.startmenu.selected_map_index])
             self.state.set_difficulty_mode(self.startmenu.selected_mode_index)
             self.state.set_display_mode(self.startmenu.display_mode)
@@ -40,7 +43,8 @@ class GameLoop:
             self.state.start_game()
             self.state.states = PLAY
             if self.state.display_mode == TERMINAL:
-                pygame.display.set_mode((20, 20), pygame.HWSURFACE | pygame.DOUBLEBUF )
+                self.state.set_screen_size(20, 20)
+                pygame.display.set_mode((self.state.screen_width, self.state.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF )
 
     def handle_pause_events(self,dt, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -78,8 +82,9 @@ class GameLoop:
         if keys[pygame.K_F11]:
             self.state.save()
         if keys[pygame.K_F12]:
-            self.state.load()
-
+            loaded = self.state.load()
+            if loaded:
+                pygame.display.set_mode((self.state.screen_width, self.state.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
         # Générer fichier HTML
         if keys[pygame.K_TAB]:
             self.state.generate_html_file(self.state.map.players_dict)
