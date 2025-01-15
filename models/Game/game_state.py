@@ -14,7 +14,6 @@ import pickle
 
 class GameState:
     def __init__(self):
-        #self.save_manager = Savegame(self)
         self.states = START
         self.speed = 1
         self.selected_map_type = MAP_NORMAL
