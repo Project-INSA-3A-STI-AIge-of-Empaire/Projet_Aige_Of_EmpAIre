@@ -32,8 +32,10 @@ class GameLoop:
     def handle_start_events(self, event):
         if pygame.key.get_pressed()[pygame.K_F12]:
             loaded = self.state.load()
-            # if loaded:
-            #     self.state.states = PLAY
+            if loaded:
+                pygame.display.set_mode((self.state.screen_width, self.state.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
+                if self.state.states == PAUSE:
+                    self.state.toggle_pause()
         elif event.type == pygame.MOUSEBUTTONDOWN and self.startmenu.handle_click(event.pos):
             self.state.set_map_type(self.startmenu.map_options[self.startmenu.selected_map_index])
             self.state.set_difficulty_mode(self.startmenu.selected_mode_index)
@@ -79,13 +81,17 @@ class GameLoop:
 
         # Sauvegarder et charger
         if keys[pygame.K_F11]:
+            self.state.set_screen_size(self.screen.get_width(), self.screen.get_height())
             self.state.save()
+            
         if keys[pygame.K_F12]:
             loaded = self.state.load()
             if loaded:
+                print(self.state.states)
                 pygame.display.set_mode((self.state.screen_width, self.state.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
                 if self.state.states == PAUSE:
                     self.state.toggle_pause()
+                print(self.state.states)
         # Générer fichier HTML
         if keys[pygame.K_TAB]:
             self.state.generate_html_file(self.state.map.players_dict)
