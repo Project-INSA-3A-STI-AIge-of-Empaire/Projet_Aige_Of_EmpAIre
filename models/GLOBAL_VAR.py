@@ -348,8 +348,10 @@ def META_SPRITES_CACHE_HANDLE(zoom_level, list_keys, camera): # returns image to
         
     
 CURSOR_IMG = pygame.image.load("Sprites/cursor.png").convert_alpha()
-MINIMAP_IMG = pygame.image.load("Sprites/minimap_cus.png").convert_alpha()
-MINIMAP_IMG = adjust_sprite(MINIMAP_IMG, MINIMAP_WIDTH*(2 + 0.2), MINIMAP_HEIGHT/2 *(2 + 0.2))
+#MINIMAP_IMG = pygame.image.load("Sprites/minimap_cus.png").convert_alpha()
+MINIMAP_IMG = pygame.image.load("Sprites/map-panel-removebg-preview.png").convert_alpha()
+
+MINIMAP_IMG = adjust_sprite(MINIMAP_IMG, MINIMAP_WIDTH*(2 + 0.7), MINIMAP_HEIGHT/2 *(2 + 0.36))
 
 #Resources
 GOLD_ICON = pygame.image.load("Icons/Resources/Aoe2de_gold.png").convert_alpha()

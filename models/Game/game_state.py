@@ -108,15 +108,15 @@ class GameState:
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
             ui.toggle_builds()
             self.last_time_switched = pygame.time.get_ticks()
-    
+
     def toggle_all(self, ui):
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
             ui.toggle_all()
             self.last_time_switched = pygame.time.get_ticks()
 
     def generate_html_file(self, players_dict):
+        
         # Creation of the HTML file using yattag
-     
         doc, tag, text = Doc().tagtext()
 
         doc.asis('<!DOCTYPE html>')

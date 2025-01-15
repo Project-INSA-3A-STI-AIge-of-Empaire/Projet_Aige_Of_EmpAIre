@@ -90,8 +90,8 @@ class MiniMap:
 
         img_width, img_height = MINIMAP_IMG.get_size()
 
-        self.position.x = g_width - img_width//2 - MINIMAP_WIDTH//2
-        self.position.y = g_height - img_height//2 - MINIMAP_HEIGHT//2
+        self.position.x = g_width - img_width/2.5 - MINIMAP_WIDTH//2
+        self.position.y = g_height - img_height/2.5 - MINIMAP_HEIGHT//2
 
 
 
