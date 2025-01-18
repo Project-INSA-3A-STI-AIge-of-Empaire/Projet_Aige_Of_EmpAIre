@@ -1,5 +1,6 @@
 from GLOBAL_VAR import *
 from GLOBAL_IMPORT import *
+
 CLASS_MAPPING = {
     'A': ArcheryRange,
     'B': Barracks,
@@ -37,6 +38,9 @@ class Player:
         
         self.entities_dict = {}
         self.linked_map = None
+
+        self.villager_free = []
+        self.villager_occupied = []
         
 
         
@@ -305,6 +309,32 @@ class Player:
                         closest_dist = current_dist 
         
         return closest_id
+    
+    
+    def player_turn(self):
+        self.villager_free = self.get_entities_by_class("v")
+        if len(self.villager_free) - len(self.villager_occupied) > 0:
+            self.set_build(self.villager_free)
+            self.set_resources(self.villager_free[0])
+    
+    def set_build(self, villager_id_list):
+        i = 0
+        while(i < 4):
+            villager_id_list.append(self.villager_free[i])
+            i += 1
+        self.build_entity(villager_id_list, 'B')
+        print(f"Before remove: villager_free = {self.villager_free}, attempting to remove {villager_id_list}")
+        for villager_id in villager_id_list:
+            if villager_id in self.villager_free:
+                self.villager_free.remove(villager_id)
+        self.villager_occupied.append(villager_id_list)
+
+
+    def set_resources(self, collector_id):
+        self.entity_closest_to("G", self.entities_dict['v'][collector_id].cell_Y, self.entities_dict['v'][collector_id].cell_X)
+        self.villager_free.remove(collector_id)
+        self.villager_occupied.append(collector_id)
+        self.add_resources(self.entities_dict['v'][collector_id].resources)
 
 
         

@@ -178,6 +178,11 @@ class GameLoop:
             if not (self.state.states == START):
                 self.handle_keyboard_inputs(move_flags, dt)
 
+            if self.state.states == PLAY:
+                for team in self.state.map.players_dict.keys():
+                    self.state.map.players_dict[team].player_turn()
+            
+
             self.update_game_state(dt)
             self.render_display(dt, mouse_x, mouse_y)
             

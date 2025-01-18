@@ -171,7 +171,12 @@ class GameState:
                                                 with tag('ul'):
                                                     with tag('li'):
                                                         doc.asis(player.entities_dict[entity_repr][id].get_html())  # Ajoute le contenu HTML de l'entité
-                                            
+                                                        doc.stag(
+                                                            'progress',
+                                                            klass="health-bar",     
+                                                            max="100",              
+                                                            value="100"
+                                                        )
 
         # Save the HTML content
         html_content = doc.getvalue()
