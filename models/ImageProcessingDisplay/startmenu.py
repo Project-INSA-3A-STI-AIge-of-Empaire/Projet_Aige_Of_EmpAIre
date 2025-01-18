@@ -4,8 +4,12 @@ from GLOBAL_VAR import *
 class StartMenu:
     def __init__(self, screen):
         self.screen = screen
-        
-        # Map options
+
+        # Map cell count
+        self.map_cell_count = 256  # Default value
+        self.editing_map_cell_count = False  # Track if the user is editing the cell count
+
+        # Map type options
         self.map_options = ["Carte Normal", "Carte Centrée"]
         self.selected_map_index = MAP_NORMAL
 
@@ -14,22 +18,24 @@ class StartMenu:
         self.selected_mode_index = LEAN
 
         # Player count options
-        self.player_count_options = {2: "2 Joueurs",3: "3 Joueurs",4: "4 Joueurs"}
-        self.selected_player_count_index = 2  # Default to 2 player
+        self.selected_player_count = 2  # Default to 2 players
+        self.editing_player_count = False  # Track if the player is editing the count
 
         self.display_mode = TERMINAL  # Default display mode
 
         # Buttons
         self.buttons = {
-            "left_map": pygame.Rect(0, 0, 50, 50),  # Left button for map
-            "right_map": pygame.Rect(0, 0, 50, 50),  # Right button for map
-            "left_mode": pygame.Rect(0, 0, 50, 50),  # Left button for game mode
-            "right_mode": pygame.Rect(0, 0, 50, 50),  # Right button for game mode
-            "left_player_count": pygame.Rect(0, 0, 50, 50),  # Left button for player count
-            "right_player_count": pygame.Rect(0, 0, 50, 50),  # Right button for player count
-            "Terminal": pygame.Rect(0, 0, 115, 50),  # Terminal view button
-            "2.5D": pygame.Rect(0, 0, 115, 50),  # 2.5D view button
-            "Lancer la Partie": pygame.Rect(0, 0, 300, 50)  # Start game button
+            "left_map": pygame.Rect(0, 0, 50, 50),
+            "right_map": pygame.Rect(0, 0, 50, 50),
+            "left_mode": pygame.Rect(0, 0, 50, 50),
+            "right_mode": pygame.Rect(0, 0, 50, 50),
+            "left_player_count": pygame.Rect(0, 0, 50, 50),
+            "right_player_count": pygame.Rect(0, 0, 50, 50),
+            "Terminal": pygame.Rect(0, 0, 115, 50),
+            "2.5D": pygame.Rect(0, 0, 115, 50),
+            "Lancer la Partie": pygame.Rect(0, 0, 300, 50),
+            "left_map_cell": pygame.Rect(0, 0, 50, 50),
+            "right_map_cell": pygame.Rect(0, 0, 50, 50)
         }
 
     def draw(self):
@@ -41,6 +47,8 @@ class StartMenu:
         center_x = screen_width // 2
         center_y = screen_height // 2
 
+        self.buttons["left_map_cell"].topleft = (center_x - 215, center_y - 200)
+        self.buttons["right_map_cell"].topleft = (center_x + 165, center_y - 200)
         self.buttons["left_map"].topleft = (center_x - 215, center_y - 140)
         self.buttons["right_map"].topleft = (center_x + 165, center_y - 140)
         self.buttons["left_mode"].topleft = (center_x - 215, center_y - 80)
@@ -51,23 +59,35 @@ class StartMenu:
         self.buttons["2.5D"].topleft = (center_x + 5, center_y + 40)
         self.buttons["Lancer la Partie"].topleft = (center_x - 150, center_y + 100)
 
+        # Draw map cell count
+        self._draw_button("left_map_cell", "<")
+        if self.editing_map_cell_count:
+            map_cell_label = "Cellules: _"
+        else:
+            map_cell_label = f"Cellules: {self.map_cell_count}"
+        self._draw_text(map_cell_label, (center_x, center_y - 185), centered=True)
+        self._draw_button("right_map_cell", ">")
+
         # Draw map selection
-        self._draw_button("left_map", "<")  # Left button for map
-        map_label = f"Map: {self.map_options[self.selected_map_index]}"
+        self._draw_button("left_map", "<")
+        map_label = f"Carte: {self.map_options[self.selected_map_index]}"
         self._draw_text(map_label, (center_x, center_y - 125), centered=True)
-        self._draw_button("right_map", ">")  # Right button for map
+        self._draw_button("right_map", ">")
 
         # Draw game mode selection
-        self._draw_button("left_mode", "<")  # Left button for game mode
-        mode_label = f"Mode de jeu: {self.game_mode_options[self.selected_mode_index]}"
+        self._draw_button("left_mode", "<")
+        mode_label = f"Mode: {self.game_mode_options[self.selected_mode_index]}"
         self._draw_text(mode_label, (center_x, center_y - 65), centered=True)
-        self._draw_button("right_mode", ">")  # Right button for game mode
+        self._draw_button("right_mode", ">")
 
         # Draw player count selection
-        self._draw_button("left_player_count", "<")  # Left button for player count
-        player_count_label = f"Joueurs: {self.player_count_options[self.selected_player_count_index]}"
+        self._draw_button("left_player_count", "<")
+        if self.editing_player_count:
+            player_count_label = "Joueurs: _"
+        else:
+            player_count_label = f"Joueurs: {self.selected_player_count}"
         self._draw_text(player_count_label, (center_x, center_y - 5), centered=True)
-        self._draw_button("right_player_count", ">")  # Right button for player count
+        self._draw_button("right_player_count", ">")
 
         # Draw display mode buttons
         self._draw_button("Terminal", "Terminal", self.display_mode == TERMINAL)
@@ -95,7 +115,11 @@ class StartMenu:
 
     def handle_click(self, pos):
         """Handle clicks on buttons."""
-        if self.buttons["left_map"].collidepoint(pos):
+        if self.buttons["left_map_cell"].collidepoint(pos):
+            self.map_cell_count = max(120, self.map_cell_count - 1)
+        elif self.buttons["right_map_cell"].collidepoint(pos):
+            self.map_cell_count = min(1024, self.map_cell_count + 1)
+        elif self.buttons["left_map"].collidepoint(pos):
             self.selected_map_index = (self.selected_map_index - 1) % len(self.map_options)
         elif self.buttons["right_map"].collidepoint(pos):
             self.selected_map_index = (self.selected_map_index + 1) % len(self.map_options)
@@ -104,9 +128,9 @@ class StartMenu:
         elif self.buttons["right_mode"].collidepoint(pos):
             self.selected_mode_index = (self.selected_mode_index + 1) % len(self.game_mode_options)
         elif self.buttons["left_player_count"].collidepoint(pos):
-            self.selected_player_count_index = 4 if self.selected_player_count_index == 2 else self.selected_player_count_index - 1
+            self.selected_player_count = max(2, self.selected_player_count - 1)
         elif self.buttons["right_player_count"].collidepoint(pos):
-            self.selected_player_count_index = 2 if self.selected_player_count_index == 4 else self.selected_player_count_index + 1
+            self.selected_player_count += 1
         elif self.buttons["Terminal"].collidepoint(pos):
             self.display_mode = TERMINAL
         elif self.buttons["2.5D"].collidepoint(pos):
@@ -115,3 +139,44 @@ class StartMenu:
             return True  # Indicate that the game can start
 
         return False  # Indicate that the game cannot start
+
+    def handle_keydown(self, event):
+        """Handle keyboard input for editable fields."""
+        if self.editing_map_cell_count:
+            if event.key == pygame.K_RETURN:  # Confirm input
+                self.editing_map_cell_count = False
+                self.map_cell_count = min(1024, max(120, self.map_cell_count))
+            elif event.key == pygame.K_BACKSPACE:  # Remove last digit
+                self.map_cell_count = int(str(self.map_cell_count)[:-1] or "120")
+            elif event.unicode.isdigit():  # Add new digit
+                # On gère la saisie des chiffres correctement
+                if self.map_cell_count == '':
+                    self.map_cell_count = int(event.unicode)  # Si c'est vide, on met le premier chiffre
+                else:
+                    self.map_cell_count = self.map_cell_count * 10 + int(event.unicode)  # On ajoute le chiffre à la fin
+
+        elif self.editing_player_count:
+            if event.key == pygame.K_RETURN:  # Confirm input
+                self.editing_player_count = False
+                self.selected_player_count = min(20, max(2, self.selected_player_count))  # Limite entre 2 et 20
+            elif event.key == pygame.K_BACKSPACE:  # Remove last digit
+                self.selected_player_count = int(str(self.selected_player_count)[:-1] or "2")
+            elif event.unicode.isdigit():  # Add new digit
+                # Même logique pour le nombre de joueurs
+                if self.selected_player_count == '':
+                    self.selected_player_count = int(event.unicode)  # Si c'est vide, on met le premier chiffre
+                else:
+                    self.selected_player_count = self.selected_player_count * 10 + int(event.unicode)  # Ajouter le chiffre à la fin
+
+
+
+
+    def start_editing_map_cell_count(self):
+        """Enable editing map cell count."""
+        self.editing_map_cell_count = True
+        self.map_cell_count = 0  # Vider la valeur lorsque l'on commence à éditer
+
+    def start_editing_player_count(self):
+        """Enable editing player count."""
+        self.editing_player_count = True
+        self.selected_player_count = 0  # Vider la valeur lorsque l'on commence à éditer

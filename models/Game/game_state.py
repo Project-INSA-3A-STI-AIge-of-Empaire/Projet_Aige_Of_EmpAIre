@@ -36,6 +36,9 @@ class GameState:
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""
         self.map.generate_map(self.selected_map_type, self.selected_mode, self.selected_players)
 
+    def set_map_size(self, map_size):
+        self.map = Map(map_size, map_size)
+
     def set_map_type(self, map_type):
         self.selected_map_type = map_type
 
@@ -64,7 +67,7 @@ class GameState:
     def toggle_fullscreen(self, gameloop):
         if not(self.full_screen):
             self.full_screen = True
-            gameloop.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.FULLSCREEN)
+            gameloop.screen = pygame.display.set_mode((FULLSCREEN_WIDTH, FULLSCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.FULLSCREEN)
             #self.screen.set_alpha(None)
         else:
             self.full_screen = False
