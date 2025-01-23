@@ -177,8 +177,8 @@ class GameState:
                                                         doc.stag(
                                                             'progress',
                                                             klass="health-bar",     
-                                                            max="100",              
-                                                            value="100"
+                                                            max=player.entities_dict[entity_repr][id].max_hp,
+                                                            value=player.entities_dict[entity_repr][id].hp
                                                         )
 
         # Save the HTML content
