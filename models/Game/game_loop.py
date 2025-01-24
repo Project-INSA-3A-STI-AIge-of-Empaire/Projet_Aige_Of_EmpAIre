@@ -204,7 +204,7 @@ class GameLoop:
 
             if self.state.states == PLAY:
                 for team in self.state.map.players_dict.keys():
-                    self.state.map.players_dict[team].player_turn()
+                    self.state.map.players_dict[team].player_turn(dt)
             
 
             self.update_game_state(dt)
