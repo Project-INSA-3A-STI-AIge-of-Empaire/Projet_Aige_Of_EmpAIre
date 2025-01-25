@@ -100,8 +100,10 @@ def defend(context):
 
 def gather_resources(context):
     for villager in context['units']['villager']:
-        if not villager.is_full():
+        if not villager.is_full() and is_unit_idle(villager):
             villager.collect_entity(context['resource_id'])
+        else:
+            drop_resources(context)
     return "Gathering resources!"
 
 def train_military(context):
@@ -135,8 +137,9 @@ def find_closest_resources(context):
 def build_structure(context):
     villager_ids = [unit.id for unit in context['units'].get('villager', []) if is_unit_idle(unit)]
     if villager_ids:
-        context['player'].build_entity(villager_ids, 'B')  # Example for Town Center
+        context['player'].build_entity(villager_ids, 'B',)  # Example for Town Center
     return "Building structure!"
+        
 
 def enemy_visible(context):
     return context['enemy_visible']
