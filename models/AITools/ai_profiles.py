@@ -145,10 +145,8 @@ class AIProfile:
 
         for action in actions:
             if action == "Gathering resources!":
-                # Gather resources with villagers
-                villagers = player.get_entities_by_class(['v'])
-                for villager_id in villagers:
-                    villager = map.get_entity_by_id(villager_id)
+                # Gather resources with villager
+                for villager in context['units']['villager']:
                     villager.collect_entity(context['resource_id'])  # Start collecting resources
                 return "Gathered resources"
 
