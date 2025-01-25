@@ -10,11 +10,12 @@ class GameEventHandler:
         self.ai_profiles = ai_profiles
 
     def process_ai_decisions(self, tree):
-        for player_id, ai_profile in self.ai_profiles.items():
-            context = self.get_context_for_player()
-            print(f"Here is the context : {context}")
-            actions = ai_profile.decide_action(tree, context)
-            print(f"Player {player_id} Actions: {actions}")
+        all_action = []
+        context = self.get_context_for_player()
+        print(f"Here is the context : {context}")
+        actions = self.ai_profiles.decide_action(tree, context)
+        all_action.append(actions)
+        print(f"Player {self.players.team} Actions: {actions}")
 
     def get_context_for_player(self):
         enemy_visible, enemy_distance, enemy_id = self.players.get_closest_ennemy()
@@ -32,13 +33,13 @@ class GameEventHandler:
                 'critical': self.players.is_free(),
             },
             'enemy_distance': enemy_distance,
-            # 'units': [{'type': 'military' if unit.is_military() else 'villager', 'instance': unit} for unit in self.players.units],
+            'units': {'military' : self.players.get_entities_by_class(['h', 'a', 's']), 'villager' : self.players.get_entities_by_class(['v'])},
             'enemy_id': enemy_id,
-            # 'resource_id': self.map.get_nearest_resource_id(player),
-            # 'drop_off_id': self.map.get_nearest_drop_off_id(player),
+            'resource_id': self.players.entity_closest_to(['G', 'W'], self.players.cell_Y, self.players.cell_X),
+            'drop_off_id': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
             'player': self.players,
-            # 'current_time': self.map.current_time,
-            # 'closest_town_center': self.players.entity_closest_to('T', self.players.cell_Y, self.players.cell_X),
+            'closest_town_center': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
+            'map' : self.map,
         }
         context['under_attack'] = True
         return context

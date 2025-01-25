@@ -38,23 +38,30 @@ class DecisionNode:
 
     def decide(self, context):
         actions = []
-
+        print(f"Question result: {self.question(context)}")
         if self.question(context):
+            print(f"Taking YES branch: {self.yes_action}")
             if isinstance(self.yes_action, DecisionNode):
                 actions.extend(self.yes_action.decide(context))
             else:
                 if callable(self.yes_action):
-                    actions.append((self.yes_action, self.priority))
+                    result = self.yes_action(context)
+                    actions.append((result, self.priority))
+                    print(f"Yes action called: {actions}")
         else:
+            print(f"Taking NO branch: {self.no_action}")
             if isinstance(self.no_action, DecisionNode):
                 actions.extend(self.no_action.decide(context))
             else:
                 if callable(self.no_action):
-                    actions.append((self.no_action, self.priority))
+                    print(f"No action called: {action}")
+                    result = self.no_action(context)
+                    actions.append((result, self.priority))
 
         actions.sort(key=lambda x: x[1], reverse=True)
 
-        return [action[0](context) for action in actions]
+        print(f"The decide method return : {actions}")
+        return [action if isinstance(action, str) else action[0] for action in actions]
 
 # ---- Questions ----
 def is_under_attack(context):
@@ -88,7 +95,7 @@ def defend(context):
     for unit in context['units']:
         if unit['type'] == 'military':
             unit['instance'].attack_entity(context['enemy_id'])
-    return "Defending the village!"
+    return "Defend the village!"
 
 def gather_resources(context):
     for unit in context['units']:
@@ -98,14 +105,14 @@ def gather_resources(context):
 
 def train_military(context):
     for building in context['buildings']['training']:
-        building['instance'].train_unit(context['player'], context['current_time'], 'v')
-    return "Training military units!"
+        building['instance'].train_unit(context['player'], 'v')
+    return "Train military units!"
 
 def attack(context):
     for unit in context['units']:
-        if unit['type'] == 'military':
+        if unit in context['units']['military']:
             unit['instance'].attack_entity(context['enemy_id'])
-    return "Attacking the enemy!"
+    return "Attack the enemy!"
 
 def drop_resources(context):
     for unit in context['units']:
@@ -185,8 +192,8 @@ class Player:
         self.entities_dict = {}
         self.linked_map = None
 
-        self.decision_tree= DecisionNode(is_under_attack)
-        self.ai_profile = {self.team : AIProfile(strategy = "agressive")}
+        self.decision_tree= tree
+        self.ai_profile = AIProfile(strategy = "aggressive")
         self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
 
         self.refl_acc = 0
@@ -433,30 +440,32 @@ class Player:
                     return True
         return False
     
-    def entity_closest_to(self, ent_repr, cell_Y, cell_X): # we give the ent_repr for the entity we want and then we give a certain position and we will return the closest entity of the given type to the cell_X, cell_Y
+    def entity_closest_to(self, ent_repr_list, cell_Y, cell_X): # we give the ent_repr for the entity we want and then we give a certain position and we will return the closest entity of the given type to the cell_X, cell_Y
         closest_id = None
         ent_ids = None
 
-        if ent_repr not in ["W", "G"]:
-            ent_ids = self.get_entities_by_class(ent_repr, None)
-        else:
-            ent_ids = self.linked_map.resource_id_dict.get(ent_repr, None)
-               
-        if ent_ids:
+        for ent_repr in ent_repr_list:
+            if ent_repr not in ["W", "G"]:
+                print(f"Searching closest entity: {ent_repr} at coordinates ({cell_Y}, {cell_X})")
+                ent_ids = self.get_entities_by_class(ent_repr)
+            else:
+                ent_ids = self.linked_map.resource_id_dict.get(ent_repr, None)
+                
+            if ent_ids:
 
-            closest_dist = float('inf')
+                closest_dist = float('inf')
 
-            for ent_id in ent_ids:
+                for ent_id in ent_ids:
 
-                current_entity = self.linked_map.get_entity_by_id(ent_id)
-                if current_entity:
+                    current_entity = self.linked_map.get_entity_by_id(ent_id)
+                    if current_entity:
 
-                    current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
+                        current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
 
-                    if current_dist < closest_dist:
-                        closest_id = current_entity.id
-                        closest_dist = current_dist 
-        
+                        if current_dist < closest_dist:
+                            closest_id = current_entity.id
+                            closest_dist = current_dist 
+            
         return closest_id
     
     def get_closest_ennemy(self):
@@ -480,8 +489,10 @@ class Player:
             self.refl_acc=0
     
     def player_turn(self,dt):
-        self.update(dt)
-        self.game_handler.process_ai_decisions(self.decision_tree)
+        # self.update(dt)
+        print("Decision tree avant utilisation:", self.decision_tree)
+        decision = self.game_handler.process_ai_decisions(self.decision_tree)
+        print(f"Decision effectué : {decision}")
         # # decision = self.ai_profile.decide_action(self.decision_tree, context)
         # return decision
     

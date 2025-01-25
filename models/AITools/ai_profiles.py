@@ -23,6 +23,8 @@ class AIProfile:
         """
         # Get the actions from the decision tree
         actions = tree.decide(context)
+        print(f"The action is : {actions}")
+        print(f"The strategy is : {self.strategy}")
 
         # Call the appropriate strategy
         if self.strategy == "aggressive":
