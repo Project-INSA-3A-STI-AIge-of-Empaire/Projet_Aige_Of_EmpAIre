@@ -122,9 +122,13 @@ def drop_resources(context):
     return "Dropping off resources!"
 
 def find_closest_resources(context):
+    print("find ressources de jules")
+    resources_to_find='W'
+    if min(context['resources']["gold"], context['resources']["wood"])==context['resources']["gold"]:
+        resources_to_find='G'
     town_center = context['player'].linked_map.get_entity_by_id(context['closest_town_center'])
     if town_center:
-        closest_resource = context['player'].entity_closest_to('G', town_center.cell_Y, town_center.cell_X)  # Example for gold
+        closest_resource = context['player'].entity_closest_to(resources_to_find, town_center.cell_Y, town_center.cell_X)  # Example for gold
         context['resource_id'] = closest_resource if closest_resource else None
     return "Found closest resources!"
 
