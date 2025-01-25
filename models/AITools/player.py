@@ -54,7 +54,7 @@ class DecisionNode:
                 actions.extend(self.no_action.decide(context))
             else:
                 if callable(self.no_action):
-                    print(f"No action called: {action}")
+                    print(f"No action called: {actions}")
                     result = self.no_action(context)
                     actions.append((result, self.priority))
 
@@ -78,13 +78,13 @@ def has_enough_military(context):
     return context['military_units'] >= 10
 
 def is_unit_idle(unit):
-    return unit['instance'].state == UNIT_IDLE
+    return unit.state == UNIT_IDLE
 
 def closest_town_center(context):
     player = context['player']
     town_center = player.entity_closest_to('T', player.cell_Y, player.cell_X)
     if town_center:
-        context['closest_town_center'] = player.linked_map.get_entity_by_id(town_center.id)
+        context['closest_town_center'] = town_center
     return town_center is not None
 
 def is_villager_full(unit):
@@ -115,22 +115,22 @@ def attack(context):
     return "Attack the enemy!"
 
 def drop_resources(context):
-    for unit in context['units']:
-        if unit['type'] == 'villager' and unit['instance'].is_full():
-            unit['instance'].drop_to_entity(context['drop_off_id'])
+    for unit in context['units']['villager']:
+        if unit.is_full():
+            unit.drop_to_entity(context['drop_off_id'])
     return "Dropping off resources!"
 
 def find_closest_resources(context):
-    town_center = context['closest_town_center']
+    town_center = context['player'].linked_map.get_entity_by_id(context['closest_town_center'])
     if town_center:
         closest_resource = context['player'].entity_closest_to('G', town_center.cell_Y, town_center.cell_X)  # Example for gold
-        context['resource_id'] = closest_resource.id if closest_resource else None
+        context['resource_id'] = closest_resource if closest_resource else None
     return "Found closest resources!"
 
 def build_structure(context):
-    villager_ids = [unit['instance'].id for unit in context['units'] if unit['type'] == 'villager' and is_unit_idle(unit)]
+    villager_ids = [unit.id for unit in context['units'].get('villager', []) if is_unit_idle(unit)]
     if villager_ids:
-        context['player'].build_entity(villager_ids, building_representation='T')  # Example for Town Center
+        context['player'].build_entity(villager_ids, 'B')  # Example for Town Center
     return "Building structure!"
 
 def enemy_visible(context):
@@ -193,7 +193,7 @@ class Player:
         self.linked_map = None
 
         self.decision_tree= tree
-        self.ai_profile = AIProfile(strategy = "aggressive")
+        self.ai_profile = AIProfile(strategy = "balanced")
         self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
 
         self.refl_acc = 0

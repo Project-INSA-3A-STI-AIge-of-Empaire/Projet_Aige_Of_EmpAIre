@@ -109,7 +109,7 @@ class AIProfile:
                 # Drop resources in storage buildings
                 villagers = player.get_entities_by_class(['v'])
                 for villager_id in villagers:
-                    villager = map.get_entity_by_id(villager_id)
+                    villager = player.linked_map.get_entity_by_id(villager_id)
                     villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
                 return "Dropped off resources"
 

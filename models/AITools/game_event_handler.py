@@ -33,7 +33,10 @@ class GameEventHandler:
                 'critical': self.players.is_free(),
             },
             'enemy_distance': enemy_distance,
-            'units': {'military' : self.players.get_entities_by_class(['h', 'a', 's']), 'villager' : self.players.get_entities_by_class(['v'])},
+            'units' : {
+                'military': [self.players.linked_map.get_entity_by_id(m_id) for m_id in self.players.get_entities_by_class(['h', 'a', 's'])],
+                'villager': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'])],
+            },
             'enemy_id': enemy_id,
             'resource_id': self.players.entity_closest_to(['G', 'W'], self.players.cell_Y, self.players.cell_X),
             'drop_off_id': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
@@ -41,6 +44,6 @@ class GameEventHandler:
             'closest_town_center': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
             'map' : self.map,
         }
-        context['under_attack'] = True
+        context['under_attack'] = False
         return context
 
