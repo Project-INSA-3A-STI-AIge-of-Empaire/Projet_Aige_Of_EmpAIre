@@ -2,6 +2,7 @@ from GLOBAL_VAR import *
 from GLOBAL_IMPORT import *
 from .game_event_handler import *
 from .ai_profiles import*
+from random import randint
 
 CLASS_MAPPING = {
     'A': ArcheryRange,
@@ -179,6 +180,11 @@ tree = DecisionNode(
     priority=10
 )
 
+def choose_strategy(Player):
+    Strategy_list=["agressive","defensive","balanced"]
+    n=randint(0,2)
+    return Strategy_list[n]
+
 class Player:
     
     def __init__(self, cell_Y, cell_X, team):
@@ -193,7 +199,7 @@ class Player:
         self.linked_map = None
 
         self.decision_tree= tree
-        self.ai_profile = AIProfile(strategy = "aggressive")
+        self.ai_profile = AIProfile(strategy = choose_strategy(self))
         self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
 
         self.refl_acc = 0
