@@ -43,12 +43,7 @@ class AIProfile:
 
         for action in actions:
             if action == "Attack the enemy!":
-                # Attack the enemy with military units
-                military_units = player.get_entities_by_class(['h', 'a', 's'])  # Get military units
-                for unit_id in military_units:
-                    unit = map.get_entity_by_id(unit_id)
-                    unit.attack_entity(context['enemy_id'])  # Attack the enemy
-                return "Executed attack strategy"
+                return perform_attack(context)
 
             if action == "Train military units!":
                 # Train military units in training buildings
