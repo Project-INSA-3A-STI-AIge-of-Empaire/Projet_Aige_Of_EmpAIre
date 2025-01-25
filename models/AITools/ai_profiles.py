@@ -24,7 +24,7 @@ class AIProfile:
         sorted_differences = sorted(differences.items(), key=lambda x: x[1], reverse=True)
         most_diff = sorted_differences[:3]
         for building_repr in most_diff:
-            result = context['player'].build_entity(context['units']['villager'], building_repr[0])
+            result = context['player'].build_entity(context['player'].get_entities_by_class('v'), building_repr[0])
             if result != 0:
                 break
 
