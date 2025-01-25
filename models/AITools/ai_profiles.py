@@ -24,7 +24,7 @@ class AIProfile:
         sorted_differences = sorted(differences.items(), key=lambda x: x[1], reverse=True)
         most_diff = sorted_differences[:3]
         for building_repr in most_diff:
-            result = context['player'].build_entity(context['units']['villager'], building_repr[0])
+            result = context['player'].build_entity(context['player'].get_entities_by_class('v'), building_repr[0])
             if result != 0:
                 break
 
@@ -67,12 +67,7 @@ class AIProfile:
 
         for action in actions:
             if action == "Attack the enemy!":
-                # Attack the enemy with military units
-                military_units = player.get_entities_by_class(['h', 'a', 's'])  # Get military units
-                for unit_id in military_units:
-                    unit = map.get_entity_by_id(unit_id)
-                    unit.attack_entity(context['enemy_id'])  # Attack the enemy
-                return "Executed attack strategy"
+                return perform_attack(context)
 
             if action == "Train military units!":
                 # Train military units in training buildings
