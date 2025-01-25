@@ -26,6 +26,7 @@ class GameLoop:
         self.startmenu = StartMenu(self.screen)
         self.pausemenu = PauseMenu(self.screen)
         self.ui = UserInterface(self.screen)
+        self.action_in_progress = False
         
 
     
@@ -204,7 +205,10 @@ class GameLoop:
 
             if self.state.states == PLAY:
                 for team in self.state.map.players_dict.keys():
-                    self.state.map.players_dict[team].player_turn(dt)
+                     if not self.action_in_progress:
+                        self.action_in_progress = True  # Mark the action as in progress
+                        self.state.map.players_dict[team].player_turn(dt)  # Trigger player turn
+                        self.action_in_progress = False  # Action finished, ready for the next one
             
 
             self.update_game_state(dt)

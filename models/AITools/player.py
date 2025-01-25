@@ -99,9 +99,9 @@ def defend(context):
     return "Defend the village!"
 
 def gather_resources(context):
-    for unit in context['units']:
-        if unit['type'] == 'villager' and not unit['instance'].is_full():
-            unit['instance'].collect_entity(context['resource_id'])
+    for villager in context['units']['villager']:
+        if not villager.is_full():
+            villager.collect_entity(context['resource_id'])
     return "Gathering resources!"
 
 def train_military(context):
@@ -150,8 +150,8 @@ tree = DecisionNode(
         resources_critical,
         yes_action=DecisionNode(
             buildings_insufficient,
-            yes_action=gather_resources,
-            no_action=drop_resources,
+            yes_action=drop_resources,
+            no_action=gather_resources,
             priority=8
         ),
         no_action=DecisionNode(
@@ -495,7 +495,7 @@ class Player:
             self.refl_acc=0
     
     def player_turn(self,dt):
-        # self.update(dt)
+        self.update(dt)
         print("Decision tree avant utilisation:", self.decision_tree)
         decision = self.game_handler.process_ai_decisions(self.decision_tree)
         print(f"Decision effectué : {decision}")
