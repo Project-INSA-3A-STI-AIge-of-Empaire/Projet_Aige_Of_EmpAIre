@@ -133,9 +133,9 @@ def find_closest_resources(context):
     return "Found closest resources!"
 
 def build_structure(context):
-    villager_ids = [unit.id for unit in context['units'].get('villager', []) if is_unit_idle(unit)]
-    if villager_ids:
-        context['player'].build_entity(villager_ids, 'B',)  # Example for Town Center
+    # villager_ids = [unit.id for unit in context['units'].get('villager', []) if is_unit_idle(unit)]
+    # if villager_ids:
+    #     context['player'].build_entity(villager_ids, 'B',)  # Example for Town Center
     return "Building structure!"
         
 

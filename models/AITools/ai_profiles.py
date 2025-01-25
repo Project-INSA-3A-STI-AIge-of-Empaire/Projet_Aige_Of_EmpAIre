@@ -15,6 +15,20 @@ class AIProfile:
         self.aggressiveness = aggressiveness
         self.defense = defense
 
+    def compare_ratios(self, actual_ratios, target_ratios, context):
+        differences = {}
+        for key, target in target_ratios.items():
+            actual = actual_ratios.get(key, 0)
+            diff = abs(target - actual)
+            differences[key] = diff
+        sorted_differences = sorted(differences.items(), key=lambda x: x[1], reverse=True)
+        most_diff = sorted_differences[:3]
+        for building_repr in most_diff:
+            result = context['player'].build_entity(context['units']['villager'], building_repr[0])
+            if result != 0:
+                break
+
+
     def decide_action(self,tree, context):
         """
         Decide the action to perform based on strategy and decision tree.
@@ -38,6 +52,16 @@ class AIProfile:
         """
         Implement the aggressive strategy by prioritizing attacks and military training.
         """
+        target_ratios = {
+            'T': 0.1,
+            'H': 0.15,   
+            'C': 0.1,   
+            'F': 0.1,    
+            'B': 0.2,    
+            'S': 0.15,  
+            'A': 0.15,   
+            'K': 0.05
+        }
         player = context['player']
         map = context['map']
 
@@ -51,6 +75,10 @@ class AIProfile:
                 for building in training_buildings:
                     building['instance'].train_unit(player, context['current_time'], 'h')  # Train HorseMan
                 return "Trained military units"
+            
+            if action == "Building structure!":
+                self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
+                return "Structure are built!"
 
         # Default to gathering resources if no attack actions are possible
         return "Gather resources for further attacks"
@@ -61,6 +89,16 @@ class AIProfile:
         """
         player = context['player']
         map = context['map']
+        target_ratios = {
+            'T': 0.1,
+            'H': 0.15,   
+            'C': 0.1,   
+            'F': 0.1,    
+            'B': 0.05,    
+            'S': 0.15,  
+            'A': 0.15,   
+            'K': 0.2
+        }
 
         for action in actions:
             if action == "Defend the village!":
@@ -80,6 +118,10 @@ class AIProfile:
                 for building in buildings_to_repair:
                     building.repair()  # Assuming a repair method exists in Building class
                 return "Repaired critical buildings"
+            
+            if action == "Building structure!":
+                self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
+                return "Structure are built!"
 
         # Default to building defensive structures
         return "Built defensive structures"
@@ -90,6 +132,16 @@ class AIProfile:
         """
         player = context['player']
         map = context['map']
+        target_ratios = {
+            'T': 0.15,
+            'H': 0.2,   
+            'C': 0.1,   
+            'F': 0.15,    
+            'B': 0.1,    
+            'S': 0.1,  
+            'A': 0.1,   
+            'K': 0.1
+        }
 
         for action in actions:
             if action == "Gathering resources!":
@@ -122,6 +174,11 @@ class AIProfile:
                     unit = map.get_entity_by_id(unit_id)
                     unit.attack_entity(context['enemy_id'])  # Attack the enemy
                 return "Executed attack strategy"
+            
+            if action == "Building structure!":
+                self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
+                return "Structure are built!"
 
         # Default to gathering resources if no actions are possible
         return "Gathered resources for balanced strategy"
+
