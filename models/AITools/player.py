@@ -3,6 +3,7 @@ from GLOBAL_IMPORT import *
 from .game_event_handler import *
 from .ai_profiles import*
 from random import randint
+from .commons_actions import perform_attack
 
 CLASS_MAPPING = {
     'A': ArcheryRange,
@@ -70,7 +71,7 @@ def is_under_attack(context):
 
 def resources_critical(context):
     resources = context['player'].get_current_resources()
-    return resources['gold'] < 50 or resources['food'] < 50 or resources['wood'] < 50
+    return resources['gold'] < 100 or resources['food'] < 100 or resources['wood'] < 100
 
 def buildings_insufficient(context):
     return not context['buildings'].get('storage', False)
@@ -112,14 +113,11 @@ def train_military(context):
     return "Train military units!"
 
 def attack(context):
-    for unit in context['units']:
-        if unit in context['units']['military']:
-            unit['instance'].attack_entity(context['enemy_id'])
-    return "Attack the enemy!"
+    return perform_attack(context)
 
 def drop_resources(context):
     for unit in context['units']['villager']:
-        if unit.is_full():
+        if unit.is_full() and not is_under_attack(context):
             unit.drop_to_entity(context['drop_off_id'])
     return "Dropping off resources!"
 
