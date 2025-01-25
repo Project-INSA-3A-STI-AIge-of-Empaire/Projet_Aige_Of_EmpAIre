@@ -53,7 +53,7 @@ class GameEventHandler:
             'player': self.players,
             'closest_town_center': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
             'map' : self.map,
+            'under_attack' : (self.players.get_closest_ennemy()[1] < 20),
         }
-        context['under_attack'] = False
         return context
 

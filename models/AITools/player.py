@@ -2,7 +2,9 @@ from GLOBAL_VAR import *
 from GLOBAL_IMPORT import *
 from .game_event_handler import *
 from .ai_profiles import*
-from random import randint
+from random import randint,seed
+import time
+
 
 CLASS_MAPPING = {
     'A': ArcheryRange,
@@ -189,6 +191,7 @@ tree = DecisionNode(
 
 def choose_strategy(Player):
     Strategy_list=["agressive","defensive","balanced"]
+    seed(time.perf_counter())
     n=randint(0,2)
     return Strategy_list[n]
 
