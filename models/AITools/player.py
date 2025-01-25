@@ -71,7 +71,7 @@ def is_under_attack(context):
 
 def resources_critical(context):
     resources = context['player'].get_current_resources()
-    return resources['gold'] < 100 or resources['food'] < 100 or resources['wood'] < 100
+    return resources['gold'] < 50 or resources['food'] < 50 or resources['wood'] < 50
 
 def buildings_insufficient(context):
     return not context['buildings'].get('storage', False)
