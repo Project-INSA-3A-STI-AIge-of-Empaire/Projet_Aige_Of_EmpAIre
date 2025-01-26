@@ -189,7 +189,10 @@ class Unit(Entity):
             self.linked_map.entity_matrix[(self.cell_Y//self.linked_map.region_division, self.cell_X//self.linked_map.region_division)] = region    
 
         self.linked_map.entity_id_dict[self.id] = self
-
+        
+        player = self.linked_map.players_dict.get(self.team, None)
+        if player is not None:
+            player.add_entity(self)
 
 
     def move_to_position(self,dt, camera, screen):

@@ -62,7 +62,7 @@ class GameLoop:
                 self.state.mouse_held = True
             elif event.button == RIGHT_CLICK:
                 Y, X = math.floor(y / TILE_SIZE_2D), math.floor(x / TILE_SIZE_2D)
-                house = ArcheryRange(Y, X, None, 2)
+                house = Farm(Y, X, None, 2)
                 self.state.map.add_entity(house)
         elif event.type == pygame.MOUSEBUTTONUP:
             self.state.mouse_held = False

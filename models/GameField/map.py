@@ -1,17 +1,15 @@
 from GameField.cell import *
 from ImageProcessingDisplay.minimap import *
 from AITools.isorange import *
-import random 
+import random
 import math
 from AITools.player import *
-
-
+from AITools.clustergenerator import *
 
 class Map:
 
     def __init__(self,_nb_CellX , _nb_CellY):
-        
-        
+
         self.nb_CellX = _nb_CellX
         self.nb_CellY = _nb_CellY
         self.tile_size_2d = TILE_SIZE_2D
@@ -38,7 +36,7 @@ class Map:
         return self.entity_id_dict.get(_entity_id, None)
     def get_player_by_team(self, _player_team):
         return self.players_dict.get(_player_team, None)
-    
+
     def check_cell(self, Y_to_check, X_to_check):
         if 0<=Y_to_check<self.nb_CellY and 0<=X_to_check<self.nb_CellX:
             REG_Y_to_check, REG_X_to_check = Y_to_check//self.region_division, X_to_check//self.region_division
@@ -48,7 +46,7 @@ class Map:
             if (region):
                 if region.get((Y_to_check, X_to_check), None) != None:
                     return 1 
-            
+
             return 0
         else:
             return 0xff
@@ -65,7 +63,7 @@ class Map:
         
         cell_padding = 0
 
-        if not(isinstance(_entity, Unit)):
+        if not(isinstance(_entity, Unit) or isinstance(_entity, Farm) or (_entity.representation in ["W"])):
             cell_padding = 1
         
         for Y_to_check in range(_entity.cell_Y + cell_padding,_entity.cell_Y - _entity.sq_size - cell_padding, -1): # we add minus 1 cause we need at least one cell free so that the units can reach this target
@@ -89,7 +87,7 @@ class Map:
                 if (current_cell == None):
                     current_region[(Y_to_set, X_to_set)] = set()
                     current_cell = current_region.get((Y_to_set, X_to_set), None)
-                
+
                 current_cell.add(_entity)
 
         if not from_save:
@@ -99,12 +97,12 @@ class Map:
             _entity.position = (bottomright_cell + topleft_cell ) * (0.5)
             _entity.box_size = bottomright_cell.x - _entity.position.x  # distance from the center to the corners of the collision box
 
-            
+
             if isinstance(_entity, Unit):
-                _entity.box_size += TILE_SIZE_2D/(2 * 3.2) # for the units hitbox is smaller 
+                _entity.box_size += TILE_SIZE_2D/(2 * 3) # for the units hitbox is smaller 
                 _entity.move_position.x = _entity.position.x
                 _entity.move_position.y = _entity.position.y # well when the unit is added its target pos to move its it self se it doesnt move
-                
+
             else:
                 _entity.box_size += TILE_SIZE_2D/(2 * 1.5) # the factors used the box_size lines are to choosen values for a well scaled collision system with respec to the type and size of the entity
         if _entity.team != 0:
@@ -120,7 +118,7 @@ class Map:
                 resource_set = self.resource_id_dict.get(_entity.representation, None)
 
             resource_set.add(_entity.id)
-            
+
         _entity.linked_map = self
 
         # at the end add the entity pointer to the id dict with the id dict 
@@ -128,7 +126,7 @@ class Map:
         self.entity_id_dict[_entity.id] = _entity
 
         return 1 # added the entity succesfully
-    
+
     def add_entity_to_closest(self, entity, cell_Y, cell_X, random_padding = 0x00, min_spacing = 4, max_spacing = 5):
         
         
@@ -220,9 +218,6 @@ class Map:
                 self.resource_id_dict.pop(_entity.represantation, None)
 
         return _entity  # Return the entity if needed elsewhere
-
-
-    
 
 
     def display(self, dt, screen, camera, g_width, g_height):
@@ -393,19 +388,38 @@ class Map:
 
     def generate_map(self,gen_mode = MAP_NORMAL , mode = MARINES ,num_players=3):
         
-        print(f"mode:{gen_mode}, res:{mode}")
+        #print(f"mode:{gen_mode}, res:{mode}")
         # Ensure consistent random generation
+
         random.seed(0xba)
         
         if gen_mode == "Carte Centrée":
             self.generate_gold_center(num_players)
         self._place_player_starting_areas(mode, num_players)
         
-        self._generate_forests()
+        self.c_generate_forests(num_players)
         if gen_mode == "Carte Normal":
             self._generate_gold()
 
-    
+    def c_generate_forests(self, num_players):
+
+        current_directory = os.path.dirname(__file__)
+
+        file_path = os.path.join(current_directory,"clusters.gen")
+        cluster_generator = ClusterGenerator(file_path)
+        spiral = spiral_distribution(self.nb_CellY, self.nb_CellX, self.region_division, num_players)
+        for top_X, top_Y in spiral:
+            cluster_offsets = cluster_generator.generate_offsets()
+
+            for offset_Y, offset_X in cluster_offsets:
+
+                current_Y, current_X = top_Y + offset_Y, top_X + offset_X
+                if 0 <= current_X < self.nb_CellX and 0 <= current_Y < self.nb_CellY:
+                    if not(self.check_cell(current_Y, current_X)):
+                        tree = Tree(current_Y, current_X, None)
+                        self.add_entity(tree)
+
+            
     def _generate_forests(self, forest_count=30, forest_size_range=(14, 28)):
         
         for _ in range(forest_count):
@@ -463,7 +477,7 @@ class Map:
         for i in range(len(polygon)):
             
             # Base position for this player's starting area
-            center_Y, center_X = int(polygon[i][1]), int(polygon[i][0])
+            center_Y, center_X = polygon[i][1], polygon[i][0]
  
 
             current_player = Player(center_Y, center_X, i + 1)
@@ -568,35 +582,52 @@ class Map:
         self.update_all_dead_entities(dt)
 
 def angle_distribution(Y, X, player_number, scale=1, rand_rot=False):
-    
-    if player_number > 1:
-        polygon = []
 
-        Y_rect = Y * scale
-        X_rect = X * scale
+    Cx = X / 2
+    Cy = Y / 2
 
-        Cx = X / 2
-        Cy = Y / 2
+    return ellipse_distribution(Y/2*scale, X/2 * scale, Cy, Cx, player_number, rand_rot)
 
-        theta = (2 * math.pi) / player_number
+
+
+def ellipse_distribution(ry, rx, Cy, Cx, angle_num, rand_rot = False):
+    if angle_num > 1:
+        points = []
+
+        theta = (2 * math.pi) / angle_num
         phi = 0
 
         if rand_rot:
             phi += random.uniform(0, 2 * math.pi)
 
-        for i in range(player_number):
+        for i in range(angle_num):
             current_theta = i * theta + phi
-            x = Cx + X_rect / 2 * math.cos(current_theta)
-            y = Cy + Y_rect / 2 * math.sin(current_theta)
-            polygon.append((x, y))
-
-        return polygon
-    elif player_number == 1:
-        return [(X * scale / 2, Y * scale / 2)]
+            x = int(Cx + rx  * math.cos(current_theta))
+            y = int(Cy + ry  * math.sin(current_theta))
+            points.append((x, y))
+        
+        return points
     else:
-        return []
+        return [(int(Cx),int(Cy))]
 
+def spiral_distribution(Y, X, reg_div, player_num):
+    points = []
+    spiral_lvl = reg_div
 
+    Y_step = Y/2 /spiral_lvl
+    X_step = X/2 /spiral_lvl
+
+    Cy, Cx = Y/2, X/2
     
+    angle_num = 0
+    angle_step = player_num
 
+    for lvl in range(spiral_lvl):
+        rY, rX = lvl*Y_step, lvl*X_step
+        print(rY,rX)
+        points += ellipse_distribution(rY, rX, Cy, Cx, angle_num, rand_rot=True)
+        angle_num += angle_step
+
+    return points
+         
     
