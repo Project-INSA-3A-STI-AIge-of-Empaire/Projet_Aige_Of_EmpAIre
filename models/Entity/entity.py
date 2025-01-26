@@ -6,8 +6,7 @@ import math
 from shape import *
 
 class Entity():
-    def __init__(self, cell_Y, cell_X, position, team, representation, sq_size = 1,id = None):
-        global ID_GENERATOR
+    def __init__(self, id_gen, cell_Y, cell_X, position, team, representation, sq_size = 1,id = None):
         self.cell_Y = cell_Y
         self.cell_X = cell_X
         self.position = position
@@ -16,7 +15,7 @@ class Entity():
         if id:
             self.id = id
         else:
-            self.id = ID_GENERATOR.give_ticket()
+            self.id = id_gen.give_ticket()
         self.sq_size = sq_size
         self.image = None
         self.dict_repr = {
@@ -65,29 +64,11 @@ class Entity():
         ent_shape = entClass(entity.position.x, entity.position.y, entity.box_size)
         
         Status = False
-        
-        """
-        alpha = self.position.alpha_angle(entity.position)
-        op_alpha = alpha + math.pi
-        if isinstance(entity, Unit):
-            if self_shape.collide_with(ent_shape):
-                Status = True 
-            if flags and Status:
-                while self_shape.collide_with(ent_shape):
-                    self.position.x += round(math.cos(op_alpha))
-                    self.position.y += round(math.sin(op_alpha))
-                    self_shape = self.ShapeClass(self.position.x, self.position.y, self.bs)
-            if pygame.time.get_ticks() - self.last_time_computed > 1:
-                self.last_time_computed = pygame.time.get_ticks()
-                return Status
-            return False
-        else:
-        """     
+  
         if shape_self.collide_with(ent_shape):
             Status = True
         # i wrote it like this on purpose incase there is some future update
         return Status
-    
+
     def update(self, dt, camera = None, screen = None):
         return None
-    

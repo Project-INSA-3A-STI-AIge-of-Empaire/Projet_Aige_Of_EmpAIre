@@ -292,7 +292,7 @@ class Player:
                     return BUILDING_POPULATION_MAX_LIMIT
                 
                 BuildingClass = CLASS_MAPPING.get(representation, None)
-                Instance = BuildingClass(None, None, None, self.team)
+                Instance = BuildingClass(self.linked_map.id_generator,None, None, None, self.team)
                 
                 if isinstance(Instance, Building) and Instance.affordable_by(self.get_current_resources()):
                     self.remove_resources(Instance.cost)
