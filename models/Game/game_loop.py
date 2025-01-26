@@ -45,7 +45,7 @@ class GameLoop:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # Handle clicking on start menu elements
             if self.startmenu.handle_click(event.pos):
-                self.state.set_map_size(self.startmenu.map_cell_count)
+                self.state.set_map_size(self.startmenu.map_cell_count_x, self.startmenu.map_cell_count_y)
                 self.state.set_map_type(self.startmenu.map_options[self.startmenu.selected_map_index])
                 self.state.set_difficulty_mode(self.startmenu.selected_mode_index)
                 self.state.set_display_mode(self.startmenu.display_mode)
@@ -62,12 +62,15 @@ class GameLoop:
                 # Check if clicking on player count or cell count enables editing
                 center_x, center_y = self.state.screen_width // 2, self.state.screen_height // 2
                 player_count_rect = pygame.Rect(center_x - 75, center_y - 20, 150, 50)  # Rect for player count
-                map_cell_rect = pygame.Rect(center_x - 75, center_y - 185, 150, 50)  # Rect for cell count
+                map_cell_rect_x = pygame.Rect(center_x - 75, center_y - 280, 150, 50)  # Rect for X cell count
+                map_cell_rect_y = pygame.Rect(center_x - 75, center_y - 185, 150, 50)  # Rect for Y cell count
 
                 if player_count_rect.collidepoint(event.pos):
                     self.startmenu.start_editing_player_count()
-                elif map_cell_rect.collidepoint(event.pos):
-                    self.startmenu.start_editing_map_cell_count()
+                elif map_cell_rect_x.collidepoint(event.pos):
+                    self.startmenu.start_editing_map_cell_count_x()
+                elif map_cell_rect_y.collidepoint(event.pos):
+                    self.startmenu.start_editing_map_cell_count_y()
 
         elif event.type == pygame.KEYDOWN:
             # Handle keyboard events for editing
