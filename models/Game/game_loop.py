@@ -101,6 +101,12 @@ class GameLoop:
         elif keys[pygame.K_KP_MINUS] or keys[pygame.K_j]:
             self.state.camera.adjust_zoom(dt, -0.1, SCREEN_WIDTH, SCREEN_HEIGHT)
 
+        # Changer la vitesse de Jeu
+        if keys[pygame.K_1]:
+            self.state.set_speed(self.state.speed+0.1)
+        if keys[pygame.K_2]:
+            self.state.set_speed(self.state.speed-0.1)
+
         # Basculer le mode d'affichage
         if keys[pygame.K_F10]:
             self.state.toggle_display_mode(self)
