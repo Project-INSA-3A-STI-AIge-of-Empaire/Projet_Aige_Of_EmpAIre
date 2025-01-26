@@ -522,19 +522,19 @@ class Player:
     
     def is_free(self):
         return 'is_free'
-    
+
     def update(self, dt):
         self.update_population(dt)
         self.refl_acc+=dt
         if self.refl_acc>ONE_SEC/3:
             self.player_turn(dt)
-    
+
     def player_turn(self,dt):
         print("Decision tree avant utilisation:", self.decision_tree)
         decision = self.game_handler.process_ai_decisions(self.decision_tree)
         print(f"Decision effectué : {decision}")
         self.refl_acc=0
-        
+    
         # # decision = self.ai_profile.decide_action(self.decision_tree, context)
         # return decision
     

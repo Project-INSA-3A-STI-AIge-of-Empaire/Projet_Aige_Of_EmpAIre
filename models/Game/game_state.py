@@ -24,7 +24,7 @@ class GameState:
         # Pour gérer le délai de basculement d'affichage
         self.last_time_switched = 0
         self.switch_cooldown = ONE_SEC*(0.2) # Délai de 200ms (0,2 secondes)
-        self.full_screen = True
+        self.full_screen = False
         self.mouse_held = False
         self.screen_width = SCREEN_WIDTH
         self.screen_height = SCREEN_HEIGHT
