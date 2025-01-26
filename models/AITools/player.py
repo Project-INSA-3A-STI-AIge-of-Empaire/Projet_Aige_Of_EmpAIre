@@ -1,5 +1,11 @@
 from GLOBAL_VAR import *
 from GLOBAL_IMPORT import *
+from .game_event_handler import *
+from .ai_profiles import*
+from random import randint,seed
+import time
+from .commons_actions import perform_attack
+
 CLASS_MAPPING = {
     'A': ArcheryRange,
     'B': Barracks,
@@ -25,6 +31,167 @@ CLASS_MAPPING = {
     'fps':FireSpear,
     'V': PVector2
 }
+
+class DecisionNode:
+    def __init__(self, question, yes_action=None, no_action=None, priority=0):
+        self.question = question
+        self.yes_action = yes_action
+        self.no_action = no_action
+        self.priority = priority
+
+    def decide(self, context):
+        actions = []
+        print(f"Question result: {self.question(context)}")
+        if self.question(context):
+            print(f"Taking YES branch: {self.yes_action}")
+            if isinstance(self.yes_action, DecisionNode):
+                actions.extend(self.yes_action.decide(context))
+            else:
+                if callable(self.yes_action):
+                    result = self.yes_action(context)
+                    actions.append((result, self.priority))
+                    print(f"Yes action called: {actions}")
+        else:
+            print(f"Taking NO branch: {self.no_action}")
+            if isinstance(self.no_action, DecisionNode):
+                actions.extend(self.no_action.decide(context))
+            else:
+                if callable(self.no_action):
+                    print(f"No action called: {actions}")
+                    result = self.no_action(context)
+                    actions.append((result, self.priority))
+
+        actions.sort(key=lambda x: x[1], reverse=True)
+
+        print(f"The decide method return : {actions}")
+        return [action if isinstance(action, str) else action[0] for action in actions]
+
+# ---- Questions ----
+def is_under_attack(context):
+    return context['under_attack']
+
+def resources_critical(context):
+    resources = context['player'].get_current_resources()
+    return resources['gold'] < 50 or resources['food'] < 50 or resources['wood'] < 50
+
+def buildings_insufficient(context):
+    return not context['buildings'].get('storage', False)
+
+def has_enough_military(context):
+    return context['military_units'] >= 10
+
+def is_unit_idle(unit):
+    return unit.state == UNIT_IDLE
+
+def closest_town_center(context):
+    player = context['player']
+    town_center = player.entity_closest_to('T', player.cell_Y, player.cell_X)
+    if town_center:
+        context['closest_town_center'] = town_center
+    return town_center is not None
+
+def is_villager_full(unit):
+    return unit['type'] == 'villager' and unit['instance'].is_full()
+
+# ---- Actions ----
+def defend(context):
+    for unit in context['units']:
+        if unit['type'] == 'military':
+            unit['instance'].attack_entity(context['enemy_id'])
+    return "Defend the village!"
+
+def gather_resources(context):
+    for villager in context['units']['villager']:
+        if not villager.is_full() and is_unit_idle(villager):
+            villager.collect_entity(context['resource_id'])
+        else:
+            drop_resources(context)
+    return "Gathering resources!"
+
+def train_military(context):
+    for building in context['buildings']['training']:
+        building['instance'].train_unit(context['player'], 'v')
+    return "Train military units!"
+
+def attack(context):
+    return perform_attack(context)
+
+def drop_resources(context):
+    for unit in context['units']['villager']:
+        if unit.is_full() and not is_under_attack(context):
+            unit.drop_to_entity(context['drop_off_id'])
+    return "Dropping off resources!"
+
+def find_closest_resources(context):
+    print("find ressources de jules")
+    resources_to_find='W'
+    if min(context['resources']["gold"], context['resources']["wood"])==context['resources']["gold"]:
+        resources_to_find='G'
+    town_center = context['player'].linked_map.get_entity_by_id(context['closest_town_center'])
+    if town_center:
+        closest_resource = context['player'].entity_closest_to(resources_to_find, town_center.cell_Y, town_center.cell_X)  # Example for gold
+        context['resource_id'] = closest_resource if closest_resource else None
+    return "Found closest resources!"
+
+def build_structure(context):
+    # villager_ids = [unit.id for unit in context['units'].get('villager', []) if is_unit_idle(unit)]
+    # if villager_ids:
+    #     context['player'].build_entity(villager_ids, 'B',)  # Example for Town Center
+    return "Building structure!"
+        
+
+def enemy_visible(context):
+    return context['enemy_visible']
+
+# ---- Arbre de décision ----
+tree = DecisionNode(
+    is_under_attack,
+    yes_action=DecisionNode(
+        enemy_visible,
+        yes_action=attack,
+        no_action=defend,
+        priority=10
+    ),
+    no_action=DecisionNode(
+        resources_critical,
+        yes_action=DecisionNode(
+            buildings_insufficient,
+            yes_action=drop_resources,
+            no_action=gather_resources,
+            priority=8
+        ),
+        no_action=DecisionNode(
+            has_enough_military,
+            yes_action=train_military,
+            no_action=DecisionNode(
+                closest_town_center,
+                yes_action=DecisionNode(
+                    find_closest_resources,
+                    yes_action=build_structure,
+                    no_action=DecisionNode(
+                        is_villager_full,
+                        yes_action=drop_resources,
+                        no_action=gather_resources,
+                        priority=7
+                    ),
+                    priority=7
+                ),
+                no_action=gather_resources,
+                priority=7
+            ),
+            priority=7
+        ),
+        priority=9
+    ),
+    priority=10
+)
+
+def choose_strategy(Player):
+    Strategy_list=["agressive","defensive","balanced"]
+    seed(time.perf_counter())
+    n=randint(0,2)
+    return Strategy_list[n]
+
 class Player:
     
     def __init__(self, cell_Y, cell_X, team):
@@ -37,6 +204,12 @@ class Player:
         
         self.entities_dict = {}
         self.linked_map = None
+
+        self.decision_tree= tree
+        self.ai_profile = AIProfile(strategy = choose_strategy(self))
+        self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
+
+        self.refl_acc = 0
         
 
         
@@ -280,31 +453,87 @@ class Player:
                     return True
         return False
     
-    def entity_closest_to(self, ent_repr, cell_Y, cell_X): # we give the ent_repr for the entity we want and then we give a certain position and we will return the closest entity of the given type to the cell_X, cell_Y
+    def entity_closest_to(self, ent_repr_list, cell_Y, cell_X): # we give the ent_repr for the entity we want and then we give a certain position and we will return the closest entity of the given type to the cell_X, cell_Y
         closest_id = None
         ent_ids = None
 
-        if ent_repr not in ["W", "G"]:
-            ent_ids = self.get_entities_by_class(ent_repr, None)
-        else:
-            ent_ids = self.linked_map.resource_id_dict.get(ent_repr, None)
-               
-        if ent_ids:
+        for ent_repr in ent_repr_list:
+            if ent_repr not in ["W", "G"]:
+                print(f"Searching closest entity: {ent_repr} at coordinates ({cell_Y}, {cell_X})")
+                ent_ids = self.get_entities_by_class(ent_repr)
+            else:
+                ent_ids = self.linked_map.resource_id_dict.get(ent_repr, None)
+                
+            if ent_ids:
 
-            closest_dist = float('inf')
+                closest_dist = float('inf')
 
-            for ent_id in ent_ids:
+                for ent_id in ent_ids:
 
-                current_entity = self.linked_map.get_entity_by_id(ent_id)
-                if current_entity:
+                    current_entity = self.linked_map.get_entity_by_id(ent_id)
+                    if current_entity:
 
-                    current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
+                        current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
 
-                    if current_dist < closest_dist:
-                        closest_id = current_entity.id
-                        closest_dist = current_dist 
-        
+                        if current_dist < closest_dist:
+                            closest_id = current_entity.id
+                            closest_dist = current_dist 
+            
         return closest_id
+    
+    def get_closest_ennemy(self):
+        closest_id = None
+        closest_distance = float('inf')
+        for entity_id,entity in self.linked_map.entity_id_dict.items():
+            if entity.team != self.team and isinstance(entity, Unit):
+                current_distance = math.dist([entity.cell_X, entity.cell_Y],[self.cell_X,self.cell_Y])
+                if current_distance < closest_distance:
+                    closest_id = entity_id
+                    closest_distance = current_distance
+        closest_entity = self.linked_map.get_entity_by_id(closest_id)
+        return closest_entity,closest_distance, closest_id
+    
+    def is_free(self):
+        return 'is_free'
+    
+    def update(self, dt):
+        self.refl_acc+=dt
+        if self.refl_acc>3:
+            self.refl_acc=0
+    
+    def player_turn(self,dt):
+        self.update(dt)
+        print("Decision tree avant utilisation:", self.decision_tree)
+        decision = self.game_handler.process_ai_decisions(self.decision_tree)
+        print(f"Decision effectué : {decision}")
+        # # decision = self.ai_profile.decide_action(self.decision_tree, context)
+        # return decision
+    
+    # def set_build(self, villager_id_list):
+    #     i = 0
+    #     while(i < 4):
+    #         villager_id_list.append(self.villager_free[i])
+    #         i += 1
+    #     self.build_entity(villager_id_list, 'B')
+    #     print(f"Before remove: villager_free = {self.villager_free}, attempting to remove {villager_id_list}")
+    #     for villager_id in villager_id_list:
+    #         if villager_id in self.villager_free:
+    #             self.villager_free.remove(villager_id)
+    #     self.villager_occupied.append(villager_id_list)
+
+
+    # def set_resources(self, collector_id):
+    #     drop_build_id = self.entity_closest_to('T', self.entities_dict['v'][collector_id].cell_Y, self.entities_dict['v'][collector_id].cell_X)
+    #     object = self.linked_map.get_entity_by_id(drop_build_id)
+    #     resource_id = self.entity_closet_to('G', object.cell_Y, object.cell_X)
+    #     self.villager_free.remove(collector_id)
+    #     self.set_collect(object,resource_id)
+    #     self.villager_occupied.append(collector_id)
+
+    # def set_collect(self, villager, entity_id):
+    #     if not villager.is_full():
+    #         villager.move_to(entity_id.position)
+    #         villager.collect_entity(entity_id)
 
 
         

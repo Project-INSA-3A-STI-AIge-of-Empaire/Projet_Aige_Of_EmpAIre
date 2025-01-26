@@ -26,6 +26,7 @@ class GameLoop:
         self.startmenu = StartMenu(self.screen)
         self.pausemenu = PauseMenu(self.screen)
         self.ui = UserInterface(self.screen)
+        self.action_in_progress = False
         
 
     
@@ -34,20 +35,44 @@ class GameLoop:
             loaded = self.state.load()
             if loaded:
                 print(self.state.states)
-                pygame.display.set_mode((self.state.screen_width, self.state.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
+                pygame.display.set_mode(
+                    (self.state.screen_width, self.state.screen_height),
+                    pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE,
+                )
                 if self.state.states == PAUSE:
                     self.state.states = PLAY
                 print(self.state.states)
-        elif event.type == pygame.MOUSEBUTTONDOWN and self.startmenu.handle_click(event.pos):
-            self.state.set_map_type(self.startmenu.map_options[self.startmenu.selected_map_index])
-            self.state.set_difficulty_mode(self.startmenu.selected_mode_index)
-            self.state.set_display_mode(self.startmenu.display_mode)
-            self.state.set_players(self.startmenu.selected_player_count_index)
-            self.state.start_game()
-            self.state.states = PLAY
-            if self.state.display_mode == TERMINAL:
-                self.state.set_screen_size(20, 20)
-                pygame.display.set_mode((self.state.screen_width, self.state.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF )
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            # Handle clicking on start menu elements
+            if self.startmenu.handle_click(event.pos):
+                self.state.set_map_size(self.startmenu.map_cell_count)
+                self.state.set_map_type(self.startmenu.map_options[self.startmenu.selected_map_index])
+                self.state.set_difficulty_mode(self.startmenu.selected_mode_index)
+                self.state.set_display_mode(self.startmenu.display_mode)
+                self.state.set_players(self.startmenu.selected_player_count)
+                self.state.start_game()
+                self.state.states = PLAY
+                if self.state.display_mode == TERMINAL:
+                    self.state.set_screen_size(20, 20)
+                    pygame.display.set_mode(
+                        (self.state.screen_width, self.state.screen_height),
+                        pygame.HWSURFACE | pygame.DOUBLEBUF,
+                    )
+            else:
+                # Check if clicking on player count or cell count enables editing
+                center_x, center_y = self.state.screen_width // 2, self.state.screen_height // 2
+                player_count_rect = pygame.Rect(center_x - 75, center_y - 20, 150, 50)  # Rect for player count
+                map_cell_rect = pygame.Rect(center_x - 75, center_y - 185, 150, 50)  # Rect for cell count
+
+                if player_count_rect.collidepoint(event.pos):
+                    self.startmenu.start_editing_player_count()
+                elif map_cell_rect.collidepoint(event.pos):
+                    self.startmenu.start_editing_map_cell_count()
+
+        elif event.type == pygame.KEYDOWN:
+            # Handle keyboard events for editing
+            self.startmenu.handle_keydown(event)
+
 
     def handle_pause_events(self,dt, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -177,6 +202,14 @@ class GameLoop:
 
             if not (self.state.states == START):
                 self.handle_keyboard_inputs(move_flags, dt)
+
+            if self.state.states == PLAY:
+                for team in self.state.map.players_dict.keys():
+                     if not self.action_in_progress:
+                        self.action_in_progress = True  # Mark the action as in progress
+                        self.state.map.players_dict[team].player_turn(dt)  # Trigger player turn
+                        self.action_in_progress = False  # Action finished, ready for the next one
+            
 
             self.update_game_state(dt)
             self.render_display(dt, mouse_x, mouse_y)

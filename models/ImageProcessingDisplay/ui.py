@@ -6,7 +6,7 @@ from Entity.Building.building import Building
 class UserInterface:
     def __init__(self, screen):
         self.screen = screen
-        self.font = pygame.font.SysFont(None, 36)
+        self.font = pygame.font.SysFont(None, 28)
         self.display_resources = False
         self.display_units = False
         self.display_builds = False
@@ -14,7 +14,7 @@ class UserInterface:
     def draw_resources(self, players_dict):
         for player_id, player_object in players_dict.items():
             player_offset = -12
-            player_pos = (100*player_id, 50)
+            player_pos = (90*player_id-10, 50)
             # Représentations attendues des unités avec leur offset respectif
             expected_unit_representations = [
                     ('v', 0),
