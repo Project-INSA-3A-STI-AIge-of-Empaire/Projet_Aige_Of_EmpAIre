@@ -63,7 +63,7 @@ class Map:
         
         cell_padding = 0
 
-        if not(isinstance(_entity, Unit) or isinstance(_entity, Farm) or (_entity.representation in ["W", "G"])):
+        if not(isinstance(_entity, Unit)):# or isinstance(_entity, Farm) or (_entity.representation in ["W", "G"])):
             cell_padding = 1
         
         for Y_to_check in range(_entity.cell_Y + cell_padding,_entity.cell_Y - _entity.sq_size - cell_padding, -1): # we add minus 1 cause we need at least one cell free so that the units can reach this target
@@ -188,8 +188,7 @@ class Map:
             if proj.reached_target:
                 self.remove_projectile(proj)
 
-      
-    
+
     def remove_entity(self,_entity, unit_moving = False):
 
         assert _entity is not None, "Entity cannot be None (Error 0x0011)"
@@ -248,7 +247,7 @@ class Map:
             tmp_bottomright = PVector2(0, 0)
 
             (top_Y, top_X), (left_Y, left_X), (right_Y, right_X), (bottom_Y, bottom_X) = camera.indexes_in_point_of_view(g_width, g_height)
-            
+
             top_Xt = max(0, min(top_X, self.nb_CellX - 1))
             top_Yt = max(0, min(top_Y, self.nb_CellY - 1))
 
@@ -327,9 +326,6 @@ class Map:
             for current_entity in sorted(entity_to_display, key=lambda entity: (isinstance(entity,SwordMan),not(isinstance(entity, Farm)), entity.position.z, entity.position.y + entity.position.x, entity.position.y)):
             
                 current_entity.display(dt, screen, camera, g_width, g_height)
-            
-            
-
 
 
             # minimap display 
