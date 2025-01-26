@@ -6,7 +6,7 @@ from Entity.Building.building import Building
 class UserInterface:
     def __init__(self, screen):
         self.screen = screen
-        self.font = pygame.font.SysFont(None, 28)
+        self.font = pygame.font.Font(MEDIEVALSHARP, 22)
         self.display_resources = False
         self.display_units = False
         self.display_builds = False

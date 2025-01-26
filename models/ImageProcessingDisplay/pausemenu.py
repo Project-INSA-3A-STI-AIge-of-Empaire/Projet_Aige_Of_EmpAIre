@@ -4,7 +4,7 @@ from GLOBAL_VAR import *
 class PauseMenu:
     def __init__(self, screen):
         self.screen = screen
-        self.font = pygame.font.SysFont(None, 36)
+        self.font = pygame.font.Font(MEDIEVALSHARP, 28)
 
         # Button dimensions
         self.button_width = 200

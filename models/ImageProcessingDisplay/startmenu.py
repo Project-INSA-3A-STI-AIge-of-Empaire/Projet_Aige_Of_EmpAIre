@@ -117,14 +117,14 @@ class StartMenu:
         rect = self.buttons[key]
         color = (0, 128, 0) if selected else (128, 128, 128)  # Green if selected, grey otherwise
         pygame.draw.rect(self.screen, color, rect)
-        font = pygame.font.SysFont(None, 36)
+        font = pygame.font.Font(MEDIEVALSHARP, 28)
         button_text = font.render(text, True, (255, 255, 255))
         text_rect = button_text.get_rect(center=rect.center)
         self.screen.blit(button_text, text_rect)
 
     def _draw_text(self, text, pos, centered=False):
         """Draw text at a specific position."""
-        font = pygame.font.SysFont(None, 36)
+        font = pygame.font.Font(MEDIEVALSHARP, 28)
         rendered_text = font.render(text, True, WHITE_COLOR)
         text_rect = rendered_text.get_rect(center=pos if centered else None)
         self.screen.blit(rendered_text, text_rect if centered else pos)
