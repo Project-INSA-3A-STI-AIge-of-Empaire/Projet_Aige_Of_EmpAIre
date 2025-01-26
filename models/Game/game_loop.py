@@ -41,9 +41,9 @@ class GameLoop:
                 )
                 if self.state.states == PAUSE:
                     self.state.states = PLAY
-                print(self.state.states)
+
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # Handle clicking on start menu elements
+
             if self.startmenu.handle_click(event.pos):
                 self.state.set_map_size(self.startmenu.map_cell_count_x, self.startmenu.map_cell_count_y)
                 self.state.set_map_type(self.startmenu.map_options[self.startmenu.selected_map_index])
@@ -175,7 +175,10 @@ class GameLoop:
                 self.state.map.display(dt, self.screen, self.state.camera, self.screen_width, self.screen_height)
                 fps = int(self.clock.get_fps())
                 fps_text = self.font.render(f"FPS: {fps}", True, (255, 255, 255))
+                speed_text = self.font.render(f"speed: {self.state.speed:.1f}", True, (255, 255, 255))
                 self.screen.blit(fps_text, (10, 10))
+                self.screen.blit(speed_text, (100, 10))
+
                 self.ui.draw_resources(self.state.map.players_dict)
             elif self.state.display_mode == TERMINAL:
                 self.state.map.terminal_display(dt, self.state.terminal_camera)
