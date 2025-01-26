@@ -28,6 +28,7 @@ class Node:
 
     def __str__(self):
         return f"({self.X},{self.Y}): G={self.G_cost} H={self.H_cost} F={self.F_cost}"
+
 def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, pass_flags = 0):
     if not (0 <= start_X < _map.nb_CellX and 0 <= start_Y < _map.nb_CellY and 
             0 <= end_X < _map.nb_CellX and 0 <= end_Y < _map.nb_CellY):
@@ -78,6 +79,8 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, pass_flags = 0
 
             path = {}
             while collision_node: # this maybe is not the best one to the center but the closest one to collide
+                if (collision_node.Y, collision_node.X) in path:
+                    break
                 path[(collision_node.Y, collision_node.X)] = None # the keys are the node we did this so we can pop easliy later
                 collision_node = collision_node.previus
             reversed_path = dict(reversed(list(path.items())))
@@ -95,7 +98,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, pass_flags = 0
             
             return reversed_path
         ## end ##
-        
+
         searched.add((best_node.X, best_node.Y))
 
         for offsetY in [-1, 0, 1]:
@@ -108,32 +111,36 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, pass_flags = 0
                         continue
 
                     cell_walkable = True 
-
+                    C_cost = 0
                     #check if the current cellX and cellY contains entities 
                     region = _map.entity_matrix.get((neighbor_Y//_map.region_division, neighbor_X//_map.region_division), None)
 
                     if (region != None):
-                        entities = region.get((neighbor_Y, neighbor_X), None)
-                        if(entities): # entities exists so the cell is occupied
-                
-                            for entity in entities:
-                                if (entity.id == the_moving_unit._entity_optional_target_id):
-                                    
-                                    cell_walkable = True 
-                                    collided_with_entity = True 
-                                    break
+                        for team_region in region.values():
+                            entities = team_region.get((neighbor_Y, neighbor_X), None)
+                            if(entities): # entities exists so the cell is occupied
+                    
+                                for entity in entities:
+                                    if (entity.id == the_moving_unit._entity_optional_target_id):
 
-                                elif not(entity.walkable):
-                                    if not(neighbor_X == end_X and neighbor_Y == end_Y and pass_flags):
-                                        cell_walkable = False
+                                        cell_walkable = True 
+                                        collided_with_entity = True 
                                         break
+
+                                    elif not(entity.walkable):
+                                        if not(neighbor_X == end_X and neighbor_Y == end_Y and pass_flags):
+                                            cell_walkable = False
+                                            break
+
+                                    elif entity.representation not in ["F"]:
+                                        C_cost += 14
 
                     if cell_walkable:
                         neighbor_node = discoverd.get((neighbor_Y, neighbor_X),None) 
 
                         if neighbor_node is None: # we didnt discover this cell in the grid, so we create the node 
                             neighbor_node = Node(neighbor_X, neighbor_Y)
-                            neighbor_node.G_cost = neighbor_node.dist_to(start_node) 
+                            neighbor_node.G_cost = neighbor_node.dist_to(start_node) + C_cost
                             neighbor_node.H_cost = neighbor_node.dist_to(target_node)
                             neighbor_node.update_F_cost()
                             neighbor_node.previus = best_node
@@ -141,7 +148,7 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, pass_flags = 0
                             discoverd[(neighbor_Y, neighbor_X)] = neighbor_node # now it is discoverd and we need to explore it, push to the heap
                             heapq.heappush(searching, (neighbor_node.F_cost, neighbor_node)) # we push with respect to the F_cost, priority to the lowest F cost
                         else:
-                            current_G_cost = best_node.G_cost + best_node.dist_to(neighbor_node) 
+                            current_G_cost = best_node.G_cost + best_node.dist_to(neighbor_node) + C_cost
                             if current_G_cost < neighbor_node.G_cost: # if it smaller, we found a path connected to this node, better than a previous one
                                 neighbor_node.G_cost = current_G_cost # update its G cost
                                 neighbor_node.update_F_cost()

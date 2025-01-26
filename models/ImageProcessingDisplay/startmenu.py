@@ -42,7 +42,7 @@ class StartMenu:
         """Draw buttons and selected options on the screen."""
         self.screen.fill((255, 255, 255))  # Fill the screen with white
         screen_width, screen_height = self.screen.get_size()
-
+        self.screen.blit(adjust_sprite(START_IMG,screen_width, screen_height), (0, 0))
         # Calculate positions based on screen size
         center_x = screen_width // 2
         center_y = screen_height // 2

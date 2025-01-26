@@ -12,7 +12,7 @@ class Resources(Entity):
         self.max_storage = storage_capacity
         self.display_choice = 0
         self.linked_map = None
-        self.HitboxClass = RoundedSquare
+        self.HitboxClass = "RoundedSquare"
     def display(self, dt, screen, camera, g_width, g_height):
         iso_x, iso_y = camera.convert_to_isometric_2d(self.position.x, self.position.y)
         camera.draw_box(screen, self)
@@ -28,6 +28,6 @@ class Resources(Entity):
         self.resources[self.resource_indicator] -= amount
 
         return amount
-    
+
 def get_resource_html(self):
         return f'<li class="resource">f"{self.dict_repr.get(self.representation)} : {self.position}</li>'

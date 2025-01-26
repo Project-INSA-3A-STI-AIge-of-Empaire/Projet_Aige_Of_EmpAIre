@@ -191,10 +191,12 @@ class GameLoop:
                 if event.type == pygame.QUIT:
                     running = False
                 if self.state.states == START:
+                    self.state.change_music("start")
                     self.handle_start_events(event)
                 elif self.state.states == PAUSE:
                     self.handle_pause_events(dt, event)
                 elif self.state.states == PLAY:
+                    self.state.change_music(self.state.map.state)
                     self.handle_play_events(event, mouse_x, mouse_y)
 
             if self.state.mouse_held:
@@ -203,13 +205,14 @@ class GameLoop:
             if not (self.state.states == START):
                 self.handle_keyboard_inputs(move_flags, dt)
 
+            """
             if self.state.states == PLAY:
                 for team in self.state.map.players_dict.keys():
                      if not self.action_in_progress:
                         self.action_in_progress = True  # Mark the action as in progress
                         self.state.map.players_dict[team].player_turn(dt)  # Trigger player turn
                         self.action_in_progress = False  # Action finished, ready for the next one
-            
+            """
 
             self.update_game_state(dt)
             self.render_display(dt, mouse_x, mouse_y)
