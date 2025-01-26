@@ -30,7 +30,8 @@ class Map:
 
         # for the minimap
         self.minimap = MiniMap(PVector2(1000,300), _nb_CellX, _nb_CellY)
-
+        
+        self.id_generator = IdGenerator()
         self.state = "normal"
 
     def get_entity_by_id(self, _entity_id):
@@ -216,7 +217,7 @@ class Map:
 
         if not(unit_moving):
             self.entity_id_dict.pop(_entity.id, None)
-            ID_GENERATOR.free_ticket(_entity.id)
+            self.id_generator.free_ticket(_entity.id)
             if _entity.team != 0:
                 player = self.players_dict.get(_entity.team, None)
 
@@ -398,7 +399,7 @@ class Map:
         number_gold = num_players*self.region_division
 
         for _ in range(number_gold**2):
-            current_gold = Gold(center_Y, center_X, None)
+            current_gold = Gold(self.id_generator,center_Y, center_X, None)
             self.add_entity_to_closest(current_gold, center_Y, center_X, random_padding=0x1)
 
     def generate_map(self,gen_mode = MAP_NORMAL , mode = MARINES ,num_players=3):
@@ -431,7 +432,7 @@ class Map:
                 current_Y, current_X = top_Y + offset_Y, top_X + offset_X
                 if 0 <= current_X < self.nb_CellX and 0 <= current_Y < self.nb_CellY:
                     if not(self.check_cell(current_Y, current_X)):
-                        tree = Tree(current_Y, current_X, None)
+                        tree = Tree(self.id_generator,current_Y, current_X, None)
                         self.add_entity(tree)
 
             
@@ -454,7 +455,7 @@ class Map:
                 # Add tree if position is valid and unoccupied
                 if 0 <= tree_X < self.nb_CellX and 0 <= tree_Y < self.nb_CellY:
                     if not(self.check_cell(tree_Y, tree_X)):
-                        tree = Tree(tree_Y, tree_X, None)
+                        tree = Tree(self.id_generator,tree_Y, tree_X, None)
                         self.add_entity(tree)
     
     def _generate_gold(self, gold_veins=30, vein_size_range=(8, 20)):
@@ -478,7 +479,7 @@ class Map:
                 # Add gold if position is valid and unoccupied
                 if 0 <= gold_X < self.nb_CellX and 0 <= gold_Y < self.nb_CellY:
                     if not(self.check_cell(gold_Y, gold_X)):
-                        gold = Gold(gold_Y, gold_X, None)
+                        gold = Gold(self.id_generator,gold_Y, gold_X, None)
                         self.add_entity(gold)
     
 
@@ -511,7 +512,7 @@ class Map:
                     
                     for i in range(number):
                         
-                        entity_instance = EntityClass(None, None, None, current_player.team)
+                        entity_instance = EntityClass(self.id_generator,None, None, None, current_player.team)
                         if isinstance(entity_instance, Unit):
                             current_player.add_population()
                             current_player.current_population += 1
@@ -534,14 +535,14 @@ class Map:
             gold_Y = center_Y + offset_Y
             if not(self.check_cell(gold_X, gold_Y)):
                 
-                gold = Gold(gold_Y, gold_X, None)
+                gold = Gold(self.id_generator,gold_Y, gold_X, None)
                 self.add_entity(gold)
 
         for offset_X, offset_Y in [(GEN_DIS_T, GEN_DIS_T), (GEN_DIS_T, -GEN_DIS_T), (-GEN_DIS_T, GEN_DIS_T)]:
             tree_X = center_X + offset_X
             tree_Y = center_Y + offset_Y
             if not(self.check_cell(tree_Y, tree_Y)):  
-                tree = Tree(tree_Y, tree_X, None)
+                tree = Tree(self.id_generator,tree_Y, tree_X, None)
                 self.add_entity(tree)
 
 

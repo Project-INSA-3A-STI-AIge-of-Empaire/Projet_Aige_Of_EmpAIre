@@ -80,15 +80,11 @@ class GameLoop:
 
     def handle_play_events(self, event, mouse_x, mouse_y):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = self.state.camera.convert_from_isometric_2d(mouse_x, mouse_y)
+
             if event.button == LEFT_CLICK:
                 entity_id = self.state.map.mouse_get_entity(self.state.camera, mouse_x, mouse_y)
-                
+
                 self.state.mouse_held = True
-            elif event.button == RIGHT_CLICK:
-                Y, X = math.floor(y / TILE_SIZE_2D), math.floor(x / TILE_SIZE_2D)
-                house = Farm(Y, X, None, 2)
-                self.state.map.add_entity(house)
         elif event.type == pygame.MOUSEBUTTONUP:
             self.state.mouse_held = False
 
@@ -179,13 +175,13 @@ class GameLoop:
 
 
     def run(self):
+        global ID_GENERATOR
         running = True
         while running:
             dt = self.clock.tick(FPS)
             self.screen_width, self.screen_height = self.screen.get_width(), self.screen.get_height()
             move_flags = 0
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            current_time = pygame.time.get_ticks()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

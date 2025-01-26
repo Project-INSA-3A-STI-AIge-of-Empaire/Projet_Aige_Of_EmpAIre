@@ -5,8 +5,8 @@ import random
 
 class Unit(Entity):
 
-    def __init__(self, cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed = 1, _range=1):
-        super().__init__(cell_Y, cell_X, position, team, representation)
+    def __init__(self,id_gen ,cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed = 1, _range=1):
+        super().__init__(id_gen,cell_Y, cell_X, position, team, representation)
         self.hp = hp
         self.max_hp = hp
         self.training_time=training_time

@@ -274,7 +274,6 @@ class GameState:
             messagebox.showinfo("Erreur", "impossible d'ouvrir le fichier html")
 
     def save(self):
-        global ID_GENERATOR
         # Sauvegarde l'objet dans un fichier
         file_path = filedialog.asksaveasfilename(
             defaultextension=".save",
@@ -282,7 +281,6 @@ class GameState:
         )
         if file_path:
             with open(file_path, 'wb') as file:
-                pickle.dump(ID_GENERATOR, file)
                 pickle.dump(self.__dict__, file)
             print(f"Jeu sauvegardé dans {file_path}")
             messagebox.showinfo("Sauvegarde réussie", f"Jeu sauvegardé dans {file_path}")
@@ -291,7 +289,6 @@ class GameState:
             messagebox.showwarning("Aucune sauvegarde", "Sauvegarde annulée.")
 
     def load(self):
-        global ID_GENERATOR
         # Charge une sauvegarde depuis un fichier
         file_path = filedialog.askopenfilename(
             title="Sélectionner un fichier de sauvegarde",
@@ -300,7 +297,6 @@ class GameState:
 
         if file_path:
             with open(file_path, 'rb') as file:
-                ID_GENERATOR = pickle.load(file)
                 self.__dict__ = pickle.load(file)
                 print(f"Jeu chargé depuis {file_path}")
                 messagebox.showinfo("Chargement réussi", f"Jeu chargé depuis {file_path}")

@@ -21,8 +21,8 @@ TRAINABLE_UNITS = {
 
 class TrainingBuilding(Building):
 
-    def __init__(self, cell_Y, cell_X, position, team,representation, sq_size, hp, cost, build_time, trainable_units):
-        super().__init__(cell_Y, cell_X, position, team,representation, sq_size, hp, cost, build_time)
+    def __init__(self, id_gen,cell_Y, cell_X, position, team,representation, sq_size, hp, cost, build_time, trainable_units):
+        super().__init__(id_gen,cell_Y, cell_X, position, team,representation, sq_size, hp, cost, build_time)
         self.trainable_units = trainable_units
 
         self.time_left = None
@@ -54,7 +54,7 @@ class TrainingBuilding(Building):
             if self.unit_being_trained == None:
                 if entity_repr in self.trainable_units:
                     UnitClass = TRAINABLE_UNITS.get(entity_repr, None)
-                    unit = UnitClass(None, None, None, player.team)
+                    unit = UnitClass(self.linked_map.id_generator, None, None, None, player.team)
 
                     if unit.affordable_by(player.get_current_resources()):
                         if player.get_current_population_capacity() > player.current_population:

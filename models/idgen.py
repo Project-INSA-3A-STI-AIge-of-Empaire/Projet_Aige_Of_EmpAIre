@@ -26,6 +26,3 @@ class IdGenerator:
             rep += f" {id}"
 
         return rep
-
-ID_GENERATOR = IdGenerator() # this needs to be saved and loaded to properly give the ids for entities
-
