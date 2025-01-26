@@ -1,4 +1,5 @@
 from Entity.entity import *
+from .player import *
 # from GameField.map import Map
 # from .player import DecisionNode
 # from .decision_tree import tree  # Import the decision tree to use its structure.
@@ -22,11 +23,28 @@ class AIProfile:
             diff = abs(target - actual)
             differences[key] = diff
         sorted_differences = sorted(differences.items(), key=lambda x: x[1], reverse=True)
-        most_diff = sorted_differences[:3]
-        for building_repr in most_diff:
+        for building_repr in sorted_differences:
+            existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))
+            print(f"Old list of building : {existing_ids}")
             result = context['player'].build_entity(context['player'].get_entities_by_class('v'), building_repr[0])
+            print(f"Résultat de build_entity : {result}")
+            new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))
+            print(f"New list of buildings {new_ids}")
+            new_building_ids = new_ids - existing_ids
             if result != 0:
-                break
+                new_building_id = new_building_ids.pop()
+                building = context['player'].linked_map.get_entity_by_id(new_building_id)
+                if building.state == BUILDING_ACTIVE:
+                    return
+            # elif result == 0:
+            #         print("test compare ratios ==0")
+            #         for villager in context['units']['villager']:
+            #             if villager.state == UNIT_IDLE:
+            #                 villager.collect_entity(context['resource_id'])  # Start collecting resources
+            #             elif villager.is_full():
+            #                 villager.drop_to_entity(context['drop_off_id'])
+            #         return "Gathered resources"
+                
 
 
     def decide_action(self,tree, context):
@@ -73,10 +91,11 @@ class AIProfile:
                 # Train military units in training buildings
                 training_buildings = context['buildings']['training']
                 for building in training_buildings:
-                    building['instance'].train_unit(player, context['current_time'], 'h')  # Train HorseMan
+                    (context[player].linked_map.get_entity_by_id(building)).train_unit(context[player], 'h')  # Train HorseMan
                 return "Trained military units"
             
             if action == "Building structure!":
+                print("bonjour")
                 self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
                 return "Structure are built!"
 
@@ -120,11 +139,16 @@ class AIProfile:
                 return "Repaired critical buildings"
             
             if action == "Building structure!":
+                print("hello")
                 self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
                 return "Structure are built!"
 
-        # Default to building defensive structures
-        return "Built defensive structures"
+        # for villager in context['units']['villager']:
+        #     if not villager.is_full() and is_unit_idle(villager):
+        #         villager.collect_entity(context['resource_id'])
+        #     else:
+        #         drop_resources(context)
+        # return "Gathering resources!"
 
     def _balanced_strategy(self, actions, context):
         """
@@ -150,7 +174,7 @@ class AIProfile:
                     villager.collect_entity(context['resource_id'])  # Start collecting resources
                 return "Gathered resources"
 
-            if action == "Dropping off resources!":
+            elif action == "Dropping off resources!":
                 # Drop resources in storage buildings
                 villagers = player.get_entities_by_class(['v'])
                 for villager_id in villagers:
@@ -158,14 +182,16 @@ class AIProfile:
                     villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
                 return "Dropped off resources"
 
-            if action == "Train military units!":
+            elif action == "Train military units!":
                 # Train military units in training buildings
                 training_buildings = context['buildings']['training']
+                if training_buildings == None:
+                    action = "Building structure!"
                 for building in training_buildings:
                     building['instance'].train_unit(player, context['current_time'], 'v')  # Train Villager
                 return "Trained military units"
 
-            if action == "Attack the enemy!":
+            elif action == "Attack the enemy!":
                 # Attack the enemy
                 military_units = player.get_entities_by_class(['h', 'a', 's'])
                 for unit_id in military_units:
@@ -173,7 +199,7 @@ class AIProfile:
                     unit.attack_entity(context['enemy_id'])  # Attack the enemy
                 return "Executed attack strategy"
             
-            if action == "Building structure!":
+            elif action == "Building structure!":
                 self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
                 return "Structure are built!"
 

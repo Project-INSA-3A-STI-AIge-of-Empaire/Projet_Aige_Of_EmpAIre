@@ -78,7 +78,7 @@ def buildings_insufficient(context):
     return not context['buildings'].get('storage', False)
 
 def has_enough_military(context):
-    return context['military_units'] >= 10
+    return context['ratio_military'] >= 0.5 or len(context['units']['villager']) >= 10
 
 def is_unit_idle(unit):
     return unit.state == UNIT_IDLE
@@ -109,8 +109,8 @@ def gather_resources(context):
     return "Gathering resources!"
 
 def train_military(context):
-    for building in context['buildings']['training']:
-        building['instance'].train_unit(context['player'], 'v')
+    # for building in context['buildings']['training']:
+    #     building['instance'].train_unit(context['player'], 'v')
     return "Train military units!"
 
 def attack(context):
@@ -166,9 +166,9 @@ tree = DecisionNode(
             no_action=DecisionNode(
                 closest_town_center,
                 yes_action=DecisionNode(
-                    find_closest_resources,
-                    yes_action=build_structure,
-                    no_action=DecisionNode(
+                    resources_critical,
+                    no_action=build_structure,
+                    yes_action=DecisionNode(
                         is_villager_full,
                         yes_action=drop_resources,
                         no_action=gather_resources,
