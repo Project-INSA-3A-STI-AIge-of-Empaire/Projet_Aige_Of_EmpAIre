@@ -151,7 +151,7 @@ tree = DecisionNode(
             buildings_insufficient,
             yes_action=drop_resources,
             no_action=gather_resources,
-            priority=8
+            priority=7
         ),
         no_action=DecisionNode(
             has_enough_military,
@@ -165,18 +165,18 @@ tree = DecisionNode(
                         is_villager_full,
                         yes_action=drop_resources,
                         no_action=gather_resources,
-                        priority=7
+                        priority=10
                     ),
-                    priority=7
+                    priority=9
                 ),
                 no_action=gather_resources,
-                priority=7
+                priority=8
             ),
             priority=7
         ),
-        priority=9
+        priority=6
     ),
-    priority=10
+    priority=5
 )
 
 def choose_strategy(Player):
@@ -205,6 +205,7 @@ class Player:
         self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
 
         self.refl_acc = 0
+        self.is_busy = False
 
 
     def add_entity(self, entity):
