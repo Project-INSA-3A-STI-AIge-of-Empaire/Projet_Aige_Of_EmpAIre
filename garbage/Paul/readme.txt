@@ -62,6 +62,45 @@ for the actual tree, select(hah) which node to use when making the tree dependin
 (case match) 
 
 
+ideas for bits of the tree :
+
+fallback under_attack(
+	condition currently_safe()
+	fallback defensive_action(
+		sequence defend(
+			condition close_to_defensive_building()
+			action attack(closest_def_build, enemy_unit))
+		sequence send_cavalry(
+			condition unit_available(horseman)
+			action attack(horseman, enemy_unit))
+		sequence send ... (etc, etc) (find a way to send multiple units) (which unit to send first ?)
+		.
+		.
+		.
+		sequence train_units(
+			fallback can_train(
+				condition trainable_buildings_exist()
+				sequence build_building(
+					condition enough_resources()
+					action build(building))) (again, try to generalize this)
+			condition enough_resources()
+			condition can_add_unit()
+			action add_units()))))
+
+leaf nodes to make :
+
+class attack(Action)
+
+class collect(action):
+	
+class check_unfinished_buildings(condition):
+
+class check_available_resources(condition):
+
+class can_add_unit(condition):
+
+
+implement dt somehow
 
 
 useful links

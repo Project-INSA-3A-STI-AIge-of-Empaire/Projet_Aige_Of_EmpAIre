@@ -91,7 +91,7 @@ class Circle(Shape):
 class RoundedSquare(Square):
     def __init__(self, x, y, half_side):
         super().__init__(x, y, half_side)
-        self.corner_radius = TILE_SIZE_2D/6  # Radius of the rounded corners
+        self.corner_radius = TILE_SIZE_2D/8  # Radius of the rounded corners
 
     def draw(self, screen, color):
         # Draw the main rectangle body
@@ -159,3 +159,10 @@ class RoundedSquare(Square):
             if math.sqrt((cx - circle.x) ** 2 + (cy - circle.y) ** 2) <= circle.radius:
                 return True
         return False
+
+SHAPE_MAPPING = {
+    "Circle":Circle,
+    "Rectangle":Rectangle,
+    "Square":Square,
+    "RoundedSquare":RoundedSquare
+}

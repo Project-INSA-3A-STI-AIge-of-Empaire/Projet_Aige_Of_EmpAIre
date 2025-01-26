@@ -5,8 +5,8 @@ import os
 #from Game.savegame import *
 from ImageProcessingDisplay import UserInterface, StartMenu, PauseMenu, Camera, TerminalCamera 
 from GameField.map import *
-from GLOBAL_VAR import *
-from Entity import *
+#from GLOBAL_VAR import *
+#from Entity import *
 from yattag import Doc
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -24,13 +24,21 @@ class GameState:
         # Pour gérer le délai de basculement d'affichage
         self.last_time_switched = 0
         self.switch_cooldown = ONE_SEC*(0.2) # Délai de 200ms (0,2 secondes)
-        self.full_screen = True
+        self.full_screen = False
         self.mouse_held = False
         self.screen_width = SCREEN_WIDTH
         self.screen_height = SCREEN_HEIGHT
         self.camera = Camera()
         self.terminal_camera = TerminalCamera()
+        self.music_state = ""
 
+    def change_music(self, state):
+        
+        if self.music_state != state:  # Ne changer que si l'état est différent
+            pygame.mixer.music.stop()  # Arrêter la musique actuelle
+            pygame.mixer.music.load(MUSIC[state])  # Charger la nouvelle musique
+            pygame.mixer.music.play(-1)  # Jouer en boucle (-1 = boucle infinie)
+            self.music_state = state
 
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""
@@ -177,8 +185,8 @@ class GameState:
                                                         doc.stag(
                                                             'progress',
                                                             klass="health-bar",     
-                                                            max="100",              
-                                                            value="100"
+                                                            max=player.entities_dict[entity_repr][id].max_hp,
+                                                            value=player.entities_dict[entity_repr][id].hp
                                                         )
 
         # Save the HTML content

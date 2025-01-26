@@ -30,7 +30,7 @@ class leafNode(treeNode):
 
 class Sequence(ctrlNode):
 
-    def update(self,x):
+    def update(self,x):    #have to add an unused x variable, otherwise it doesnt work because of some reason. i looked it up but i forgot why, sorry.
         for (child) in self.childlist:
             if (child.update(child)!="success"): #if the child process returns anything but success, the sequence stops updating its branches and returns failure
                 self.status="failure"
@@ -76,7 +76,7 @@ class ForceFail(decoNode):
 
 class Invert(decoNode):
     
-    def update(self):
+    def update(self,x):
         if (self.child.update(self.child)=="success"):  
             self.status="failure"
         elif (self.child.update(self.child)=="failure"):  
@@ -95,8 +95,37 @@ class BehaviorTree(decoNode):
         return self.status
 
 
-class TestLeaf(Action):   
+class Test1(Action):   
     def update(self,x):
-        print("test leaf")
+        print("test leaf 1")
         return self.status 
+
+class Test2(Action):   
+    def update(self,x):
+        print("test leaf 2")
+        return self.status
+
+class Test3(Action):   
+    def update(self,x):
+        print("test leaf 3")
+        return self.status
     
+
+class Test4(Action):   
+    def update(self,x):
+        print("test leaf 4")
+        return self.status
+
+class Test5(Action):   
+    def update(self,x):
+        print("test leaf 5")
+        return self.status
+
+class attack(Action):
+	def __init__(self,status,unit):
+		self.status=status
+		self.unit=unit
+
+	def update(self,x):
+		self.unit.attack_entity(entity_id)
+		#now what abt status tho

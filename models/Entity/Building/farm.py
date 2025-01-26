@@ -21,5 +21,5 @@ class Farm(Building):
     
         iso_x, iso_y = camera.convert_to_isometric_2d(self.position.x - self.linked_map.tile_size_2d/2, self.position.y - self.linked_map.tile_size_2d/2)
         draw_percentage_bar(screen, camera, iso_x, iso_y, self.resources[self.resource_indicator], self.max_storage, self.sq_size)
-        display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = ["Mi"], camera = camera), iso_x, iso_y, screen, 0x04, 1)
+        #display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = ["Mi"], camera = camera), iso_x, iso_y, screen, 0x04, 1)
 

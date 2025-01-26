@@ -17,6 +17,7 @@ class RangedUnit(Unit):
         self.projetctile_type = _projetctile_type
         self.projetctile_padding = None 
         self.last = pygame.time.get_ticks()
+
     def check_in_range_with(self, entity):
         range_circle = Circle(self.position.x, self.position.y, self.linked_map.tile_size_2d * self.range)
         #return self.position.abs_distance(entity.position) < (self.linked_map.tile_size_2d * (self.range + math.floor(entity.sq_size/2)))
@@ -40,8 +41,6 @@ class RangedUnit(Unit):
             if self.animation_frame >= self.attack_frame and self.will_attack:
                 self.will_attack = False
                 
-                print(f'time:{pygame.time.get_ticks() - self.last}')
-                self.last = pygame.time.get_ticks()
                 ProjectileClass = PROJECTILE_TYPE_MAPPING.get(self.projetctile_type, None)
                 projectile = ProjectileClass(self.cell_Y, self.cell_X, PVector2(self.position.x - self.projetctile_padding, self.position.y - self.projetctile_padding), _entity, self.linked_map, self.team, self.attack)
                 self.linked_map.add_projectile(projectile)
@@ -53,60 +52,62 @@ class RangedUnit(Unit):
 
     def try_to_attack(self,dt, camera, screen):
         if (self.state != UNIT_DYING):
-            
-            if self.entity_target_id != None:
+            entity = None
+            if self.entity_defend_from_id != None:
+                entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
+            elif self.entity_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
-                
-                if (entity != None):
+            if (entity != None):
+
+                if (entity.team != 0 and entity.team != self.team):
                     
-                    if (entity.team != 0 and entity.team != self.team):
+                    if (entity.is_dead() == False):
                         
-                        if (entity.is_dead() == False):
+                        
+                        if not(self.check_range_with_target):
                             
-                            
-                            if not(self.check_range_with_target):
+                            if (self.check_in_range_with(entity)):
                                 
-                                if (self.check_in_range_with(entity)):
-                                    
-                                    self.check_range_with_target = True
-                                    self.locked_with_target = True
-                                    
-                                    
-                                else:
-                                    
-                                    if not(self.state == UNIT_WALKING): # we need to reach it in range
-                                        self.change_state(UNIT_WALKING)
+                                self.check_range_with_target = True
+                                self.locked_with_target = True
+                                
+                                
+                            else:
+                                
+                                if not(self.state == UNIT_WALKING): # we need to reach it in range
+                                    self.change_state(UNIT_WALKING)
 
-                                    self._entity_optional_target_id = entity.id
-                                    self.move_position.x = entity.position.x
-                                    self.move_position.y = entity.position.y
-                                    
+                                self._entity_optional_target_id = entity.id
+                                self.move_position.x = entity.position.x
+                                self.move_position.y = entity.position.y
+                                
 
-                                    
-                                    self.locked_with_target = False
-                                    self.first_time_pass = True
-                                    self.try_to_move(dt,camera,screen)
-                            else: # enemy in range  
-                                self.target_direction = self.position.alpha_angle(entity.position)
-                                dist_to_entity = self.position.abs_distance(entity.position)
+                                
+                                self.locked_with_target = False
+                                self.first_time_pass = True
+                                self.try_to_move(dt,camera,screen)
+                        else: # enemy in range  
+                            self.target_direction = self.position.alpha_angle(entity.position)
+                            dist_to_entity = self.position.abs_distance(entity.position)
 
-                                if (dist_to_entity <= (self.range * (entity.sq_size) * self.linked_map.tile_size_2d + entity.box_size + self.box_size)):
-                                    self.try_to_damage(dt, entity)
-                                else:
-                                    self.check_range_with_target = False
-                                    if not(self.state == UNIT_IDLE):
-                                        self.change_state(UNIT_IDLE)
-                        
-                        
-                        else:
-                            if not(self.state == UNIT_IDLE):
-                                self.change_state(UNIT_IDLE)
-                            self.entity_target_id = None
-                            self.locked_with_target = False
+                            if (dist_to_entity <= (self.range * (entity.sq_size) * self.linked_map.tile_size_2d + entity.box_size + self.box_size)):
+                                self.try_to_damage(dt, entity)
+                            else:
+                                self.check_range_with_target = False
+
                     else:
                         if not(self.state == UNIT_IDLE):
-                                self.change_state(UNIT_IDLE)
-                
+                            self.change_state(UNIT_IDLE)
+                        self.reset_target()
+                        self.locked_with_target = False
+                else:
+                    if not(self.state == UNIT_IDLE):
+                        self.change_state(UNIT_IDLE)
+                    self.change_state(UNIT_IDLE)
+                    self.reset_target()
+            
     def display(self, dt, screen, camera, g_width, g_height):
-        draw_isometric_circle(camera, screen, self.position.x, self.position.y, self.range*TILE_SIZE_2D, TEAM_COLORS.get(self.team)) 
+        #draw_isometric_circle(camera, screen, self.position.x, self.position.y, self.range*TILE_SIZE_2D, TEAM_COLORS.get(self.team)) 
+        #draw_isometric_circle(camera, screen, self.position.x, self.position.y, 10*TILE_SIZE_2D, TEAM_COLORS.get(self.team)) 
+
         super().display(dt, screen, camera, g_width, g_height)

@@ -10,7 +10,6 @@ class MeleeUnit(Unit):
         if self.first_time_pass or (self.attack_time_acc > self.attack_delta_time):
             
             if (self.first_time_pass):
-                print("using free pas")
                 self.first_time_pass = False
             if not(self.state == UNIT_ATTACKING):
                 self.start = pygame.time.get_ticks()
@@ -23,17 +22,15 @@ class MeleeUnit(Unit):
             if self.animation_frame >= self.attack_frame and self.will_attack:
                 self.will_attack = False
                 entity.hp -= self.attack
-                print(f'time:{pygame.time.get_ticks() - self.last}')
                 self.last = pygame.time.get_ticks()
                 if entity.is_dead():
-                    if self.entity.representation in ['C','T','v']:
-                            if self.entity.state != STATES.get(self.entity.representation, None).get("dying", None):
+                    if entity.representation in ['C','T','v']:
+                            if entity.state != STATES.get(entity.representation, None).get("dying", None):
                                 resources = {}
-                                if self.entity.representation == 'v':
-                                    resources = self.entity.resources
+                                if entity.representation == 'v':
+                                    resources = entity.resources
                                 else:
-                                    resources = self.entity.storage.lose_resource()
-                                print(self.team)
+                                    resources = entity.storage.lose_resource()
                                 player_gained = self.linked_map.players_dict.get(self.team,None)
                                 player_gained.add_resources(resources)
                     self.linked_map.dead_entities[entity.id] = entity
@@ -42,7 +39,6 @@ class MeleeUnit(Unit):
                     
 
             elif self.animation_frame == (self.len_current_animation_frames() - 1):
-                print(f"finished attack {pygame.time.get_ticks() - self.start}")
                 
                 self.check_range_with_target = False # we need to recheck if it is still in range
                 self.change_state(UNIT_IDLE) # if the entity is killed we stop 
@@ -51,48 +47,49 @@ class MeleeUnit(Unit):
         
     def try_to_attack(self,dt, camera, screen):
         if (self.state != UNIT_DYING):
-            if self.entity_target_id != None:
+            entity = None
+            if self.entity_defend_from_id != None:
+                entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
+            elif self.entity_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
-                
-                if (entity != None): 
-                    if (entity.team != 0 and entity.team != self.team):
-                        if (entity.is_dead() == False):
-                            
-                            if not(self.check_range_with_target):
-                                if (self.collide_with_entity(entity)):
-                                    self.check_range_with_target = True
-                                    self.locked_with_target = True
-                                        
-                                else:
-                                    if not(self.state == UNIT_WALKING):
-                                        self.change_state(UNIT_WALKING)
 
-                                    self._entity_optional_target_id = entity.id
-                                    self.move_position.x = entity.position.x
-                                    self.move_position.y = entity.position.y
+            if (entity != None): 
+                if (entity.team != 0 and entity.team != self.team):
+                    if (entity.is_dead() == False):
+                        
+                        if not(self.check_range_with_target):
+                            if (self.collide_with_entity(entity)):
+                                self.check_range_with_target = True
+                                self.locked_with_target = True
                                     
-                                    self.locked_with_target = False
-                                    self.first_time_pass = True
-                                    self.try_to_move(dt, camera, screen )
-                            else: # collided 
-                                self.target_direction = self.position.alpha_angle(entity.position)
-                                dist_to_entity = self.position.abs_distance(entity.position)
+                            else:
+                                if not(self.state == UNIT_WALKING):
+                                    self.change_state(UNIT_WALKING)
 
-                                if (dist_to_entity <= ((entity.sq_size) * TILE_SIZE_2D + entity.box_size + self.box_size)):
-                                    self.try_to_damage(dt, entity)
-                                else:
-                                    self.check_range_with_target = False
-                                    
-                                    if not(self.state == UNIT_IDLE):
-                                        self.change_state(UNIT_IDLE)
-                        else:
-                            if not(self.state == UNIT_IDLE):
-                                self.change_state(UNIT_IDLE)
-                            self.entity_target_id = None
-                            self.locked_with_target = False
+                                self._entity_optional_target_id = entity.id
+                                self.move_position.x = entity.position.x
+                                self.move_position.y = entity.position.y
+                                
+                                self.locked_with_target = False
+                                self.first_time_pass = True
+                                self.try_to_move(dt, camera, screen )
+                        else: # collided 
+                            self.target_direction = self.position.alpha_angle(entity.position)
+                            dist_to_entity = self.position.abs_distance(entity.position)
+
+                            if (dist_to_entity <= ((entity.sq_size) * TILE_SIZE_2D + entity.box_size + self.box_size)):
+                                self.try_to_damage(dt, entity)
+                            else:
+                                self.check_range_with_target = False
+
                     else:
                         if not(self.state == UNIT_IDLE):
                             self.change_state(UNIT_IDLE)
-                
-            
-            
+                        self.reset_target()
+                        self.locked_with_target = False
+                else:
+                    if not(self.state == UNIT_IDLE):
+                        self.change_state(UNIT_IDLE)
+                    self.change_state(UNIT_IDLE)
+                    self.reset_target()
+

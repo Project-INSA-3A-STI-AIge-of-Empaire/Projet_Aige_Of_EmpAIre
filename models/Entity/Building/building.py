@@ -17,7 +17,7 @@ class Building(Entity):
         self.animation_frame = 0
         self.state = BUILDING_ACTIVE
         self.animation_speed = [1, 1, 20]
-        self.HitboxClass = RoundedSquare
+        self.HitboxClass = "Square"
         self.builders = {}
         self.build_progress = 0
 
@@ -115,7 +115,7 @@ class Building(Entity):
             builder = self.linked_map.get_entity_by_id(builder_id)
 
             if builder != None:
-                if builder.build_target_id != self.id or builder.is_dead():
+                if builder.build_target_id != self.id or builder.is_dead() or not(self.collide_with_entity(builder)):
                     self.builders.pop(builder_id)
             else:
                 self.builders.pop(builder_id)
@@ -139,9 +139,8 @@ class Building(Entity):
                         # Increment the health by the repair amount
                         self.hp += repair_progress
                     else:
-                        self.hp = self.max_hp                    
-                        
-                    
+                        self.hp = self.max_hp
+
 
                 else: 
                     effective_time = (3 * self.build_time * ONE_SEC) / (number_of_builder + 2)
@@ -153,10 +152,6 @@ class Building(Entity):
 
                     if self.build_progress >= 1:
                         self.change_state(BUILDING_ACTIVE)
-
-
-
-
 
 
     def get_html(self):

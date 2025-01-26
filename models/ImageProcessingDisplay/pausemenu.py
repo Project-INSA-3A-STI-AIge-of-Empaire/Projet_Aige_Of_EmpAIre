@@ -36,6 +36,9 @@ class PauseMenu:
         overlay.set_alpha(220)  # Transparency level (0-255)
         overlay.fill((0, 0, 0))  # Black background
         self.screen.blit(overlay, (0, 0))
+        screen_width, screen_height = self.screen.get_size()
+
+        self.screen.blit(adjust_sprite(START_IMG,screen_width, screen_height), (0, 0))
 
         # Draw pause menu title
         title_text = self.font.render("Pause Menu", True, WHITE_COLOR)
