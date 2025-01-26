@@ -22,7 +22,7 @@ class GameEventHandler:
         context = {
             'resources': self.players.get_current_resources(),
             'military_units': len(self.players.get_entities_by_class(['h', 'a', 's'])),
-            'ratio_military':len(self.players.get_entities_by_class(['h', 'a', 's']))/len(self.players.get_entities_by_class(['h', 'a', 's','v'])),
+            'ratio_military':len(self.players.get_entities_by_class(['h', 'a', 's']))/len(self.players.get_entities_by_class(['h', 'a', 's','v'])) if len(self.players.get_entities_by_class(['h','a','s','v'])) != 0 else 0,
             'military_units_details': {
                 'archers': len(self.players.get_entities_by_class(['a'])),
                 'infantry': len(self.players.get_entities_by_class(['s'])),
