@@ -74,7 +74,11 @@ TEAM_COLORS = {
     19: PEACH_COLOR,
     20: MINT_COLOR
 }
-
+MUSIC = {
+    "start":"Sounds/Menu.mp3",
+    "normal":"Sounds/Normal.mp3",
+    "battle":"Sounds/Battle.mp3"
+}
 
 LEFT_CLICK = 1 
 RIGHT_CLICK = 3 
@@ -383,11 +387,11 @@ def META_SPRITES_CACHE_HANDLE(zoom_level, list_keys, camera): # returns image to
             current_dict = current_dict.get(list_keys[key], None)
         
     return current_dict 
-        
-    
+
 CURSOR_IMG = pygame.image.load("Sprites/cursor.png").convert_alpha()
 #MINIMAP_IMG = pygame.image.load("Sprites/minimap_cus.png").convert_alpha()
 MINIMAP_IMG = pygame.image.load("Sprites/map-panel-removebg-preview.png").convert_alpha()
+START_IMG = pygame.image.load("Icons/loading_slash_sml.webp").convert_alpha()
 
 MINIMAP_IMG = adjust_sprite(MINIMAP_IMG, MINIMAP_WIDTH*(2 + 0.7), MINIMAP_HEIGHT/2 *(2 + 0.36))
 

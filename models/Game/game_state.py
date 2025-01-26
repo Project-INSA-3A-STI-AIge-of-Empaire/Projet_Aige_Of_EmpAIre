@@ -30,7 +30,15 @@ class GameState:
         self.screen_height = SCREEN_HEIGHT
         self.camera = Camera()
         self.terminal_camera = TerminalCamera()
+        self.music_state = ""
 
+    def change_music(self, state):
+        
+        if self.music_state != state:  # Ne changer que si l'état est différent
+            pygame.mixer.music.stop()  # Arrêter la musique actuelle
+            pygame.mixer.music.load(MUSIC[state])  # Charger la nouvelle musique
+            pygame.mixer.music.play(-1)  # Jouer en boucle (-1 = boucle infinie)
+            self.music_state = state
 
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""

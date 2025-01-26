@@ -200,8 +200,10 @@ class Player:
         self.cell_X = cell_X
         self.storages_id = set() # resource storages
         self.houses_id = set() # towncenters and storages
+
         self.current_population = 0
-        
+        self.homeless_units = 0
+
         self.entities_dict = {}
         self.linked_map = None
 
@@ -210,9 +212,8 @@ class Player:
         self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
 
         self.refl_acc = 0
-        
 
-        
+
     def add_entity(self, entity):
 
         entity_dict = self.entities_dict.get(entity.representation, None)
@@ -245,12 +246,13 @@ class Player:
                 self.entities_dict.pop(entity.representation, None)
             is_habitat = False
             is_storage = False
-            print(f"storages:{self.storages_id}")
-            print(f"houses:{self.houses_id}")
+
 
             if isinstance(entity, Unit):
                 if self.current_population <= self.get_current_population_capacity():
                     self.remove_population()
+                else:
+                    self.homeless_units -= 1
                 self.current_population -= 1
             if entity.representation in ['C', 'T']:
                 is_storage = True
@@ -270,7 +272,7 @@ class Player:
             return 1
         return 0
 
-    def get_entities_by_class(self, representations): # list of representations for exemple : ['a', 'h', 'v']
+    def get_entities_by_class(self, representations, is_free = False): # list of representations for exemple : ['a', 'h', 'v']
 
         id_list = []
         
@@ -280,39 +282,47 @@ class Player:
             if entity_dict:
 
                 for entity_id in entity_dict:
-                    id_list.append(entity_id)
-            print(f"ID List so far: {id_list}")
-        
+                    entity = self.linked_map.get_entity_by_id(entity_id)
+                    add = True
+
+                    if is_free and not(entity.is_free()):
+                        add = False
+                    if add:
+                        id_list.append(entity_id)
+
         return id_list
 
     def build_entity(self, villager_id_list, representation = "", entity_id = None):
-        if entity_id == None:
-            if (representation in ["T","H"]) and self.get_current_population_capacity() >= MAX_UNIT_POPULATION:
-                return BUILDING_POPULATION_MAX_LIMIT
-            
-            BuildingClass = CLASS_MAPPING.get(representation, None)
-            Instance = BuildingClass(None, None, None, self.team)
-            
-            if isinstance(Instance, Building) and Instance.affordable_by(self.get_current_resources()):
-                self.remove_resources(Instance.cost)
-                Instance.state = BUILDING_INPROGRESS
-                self.linked_map.add_entity_to_closest(Instance, self.cell_Y, self.cell_X, random_padding = 0x1)
+        if villager_id_list:
+            if entity_id == None:
+                if (representation in ["T","H"]) and self.get_current_population_capacity() >= MAX_UNIT_POPULATION:
+                    return BUILDING_POPULATION_MAX_LIMIT
+                
+                BuildingClass = CLASS_MAPPING.get(representation, None)
+                Instance = BuildingClass(None, None, None, self.team)
+                
+                if isinstance(Instance, Building) and Instance.affordable_by(self.get_current_resources()):
+                    self.remove_resources(Instance.cost)
+                    Instance.state = BUILDING_INPROGRESS
+                    self.linked_map.add_entity_to_closest(Instance, self.cell_Y, self.cell_X, random_padding = 0x1)
 
+                    for villager_id in villager_id_list:
+                        villager = self.linked_map.get_entity_by_id(villager_id)
+
+                        if villager != None:
+                            villager.build_entity(Instance.id)
+                
+                    return 1
+                return 0
+            else:
                 for villager_id in villager_id_list:
-                    villager = self.linked_map.get_entity_by_id(villager_id)
+                        villager = self.linked_map.get_entity_by_id(villager_id)
 
-                    if villager != None:
-                        villager.build_entity(Instance.id)
-            
+                        if villager != None:
+                            villager.build_entity(entity_id)
                 return 1
-            return 0
         else:
-            for villager_id in villager_id_list:
-                    villager = self.linked_map.get_entity_by_id(villager_id)
-
-                    if villager != None:
-                        villager.build_entity(entity_id)
-            return 1
+            return 0
 
 
 
@@ -414,9 +424,9 @@ class Player:
 
             if current_habitat:
                 current_capacity += current_habitat.habitat.capacity
-        
+
         return current_capacity
-    
+
 
 
     def add_population(self):
@@ -452,7 +462,24 @@ class Player:
                 if current_habitat.habitat.remove_population():
                     return True
         return False
-    
+
+    def update_population(self,dt):
+        pop = self.current_population
+        cpop = self.get_current_population_capacity()
+        if pop > cpop:
+            self.homeless_units = pop - cpop
+
+        elif pop < cpop and self.homeless_units > 0:
+            range_val = self.homeless_units
+            for _ in range(range_val):
+
+                if not(self.add_population()):
+                    break
+                else:
+                    self.homeless_units -= 1
+
+        print(f"current population:{self.current_population}, current cap:{self.get_current_population_capacity()}")
+
     def entity_closest_to(self, ent_repr_list, cell_Y, cell_X): # we give the ent_repr for the entity we want and then we give a certain position and we will return the closest entity of the given type to the cell_X, cell_Y
         closest_id = None
         ent_ids = None
@@ -497,15 +524,17 @@ class Player:
         return 'is_free'
     
     def update(self, dt):
+        self.update_population(dt)
         self.refl_acc+=dt
-        if self.refl_acc>3:
-            self.refl_acc=0
+        if self.refl_acc>ONE_SEC/3:
+            self.player_turn(dt)
     
     def player_turn(self,dt):
-        self.update(dt)
         print("Decision tree avant utilisation:", self.decision_tree)
         decision = self.game_handler.process_ai_decisions(self.decision_tree)
         print(f"Decision effectué : {decision}")
+        self.refl_acc=0
+        
         # # decision = self.ai_profile.decide_action(self.decision_tree, context)
         # return decision
     
