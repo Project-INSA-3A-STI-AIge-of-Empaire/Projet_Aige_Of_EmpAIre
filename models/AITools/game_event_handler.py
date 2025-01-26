@@ -22,6 +22,7 @@ class GameEventHandler:
         context = {
             'resources': self.players.get_current_resources(),
             'military_units': len(self.players.get_entities_by_class(['h', 'a', 's'])),
+            'ratio_military':len(self.players.get_entities_by_class(['h', 'a', 's']))/len(self.players.get_entities_by_class(['h', 'a', 's','v'])),
             'military_units_details': {
                 'archers': len(self.players.get_entities_by_class(['a'])),
                 'infantry': len(self.players.get_entities_by_class(['s'])),
@@ -29,7 +30,7 @@ class GameEventHandler:
             'enemy_visible': enemy_visible,
             'buildings': {
                 'storage': self.players.is_free(),
-                'training': self.players.get_entities_by_class(['b']),
+                'training': self.players.get_entities_by_class(['B','S','A','K']),
                 'critical': self.players.is_free(),
                 'ratio':{
                     'T' : len(self.players.entities_dict['T'])/sum(len(self.players.entities_dict[k]) for k in self.players.entities_dict.keys()) if 'T' in self.players.entities_dict.keys() else 0,
