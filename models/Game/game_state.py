@@ -5,8 +5,8 @@ import os
 #from Game.savegame import *
 from ImageProcessingDisplay import UserInterface, StartMenu, PauseMenu, Camera, TerminalCamera 
 from GameField.map import *
-from GLOBAL_VAR import *
-from Entity import *
+#from GLOBAL_VAR import *
+#from Entity import *
 from yattag import Doc
 import tkinter as tk
 from tkinter import filedialog, messagebox
