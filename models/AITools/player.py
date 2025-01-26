@@ -4,7 +4,7 @@ from .game_event_handler import *
 from .ai_profiles import*
 from random import randint,seed
 import time
-from .commons_actions import perform_attack
+
 
 CLASS_MAPPING = {
     'A': ArcheryRange,
@@ -94,11 +94,6 @@ def is_villager_full(unit):
     return unit['type'] == 'villager' and unit['instance'].is_full()
 
 # ---- Actions ----
-def defend(context):
-    for unit in context['units']:
-        if unit['type'] == 'military':
-            unit['instance'].attack_entity(context['enemy_id'])
-    return "Defend the village!"
 
 def gather_resources(context):
     for villager in context['units']['villager']:
@@ -114,7 +109,10 @@ def train_military(context):
     return "Train military units!"
 
 def attack(context):
-    return perform_attack(context)
+    for unit in context['units']['villager'] or context['units']['military']:
+        
+        unit.attack_entity(context['enemy_id'])
+    return "Attacking the enemy!"
 
 def drop_resources(context):
     for unit in context['units']['villager']:
@@ -146,12 +144,7 @@ def enemy_visible(context):
 # ---- Arbre de décision ----
 tree = DecisionNode(
     is_under_attack,
-    yes_action=DecisionNode(
-        enemy_visible,
-        yes_action=attack,
-        no_action=defend,
-        priority=10
-    ),
+    yes_action=attack,
     no_action=DecisionNode(
         resources_critical,
         yes_action=DecisionNode(

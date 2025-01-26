@@ -5,9 +5,11 @@ class StartMenu:
     def __init__(self, screen):
         self.screen = screen
 
-        # Map cell count
-        self.map_cell_count = 256  # Default value
-        self.editing_map_cell_count = False  # Track if the user is editing the cell count
+        # Map cell counts for X and Y
+        self.map_cell_count_x = 250  # Default value for X
+        self.map_cell_count_y = 250  # Default value for Y
+        self.editing_map_cell_count_x = False  # Track if the user is editing the cell count for X
+        self.editing_map_cell_count_y = False  # Track if the user is editing the cell count for Y
 
         # Map type options
         self.map_options = ["Carte Normal", "Carte Centrée"]
@@ -25,6 +27,10 @@ class StartMenu:
 
         # Buttons
         self.buttons = {
+            "left_map_x": pygame.Rect(0, 0, 50, 50),
+            "right_map_x": pygame.Rect(0, 0, 50, 50),
+            "left_map_y": pygame.Rect(0, 0, 50, 50),
+            "right_map_y": pygame.Rect(0, 0, 50, 50),
             "left_map": pygame.Rect(0, 0, 50, 50),
             "right_map": pygame.Rect(0, 0, 50, 50),
             "left_mode": pygame.Rect(0, 0, 50, 50),
@@ -33,22 +39,23 @@ class StartMenu:
             "right_player_count": pygame.Rect(0, 0, 50, 50),
             "Terminal": pygame.Rect(0, 0, 115, 50),
             "2.5D": pygame.Rect(0, 0, 115, 50),
-            "Lancer la Partie": pygame.Rect(0, 0, 300, 50),
-            "left_map_cell": pygame.Rect(0, 0, 50, 50),
-            "right_map_cell": pygame.Rect(0, 0, 50, 50)
+            "Lancer la Partie": pygame.Rect(0, 0, 300, 50)
         }
 
     def draw(self):
         """Draw buttons and selected options on the screen."""
         self.screen.fill((255, 255, 255))  # Fill the screen with white
         screen_width, screen_height = self.screen.get_size()
-        self.screen.blit(adjust_sprite(START_IMG,screen_width, screen_height), (0, 0))
+        self.screen.blit(adjust_sprite(START_IMG, screen_width, screen_height), (0, 0))
+
         # Calculate positions based on screen size
         center_x = screen_width // 2
         center_y = screen_height // 2
 
-        self.buttons["left_map_cell"].topleft = (center_x - 215, center_y - 200)
-        self.buttons["right_map_cell"].topleft = (center_x + 165, center_y - 200)
+        self.buttons["left_map_x"].topleft = (center_x - 215, center_y - 260)
+        self.buttons["right_map_x"].topleft = (center_x + 165, center_y - 260)
+        self.buttons["left_map_y"].topleft = (center_x - 215, center_y - 200)
+        self.buttons["right_map_y"].topleft = (center_x + 165, center_y - 200)
         self.buttons["left_map"].topleft = (center_x - 215, center_y - 140)
         self.buttons["right_map"].topleft = (center_x + 165, center_y - 140)
         self.buttons["left_mode"].topleft = (center_x - 215, center_y - 80)
@@ -59,14 +66,23 @@ class StartMenu:
         self.buttons["2.5D"].topleft = (center_x + 5, center_y + 40)
         self.buttons["Lancer la Partie"].topleft = (center_x - 150, center_y + 100)
 
-        # Draw map cell count
-        self._draw_button("left_map_cell", "<")
-        if self.editing_map_cell_count:
-            map_cell_label = "Cellules: _"
+        # Draw map cell count for X
+        self._draw_button("left_map_x", "<")
+        if self.editing_map_cell_count_x:
+            map_cell_label_x = "Cellules X: _"
         else:
-            map_cell_label = f"Cellules: {self.map_cell_count}"
-        self._draw_text(map_cell_label, (center_x, center_y - 185), centered=True)
-        self._draw_button("right_map_cell", ">")
+            map_cell_label_x = f"Cellules X: {self.map_cell_count_x}"
+        self._draw_text(map_cell_label_x, (center_x, center_y - 245), centered=True)
+        self._draw_button("right_map_x", ">")
+
+        # Draw map cell count for Y
+        self._draw_button("left_map_y", "<")
+        if self.editing_map_cell_count_y:
+            map_cell_label_y = "Cellules Y: _"
+        else:
+            map_cell_label_y = f"Cellules Y: {self.map_cell_count_y}"
+        self._draw_text(map_cell_label_y, (center_x, center_y - 185), centered=True)
+        self._draw_button("right_map_y", ">")
 
         # Draw map selection
         self._draw_button("left_map", "<")
@@ -109,16 +125,20 @@ class StartMenu:
     def _draw_text(self, text, pos, centered=False):
         """Draw text at a specific position."""
         font = pygame.font.SysFont(None, 36)
-        rendered_text = font.render(text, True, (0, 0, 0))
+        rendered_text = font.render(text, True, WHITE_COLOR)
         text_rect = rendered_text.get_rect(center=pos if centered else None)
         self.screen.blit(rendered_text, text_rect if centered else pos)
 
     def handle_click(self, pos):
         """Handle clicks on buttons."""
-        if self.buttons["left_map_cell"].collidepoint(pos):
-            self.map_cell_count = max(120, self.map_cell_count - 1)
-        elif self.buttons["right_map_cell"].collidepoint(pos):
-            self.map_cell_count = min(1024, self.map_cell_count + 1)
+        if self.buttons["left_map_x"].collidepoint(pos):
+            self.map_cell_count_x = max(120, self.map_cell_count_x - 5)
+        elif self.buttons["right_map_x"].collidepoint(pos):
+            self.map_cell_count_x = min(1020, self.map_cell_count_x + 5)
+        elif self.buttons["left_map_y"].collidepoint(pos):
+            self.map_cell_count_y = max(120, self.map_cell_count_y - 5)
+        elif self.buttons["right_map_y"].collidepoint(pos):
+            self.map_cell_count_y = min(1020, self.map_cell_count_y + 5)
         elif self.buttons["left_map"].collidepoint(pos):
             self.selected_map_index = (self.selected_map_index - 1) % len(self.map_options)
         elif self.buttons["right_map"].collidepoint(pos):
@@ -142,41 +162,54 @@ class StartMenu:
 
     def handle_keydown(self, event):
         """Handle keyboard input for editable fields."""
-        if self.editing_map_cell_count:
+        if self.editing_map_cell_count_x:
             if event.key == pygame.K_RETURN:  # Confirm input
-                self.editing_map_cell_count = False
-                self.map_cell_count = min(1024, max(120, self.map_cell_count))
+                self.editing_map_cell_count_x = False
+                self.map_cell_count_x = min(1020, max(120, self.map_cell_count_x))
+                self.map_cell_count_x = (self.map_cell_count_x // 5) * 5
             elif event.key == pygame.K_BACKSPACE:  # Remove last digit
-                self.map_cell_count = int(str(self.map_cell_count)[:-1] or "120")
+                self.map_cell_count_x = int(str(self.map_cell_count_x)[:-1] or "120")
             elif event.unicode.isdigit():  # Add new digit
                 # On gère la saisie des chiffres correctement
-                if self.map_cell_count == '':
-                    self.map_cell_count = int(event.unicode)  # Si c'est vide, on met le premier chiffre
+                if self.map_cell_count_x == '':
+                    self.map_cell_count_x = int(event.unicode)  # Si c'est vide, on met le premier chiffre
                 else:
-                    self.map_cell_count = self.map_cell_count * 10 + int(event.unicode)  # On ajoute le chiffre à la fin
+                    self.map_cell_count_x = self.map_cell_count_x * 10 + int(event.unicode)  # On ajoute le chiffre à la fin
+
+        elif self.editing_map_cell_count_y:
+            if event.key == pygame.K_RETURN:  # Confirm input
+                self.editing_map_cell_count_y = False
+                self.map_cell_count_y = min(1020, max(120, self.map_cell_count_y)) 
+                self.map_cell_count_y = (self.map_cell_count_y // 5) * 5
+            elif event.key == pygame.K_BACKSPACE:  # Remove last digit
+                self.map_cell_count_y = int(str(self.map_cell_count_y)[:-1] or "120")
+            elif event.unicode.isdigit():  # Add new digit
+                # On gère la saisie des chiffres correctement
+                if self.map_cell_count_y == '':
+                    self.map_cell_count_y = int(event.unicode)  # Si c'est vide, on met le premier chiffre
+                else:
+                    self.map_cell_count_y = self.map_cell_count_y * 10 + int(event.unicode)  # On ajoute le chiffre à la fin
 
         elif self.editing_player_count:
             if event.key == pygame.K_RETURN:  # Confirm input
                 self.editing_player_count = False
-                self.selected_player_count = min(20, max(2, self.selected_player_count))  # Limite entre 2 et 20
+                self.selected_player_count = min(20, max(2, self.selected_player_count))  # Limit between 2 and 20
             elif event.key == pygame.K_BACKSPACE:  # Remove last digit
                 self.selected_player_count = int(str(self.selected_player_count)[:-1] or "2")
             elif event.unicode.isdigit():  # Add new digit
-                # Même logique pour le nombre de joueurs
-                if self.selected_player_count == '':
-                    self.selected_player_count = int(event.unicode)  # Si c'est vide, on met le premier chiffre
-                else:
-                    self.selected_player_count = self.selected_player_count * 10 + int(event.unicode)  # Ajouter le chiffre à la fin
+                self.selected_player_count = self.selected_player_count * 10 + int(event.unicode)
 
+    def start_editing_map_cell_count_x(self):
+        """Enable editing map cell count for X."""
+        self.editing_map_cell_count_x = True
+        self.map_cell_count_x = 0
 
-
-
-    def start_editing_map_cell_count(self):
-        """Enable editing map cell count."""
-        self.editing_map_cell_count = True
-        self.map_cell_count = 0  # Vider la valeur lorsque l'on commence à éditer
+    def start_editing_map_cell_count_y(self):
+        """Enable editing map cell count for Y."""
+        self.editing_map_cell_count_y = True
+        self.map_cell_count_y = 0
 
     def start_editing_player_count(self):
         """Enable editing player count."""
         self.editing_player_count = True
-        self.selected_player_count = 0  # Vider la valeur lorsque l'on commence à éditer
+        self.selected_player_count = 0

@@ -85,7 +85,7 @@ class AIProfile:
 
         for action in actions:
             if action == "Attack the enemy!":
-                return perform_attack(context)
+                return attack(context)
 
             if action == "Train military units!":
                 # Train military units in training buildings
