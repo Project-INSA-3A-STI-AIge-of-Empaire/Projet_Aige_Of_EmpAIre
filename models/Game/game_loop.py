@@ -41,9 +41,9 @@ class GameLoop:
                 )
                 if self.state.states == PAUSE:
                     self.state.states = PLAY
-                print(self.state.states)
+
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # Handle clicking on start menu elements
+
             if self.startmenu.handle_click(event.pos):
                 self.state.set_map_size(self.startmenu.map_cell_count)
                 self.state.set_map_type(self.startmenu.map_options[self.startmenu.selected_map_index])

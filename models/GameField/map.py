@@ -413,27 +413,42 @@ class Map:
             self.generate_gold_center(num_players)
         self._place_player_starting_areas(mode, num_players)
         
-        self.c_generate_forests(num_players)
-        if gen_mode == "Carte Normal":
-            self._generate_gold()
+        self.c_generate_clusters(num_players, gen_mode)
 
-    def c_generate_forests(self, num_players):
+    def c_generate_clusters(self, num_players, gen_mode):
 
         current_directory = os.path.dirname(__file__)
 
-        file_path = os.path.join(current_directory,"clusters.gen")
-        cluster_generator = ClusterGenerator(file_path)
+        file_path = os.path.join(current_directory,"tree_clusters.gen")
+        file_path2 = os.path.join(current_directory,"gold_clusters.gen")
+        tree_cluster_generator = ClusterGenerator(file_path)
+        gold_cluster_generator = ClusterGenerator(file_path2)
+
         spiral = spiral_distribution(self.nb_CellY, self.nb_CellX, self.region_division, num_players)
+        gen_n = 0
         for top_X, top_Y in spiral:
-            cluster_offsets = cluster_generator.generate_offsets()
 
-            for offset_Y, offset_X in cluster_offsets:
+            if gen_n%2 == 0:
+                cluster_offsets = tree_cluster_generator.generate_offsets()
 
-                current_Y, current_X = top_Y + offset_Y, top_X + offset_X
-                if 0 <= current_X < self.nb_CellX and 0 <= current_Y < self.nb_CellY:
-                    if not(self.check_cell(current_Y, current_X)):
-                        tree = Tree(self.id_generator,current_Y, current_X, None)
-                        self.add_entity(tree)
+                for offset_Y, offset_X in cluster_offsets:
+
+                    current_Y, current_X = top_Y + offset_Y, top_X + offset_X
+                    if 0 <= current_X < self.nb_CellX and 0 <= current_Y < self.nb_CellY:
+                        if not(self.check_cell(current_Y, current_X)):
+                            tree = Tree(self.id_generator,current_Y, current_X, None)
+                            self.add_entity(tree)
+            elif gen_mode == "Carte Normal":
+                cluster_offsets = gold_cluster_generator.generate_offsets()
+
+                for offset_Y, offset_X in cluster_offsets:
+
+                    current_Y, current_X = top_Y + offset_Y, top_X + offset_X
+                    if 0 <= current_X < self.nb_CellX and 0 <= current_Y < self.nb_CellY:
+                        if not(self.check_cell(current_Y, current_X)):
+                            gold = Gold(self.id_generator,current_Y, current_X, None)
+                            self.add_entity(gold)
+            gen_n += 1
 
             
     def _generate_forests(self, forest_count=30, forest_size_range=(14, 28)):
@@ -642,7 +657,10 @@ def ellipse_distribution(ry, rx, Cy, Cx, angle_num, rand_rot = False):
 
 def spiral_distribution(Y, X, reg_div, player_num):
     points = []
-    spiral_lvl = reg_div
+    print(min(Y, X))
+    print(reg_div**reg_div)
+    spiral_lvl = int(min(Y, X) /(reg_div**(math.sqrt(reg_div))))
+    print(spiral_lvl)
 
     Y_step = Y/2 /spiral_lvl
     X_step = X/2 /spiral_lvl
@@ -650,7 +668,7 @@ def spiral_distribution(Y, X, reg_div, player_num):
     Cy, Cx = Y/2, X/2
     
     angle_num = 0
-    angle_step = player_num
+    angle_step = math.ceil(1*player_num)
 
     for lvl in range(spiral_lvl):
         rY, rX = lvl*Y_step, lvl*X_step
