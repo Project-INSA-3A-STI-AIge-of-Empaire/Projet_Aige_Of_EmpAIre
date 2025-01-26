@@ -75,7 +75,7 @@ class GameState:
     def toggle_fullscreen(self, gameloop):
         if not(self.full_screen):
             self.full_screen = True
-            gameloop.screen = pygame.display.set_mode((FULLSCREEN_WIDTH, FULLSCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.FULLSCREEN)
+            gameloop.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.FULLSCREEN)
             #self.screen.set_alpha(None)
         else:
             self.full_screen = False
@@ -94,7 +94,7 @@ class GameState:
             if self.display_mode == ISO2D:
                 self.display_mode = TERMINAL
                 
-                gameloop.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF )
+                gameloop.screen = pygame.display.set_mode((20, 20), pygame.HWSURFACE | pygame.DOUBLEBUF )
                 gameloop.screen.set_alpha(None)
             elif self.display_mode == TERMINAL:
                 self.display_mode = ISO2D
