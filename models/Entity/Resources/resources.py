@@ -5,8 +5,8 @@ from idgen import *
 
 class Resources(Entity):
 
-    def __init__(self, cell_Y, cell_X, position, representation, storage_capacity, resource_indicator, team = 0):
-        super().__init__(cell_Y, cell_X, position, team, representation)
+    def __init__(self, id_gen, cell_Y, cell_X, position, representation, storage_capacity, resource_indicator, team = 0):
+        super().__init__(id_gen,cell_Y, cell_X, position, team, representation)
         self.resources = None
         self.resource_indicator = resource_indicator
         self.max_storage = storage_capacity

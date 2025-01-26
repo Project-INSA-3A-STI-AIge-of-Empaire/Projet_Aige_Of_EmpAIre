@@ -13,8 +13,8 @@ PROJECTILE_TYPE_MAPPING = {
 
 class DefensiveBuilding(Building):
 
-    def __init__(self, cell_Y, cell_X, position, team,representation, sq_size, hp, cost, build_time, attack, attack_speed, _range, projectile_type):
-        super().__init__(cell_Y, cell_X, position, team,representation, sq_size, hp, cost, build_time)
+    def __init__(self, id_gen,cell_Y, cell_X, position, team,representation, sq_size, hp, cost, build_time, attack, attack_speed, _range, projectile_type):
+        super().__init__(id_gen,cell_Y, cell_X, position, team,representation, sq_size, hp, cost, build_time)
         self.attack = attack
         self.attack_speed = attack_speed
         self.range = _range

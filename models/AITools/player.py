@@ -299,7 +299,7 @@ class Player:
                     return BUILDING_POPULATION_MAX_LIMIT
                 
                 BuildingClass = CLASS_MAPPING.get(representation, None)
-                Instance = BuildingClass(None, None, None, self.team)
+                Instance = BuildingClass(self.linked_map.id_generator,None, None, None, self.team)
                 
                 if isinstance(Instance, Building) and Instance.affordable_by(self.get_current_resources()):
                     self.remove_resources(Instance.cost)
@@ -477,8 +477,6 @@ class Player:
                     break
                 else:
                     self.homeless_units -= 1
-
-        print(f"current population:{self.current_population}, current cap:{self.get_current_population_capacity()}")
 
     def entity_closest_to(self, ent_repr_list, cell_Y, cell_X): # we give the ent_repr for the entity we want and then we give a certain position and we will return the closest entity of the given type to the cell_X, cell_Y
         closest_id = None
