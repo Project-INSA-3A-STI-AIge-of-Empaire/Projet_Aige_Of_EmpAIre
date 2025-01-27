@@ -30,7 +30,7 @@ class AIProfile:
         for building_repr in sorted_differences:
             existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             print(f"Old list of building : {existing_ids}")
-            result = context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True), building_repr[0])
+            result = context['player'].build_entity(context['player'].get_entities_by_class(['v']), building_repr[0])
             print(f"Résultat de build_entity : {result}")
             new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             print(f"New list of buildings {new_ids}")
@@ -42,10 +42,16 @@ class AIProfile:
                     return
             elif result == 0:
                     print("test compare ratios ==0")
-                    for villager in context['units']['villager_free']:
-                        villager.collect_entity(context['resource_id'])  # Start collecting resources
-                        if villager.is_full():
-                            villager.drop_to_entity(context['drop_off_id'])
+                    resources_to_collect=("wood",'W')
+                    for temp_resources in [("gold",'G'),("food",'F')]:
+                        if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
+                            resources_to_collect=temp_resources
+                    for villager in context['units']['villager']:
+                        if villager.state==UNIT_IDLE:
+                            if not villager.is_full():
+                                villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+                            if villager.is_full():
+                                villager.drop_to_entity(context['drop_off_id'])
                     return "Gathered resources"
                 
 
@@ -189,13 +195,17 @@ class AIProfile:
         try:
             for action in actions:
                 if action == "Gathering resources!":
-                    for villager in context['units']['villager_free'] :
-                            if not villager.is_full() :
-                                villager.collect_entity(context['resource_id'])
+                    resources_to_collect=("wood",'W')
+                    for temp_resources in [("gold",'G'),("food",'F')]:
+                        if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
+                            resources_to_collect=temp_resources
+                    for villager in context['units']['villager']:
+                        if villager.state==UNIT_IDLE:
+                            if not villager.is_full():
+                                villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
                             else:
-                                action = "Dropping off resources!"
-                                return "Dropping off resources!"
-                    return "Gathering resources!"
+                                villager.drop_entity(context['drop_off_id'])
+                        return "Gathering resources!"
 
                 elif action == "Dropping off resources!":
                     # Drop resources in storage buildings
