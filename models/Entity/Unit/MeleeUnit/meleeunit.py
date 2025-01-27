@@ -36,7 +36,7 @@ class MeleeUnit(Unit):
                     self.linked_map.dead_entities[entity.id] = entity
                     entity.change_state(STATES.get(entity.representation, None).get("dying", None))
                     self.path_to_position = None
-                    
+
 
             elif self.animation_frame == (self.len_current_animation_frames() - 1):
                 

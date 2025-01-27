@@ -112,6 +112,7 @@ MODE_GENERATION = {
             "v":3
         }
     },
+
     MEAN:{
         "resources":{"gold":2000, "wood":2000, "food":2000},
         "entities":{
@@ -119,6 +120,7 @@ MODE_GENERATION = {
             "v":3
         }
     },
+
     MARINES:{
         "resources":{"gold":20000, "wood":20000, "food":20000},
         "entities":{

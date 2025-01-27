@@ -114,10 +114,12 @@ def gather_resources(context):
     for temp_resources in [("gold",'G'),("food",'F')]:
         if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
             resources_to_collect=temp_resources
+    k=0
     for villager in [context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]:
         if not villager.is_full():
             print(f"villager free : {context['units']['villager_free']}")
-            villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+            villager.collect_entity(context['player'].ect(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X)[k])
+            k+=1
         else:
             drop_resources(context)
     return "Gathering resources!"
@@ -136,15 +138,7 @@ def drop_resources(context):
             unit.drop_to_entity(context['drop_off_id'])
     return "Dropping off resources!"
 
-def find_closest_resources(context):
-    resources_to_find='W'
-    if min(context['resources']["gold"], context['resources']["wood"])==context['resources']["gold"]:
-        resources_to_find='G'
-    town_center = context['player'].linked_map.get_entity_by_id(context['closest_town_center'])
-    if town_center:
-        closest_resource = context['player'].entity_closest_to(resources_to_find, town_center.cell_Y, town_center.cell_X)  # Example for gold
-        context['resource_id'] = closest_resource if closest_resource else None
-    return "Found closest resources!"
+
 
 def build_structure(context):
     # villager_ids = [unit.id for unit in context['units'].get('villager', []) if is_unit_idle(unit)]
@@ -156,7 +150,7 @@ def enemy_visible(context):
     return context['enemy_visible']
 
 def housing_crisis(context):
-    context['player'].build_entity(context['player'].get_entities_by_class('v'), 'H')
+    context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True), 'H')
     return "Building House!"
 
 # ---- Arbre de décision ----
@@ -266,6 +260,7 @@ class Player:
         self.refl_acc = 0
         self.is_busy = False
 
+        self.life_time = 0
 
     def add_entity(self, entity):
 
@@ -570,6 +565,26 @@ class Player:
             
         return closest_id
     
+
+    def ect(self, ent_repr_list, cell_Y, cell_X):
+        entity_distances = []
+
+        for ent_repr in ent_repr_list:
+            if ent_repr not in ["W", "G"]:
+                ent_ids = self.get_entities_by_class(ent_repr)
+            else:
+                ent_ids = self.linked_map.resource_id_dict.get(ent_repr, None)
+
+            if ent_ids:
+                for ent_id in ent_ids:
+                    current_entity = self.linked_map.get_entity_by_id(ent_id)
+                    if current_entity:
+                        current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
+                        entity_distances.append((current_entity.id, current_dist))
+
+        sorted_entities = sorted(entity_distances, key=lambda x: x[1])
+        return [entity_id for entity_id, _ in sorted_entities]
+    
     def get_closest_ennemy(self):
         closest_id = None
         closest_distance = float('inf')
@@ -581,13 +596,23 @@ class Player:
                     closest_distance = current_distance
         closest_entity = self.linked_map.get_entity_by_id(closest_id)
         return closest_entity,closest_distance, closest_id
-    
+
     def is_free(self):
         return 'is_free'
 
+    def is_dead(self):
+        return not(self.entities_dict)
+
+    def get_buildings(self):
+        return self.get_entities_by_class(["T","C","H","K","F","S","B","A"])
+
     def update(self, dt):
+
         self.update_population(dt)
-        self.refl_acc+=dt
+
+        self.life_time += dt
+
+        self.refl_acc +=dt
         if self.refl_acc>ONE_SEC/3:
             self.player_turn(dt)
 
@@ -596,10 +621,10 @@ class Player:
         decision = self.game_handler.process_ai_decisions(self.decision_tree)
         print(f"Decision effectué : {decision}")
         self.refl_acc=0
-    
+
         # # decision = self.ai_profile.decide_action(self.decision_tree, context)
         # return decision
-    
+
     # def set_build(self, villager_id_list):
     #     i = 0
     #     while(i < 4):
@@ -625,6 +650,3 @@ class Player:
     #     if not villager.is_full():
     #         villager.move_to(entity_id.position)
     #         villager.collect_entity(entity_id)
-
-
-        

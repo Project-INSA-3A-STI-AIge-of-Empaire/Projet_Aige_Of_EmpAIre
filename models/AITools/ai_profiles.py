@@ -19,9 +19,18 @@ class AIProfile:
         self.aggressiveness = aggressiveness
         self.defense = defense
 
-    def compare_ratios(self, actual_ratios, target_ratios_building, context, keys_to_include=None):
-        if len(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))<2:
-            result = context['player'].build_entity(context['player'].get_entities_by_class('v'), 'F')
+    def compare_ratios(self, actual_ratios, target_ratios, context, keys_to_include=None):
+        # ids=context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S'])
+        # print(f"len ids : {len(ids)}")
+        # for id in ids:
+        #     print(f"id : {id}")
+        #     entity= context['player'].linked_map.get_entity_by_id(id)
+        #     if entity.state==BUILDING_INPROGRESS:
+        #         print(f"id : {id}")
+        #         result=context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True),entity_id=id)
+        #         return
+        if len(context['player'].get_entities_by_class(['F']))<1:
+            result = context['player'].build_entity(context['player'].get_entities_by_class('v',is_free=True), 'F')
             return
         if keys_to_include is None:
             keys_to_include = target_ratios_building.keys()
@@ -35,7 +44,7 @@ class AIProfile:
         print(f"sorted differences : {sorted_differences}")
         for building_repr in sorted_differences:
             existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
-            result = context['player'].build_entity(context['player'].get_entities_by_class(['v']), building_repr[0])
+            result = context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True), building_repr[0])
             new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             new_building_ids = new_ids - existing_ids
             if result != 0:
@@ -43,15 +52,19 @@ class AIProfile:
                 building = context['player'].linked_map.get_entity_by_id(new_building_id)
                 if building.state == BUILDING_ACTIVE:
                     return
+                # if building.state == BUILDING_INPROGRESS:
+                #     result=context['player'].build_entity(context['player'].get_entities_by_class('v',is_free=True),entity_id=building)
             elif result == 0:
                     print("test compare ratios ==0")
                     resources_to_collect=("wood",'W')
                     for temp_resources in [("gold",'G'),("food",'F')]:
                         if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
                             resources_to_collect=temp_resources
+                    k=0
                     for villager in [context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]:
                         if not villager.is_full():
-                            villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+                            villager.collect_entity(context['player'].ect(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X)[k])
+                            k+=1
                         if villager.is_full():
                             villager.drop_to_entity(context['drop_off_id'])
                     return "Gathered resources"
@@ -237,9 +250,11 @@ class AIProfile:
                     for temp_resources in [("gold",'G'),("food",'F')]:
                         if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
                             resources_to_collect=temp_resources
+                    k=0
                     for villager in [context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]:
                         if not villager.is_full():
-                            villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+                            villager.collect_entity(context['player'].ect(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+                            k+=1
                         else:
                             villager.drop_to_entity(context['drop_off_id'])
                     return "Gathering resources!"
