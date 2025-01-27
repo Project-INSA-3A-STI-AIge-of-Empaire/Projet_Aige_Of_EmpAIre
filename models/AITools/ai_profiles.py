@@ -46,12 +46,11 @@ class AIProfile:
                     for temp_resources in [("gold",'G'),("food",'F')]:
                         if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
                             resources_to_collect=temp_resources
-                    for villager in context['units']['villager']:
-                        if villager.state==UNIT_IDLE:
-                            if not villager.is_full():
-                                villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
-                            if villager.is_full():
-                                villager.drop_to_entity(context['drop_off_id'])
+                    for villager in [context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]:
+                        if not villager.is_full():
+                            villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+                        if villager.is_full():
+                            villager.drop_to_entity(context['drop_off_id'])
                     return "Gathered resources"
                 
 
@@ -204,13 +203,12 @@ class AIProfile:
                     for temp_resources in [("gold",'G'),("food",'F')]:
                         if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
                             resources_to_collect=temp_resources
-                    for villager in context['units']['villager']:
-                        if villager.state==UNIT_IDLE:
-                            if not villager.is_full():
-                                villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
-                            else:
-                                villager.drop_to_entity(context['drop_off_id'])
-                        return "Gathering resources!"
+                    for villager in [context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]:
+                        if not villager.is_full():
+                            villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+                        else:
+                            villager.drop_to_entity(context['drop_off_id'])
+                    return "Gathering resources!"
 
                 elif action == "Dropping off resources!":
                     # Drop resources in storage buildings
