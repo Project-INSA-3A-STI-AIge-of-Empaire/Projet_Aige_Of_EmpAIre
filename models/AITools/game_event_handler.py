@@ -25,13 +25,13 @@ class GameEventHandler:
             'military_units': len(self.players.get_entities_by_class(['h', 'a', 's','x','m','c'])),
             'ratio_military':len(self.players.get_entities_by_class(['h', 'a', 's','x','m','c']))/len(self.players.get_entities_by_class(['h', 'a', 's','v','x','m','c'])) if len(self.players.get_entities_by_class(['h','a','s','v','x','m','c'])) != 0 else 0,
             'military_units_details': {
-                'archers': len(self.players.get_entities_by_class(['a'])),
-                'infantry': len(self.players.get_entities_by_class(['s'])),
+                'archers': len(self.players.get_entities_by_class(['a','m'])),
+                'infantry': len(self.players.get_entities_by_class(['s','c'])),
             },
             'enemy_visible': enemy_visible,
             'buildings': {
                 'storage': self.players.get_entities_by_class(['T','C']),
-                'training': self.players.get_entities_by_class(['B','S','A','K']),
+                'training': self.players.get_entities_by_class(['B','S','A']),
                 'critical': self.players.is_free(),
                 'ratio':{
                     'T' : len(self.players.entities_dict['T'])/sum(len(self.players.entities_dict[k]) for k in self.players.entities_dict.keys()) if 'T' in self.players.entities_dict.keys() else 0,
@@ -46,7 +46,7 @@ class GameEventHandler:
             },
             'enemy_distance': enemy_distance,
             'units' : {
-                'military': [self.players.linked_map.get_entity_by_id(m_id) for m_id in self.players.get_entities_by_class(['h', 'a', 's'])],
+                'military': [self.players.linked_map.get_entity_by_id(m_id) for m_id in self.players.get_entities_by_class(['h', 'a', 's','m','c','x'])],
                 'villager': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'])],
                 'villager_free': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'],is_free=True)],
 
