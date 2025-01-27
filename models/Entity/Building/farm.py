@@ -15,7 +15,7 @@ class Farm(Building):
 
     def is_empty(self):
         return self.resources[self.resource_indicator] <= 0
-    
+
     def display(self, dt, screen, camera, g_width, g_height):
         super().display(dt, screen, camera, g_width, g_height)
     

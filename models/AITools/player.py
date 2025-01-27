@@ -280,6 +280,7 @@ class Player:
         self.refl_acc = 0
         self.is_busy = False
 
+        self.life_time = 0
 
     def add_entity(self, entity):
 
@@ -595,13 +596,22 @@ class Player:
                     closest_distance = current_distance
         closest_entity = self.linked_map.get_entity_by_id(closest_id)
         return closest_entity,closest_distance, closest_id
-    
+
     def is_free(self):
         return 'is_free'
 
+    def is_dead(self):
+        return not(self.entities_dict)
+
     def update(self, dt):
+        print(f"[nonoccup] {self.get_entities_by_class(['v'], is_free= True)}")
+        print(f"[tous] {self.get_entities_by_class(['v'])}")
+
         self.update_population(dt)
-        self.refl_acc+=dt
+
+        self.life_time += dt
+
+        self.refl_acc +=dt
         if self.refl_acc>ONE_SEC/3:
             self.player_turn(dt)
 
@@ -610,10 +620,10 @@ class Player:
         decision = self.game_handler.process_ai_decisions(self.decision_tree)
         print(f"Decision effectué : {decision}")
         self.refl_acc=0
-    
+
         # # decision = self.ai_profile.decide_action(self.decision_tree, context)
         # return decision
-    
+
     # def set_build(self, villager_id_list):
     #     i = 0
     #     while(i < 4):
@@ -639,6 +649,3 @@ class Player:
     #     if not villager.is_full():
     #         villager.move_to(entity_id.position)
     #         villager.collect_entity(entity_id)
-
-
-        
