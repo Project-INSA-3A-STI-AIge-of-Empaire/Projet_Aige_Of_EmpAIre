@@ -55,6 +55,7 @@ class GameEventHandler:
             'closest_town_center': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
             'map' : self.map,
             'under_attack' : (self.players.get_closest_ennemy()[1] < 20),
+            'housing_crisis':(self.players.current_population >= self.players.get_current_population_capacity())
         }
         return context
 
