@@ -179,8 +179,8 @@ tree = DecisionNode(
             yes_action=housing_crisis,    
             no_action=DecisionNode(    
                 has_enough_military,
-                yes_action=train_military,
-                no_action=DecisionNode(
+                no_action=train_military,
+                yes_action=DecisionNode(
                     closest_town_center,
                     yes_action=DecisionNode(
                         resources_critical,
