@@ -42,12 +42,18 @@ class MeleeUnit(Unit):
                 
                 self.check_range_with_target = False # we need to recheck if it is still in range
                 self.change_state(UNIT_IDLE) # if the entity is killed we stop 
-    
 
-        
     def try_to_attack(self,dt, camera, screen):
         if (self.state != UNIT_DYING):
             entity = None
+
+            if self.entity_target_id != None:
+                entity = self.linked_map.get_entity_by_id(self.entity_target_id)
+
+                if entity.is_dead() or entity.team == self.team:
+                    self.entity_target_id = None
+            
+
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
             elif self.entity_target_id != None:
@@ -83,13 +89,12 @@ class MeleeUnit(Unit):
                                 self.check_range_with_target = False
 
                     else:
-                        if not(self.state == UNIT_IDLE):
+                        if ((self.entity_defend_from_id == entity.id and self.entity_target_id == None) or (self.entity_target_id == entity.id)) and not(self.state == UNIT_IDLE):
                             self.change_state(UNIT_IDLE)
                         self.reset_target()
                         self.locked_with_target = False
                 else:
                     if not(self.state == UNIT_IDLE):
                         self.change_state(UNIT_IDLE)
-                    self.change_state(UNIT_IDLE)
                     self.reset_target()
 

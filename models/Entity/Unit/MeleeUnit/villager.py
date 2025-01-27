@@ -23,7 +23,7 @@ class Villager(MeleeUnit):
 
         self.attack_frame = 27
         self.collect_frame = 26
-        
+
         self.animation_speed = [60, 30, 60, 30, 60/self.collect_speed]
         self.adapte_attack_delta_time()
         
@@ -33,7 +33,7 @@ class Villager(MeleeUnit):
             self.resources[resource] = 0
 
     def try_to_drop(self, dt, camera, screen):
-        if (self.state != UNIT_DYING):
+        if (self.state != UNIT_DYING and self.entity_defend_from_id == None):
             if self.drop_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.drop_target_id)
                      
@@ -41,7 +41,7 @@ class Villager(MeleeUnit):
                     if (entity.team == self.team):
                         if (entity.is_dead() == False):
                             
-                            if (entity.representation in ["C", "T"]  ):
+                            if (entity.representation in ["C", "T"]):
 
                                 if (self.collide_with_entity(entity)):
                                     
@@ -49,6 +49,7 @@ class Villager(MeleeUnit):
                                     self.drop_target_id = None
                                     if not(self.state == UNIT_IDLE):
                                         self.change_state(UNIT_IDLE)
+                                    self.reset_task()
                                     
                                 else:
                                     if not(self.state == UNIT_WALKING):
@@ -63,15 +64,19 @@ class Villager(MeleeUnit):
                             else:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
+                                self.reset_task()
                         else:
                             if not(self.state == UNIT_IDLE):
                                 self.change_state(UNIT_IDLE)
+                            self.reset_task()
                     else:
                         if not(self.state == UNIT_IDLE):
                             self.change_state(UNIT_IDLE)
+                        self.reset_task()
                 else:
                     if not(self.state == UNIT_IDLE):
                         self.change_state(UNIT_IDLE)
+                    self.reset_task()
 
 
 
@@ -91,10 +96,10 @@ class Villager(MeleeUnit):
             if 59>self.animation_frame >= self.collect_frame and self.will_collect:
                 self.will_collect = False
                 # collect calculations
-                print(1)
+
                 amount_to_remove = 1
                 self.resources[entity.resource_indicator] += entity.remove_resources(amount_to_remove)
-                print(self.resources)
+                
                 if isinstance(entity, Resources):
                     
                     if entity.is_dead():
@@ -105,7 +110,7 @@ class Villager(MeleeUnit):
             
         
     def try_to_collect(self,dt, camera, screen):
-        if (self.state != UNIT_DYING):
+        if (self.state != UNIT_DYING and self.entity_defend_from_id == None):
             if self.resource_target_id != None:
                 if not(self.is_full()):
                     entity = self.linked_map.get_entity_by_id(self.resource_target_id)
@@ -131,39 +136,40 @@ class Villager(MeleeUnit):
                                         self.try_to_move(dt, camera, screen)
                                 else:
                                     if not(self.state == UNIT_IDLE):
-                                        self.change_state(UNIT_IDLE)      
+                                        self.change_state(UNIT_IDLE)
+                                    self.reset_task()     
                             else:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
+                                self.reset_task()
                         else:
                             if not(self.state == UNIT_IDLE):
-                                    self.change_state(UNIT_IDLE)
+                                self.change_state(UNIT_IDLE)
+                            self.reset_task()
                     else:
                         if not(self.state == UNIT_IDLE):
                             self.change_state(UNIT_IDLE)
+                        self.reset_task()
                 else:
                     if not(self.state == UNIT_IDLE):
                         self.change_state(UNIT_IDLE)
+                    self.reset_task()
 
 
     def try_to_build(self, dt, camera, screen):
-        if (self.state != UNIT_DYING):
+        if (self.state != UNIT_DYING and self.entity_defend_from_id == None):
             if self.build_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.build_target_id)
-                print(entity)
+                
                 if (entity != None):
-                    print("1")
                     if (entity.team == self.team and entity.state == BUILDING_INPROGRESS):
-                        print("2")
                         if (entity.is_dead() == False):
-                            print("3")
                             if (self.collide_with_entity(entity)):
-                                print("4")
+                                
                                 entity.builders[self.id] = None
                                 if not(self.state == UNIT_TASK):
                                     self.change_state(UNIT_TASK)
                             else:
-                                print("5")
             
                                 if not(self.state == UNIT_WALKING):
 
@@ -174,24 +180,21 @@ class Villager(MeleeUnit):
                                 self._entity_optional_target_id = entity.id
                                 
 
-                                print("----")
-                                print(f"self:{self.position}, mov:{self.move_position}")
-                                print("----")
                                 self.try_to_move(dt, camera, screen)
                                   
                         else:
-                            print("6")
                             if not(self.state == UNIT_IDLE):
                                 self.change_state(UNIT_IDLE)
+                            self.reset_task()
 
                     else:
-                        print("7")
                         if not(self.state == UNIT_IDLE):
-                                self.change_state(UNIT_IDLE)
+                            self.change_state(UNIT_IDLE)
+                        self.reset_task()
                 else:
-                    print("8")
                     if not(self.state == UNIT_IDLE):
                         self.change_state(UNIT_IDLE)
+                    self.reset_task()
 
             
     
@@ -234,7 +237,7 @@ class Villager(MeleeUnit):
 
         self.build_target_id = build_target_id
         if self.build_target_id == None:
-            print("kif fet ")
+            
             if not(self.state == UNIT_IDLE):
                 self.change_state(UNIT_IDLE)
 
@@ -253,10 +256,14 @@ class Villager(MeleeUnit):
 
     def change_state(self, new_state):
         super().change_state(new_state)
-        #if new_state == UNIT_IDLE:
-        #    self.build_target_id = None
-        #    self.resource_target_id = None
-        #    self.drop_target_id = None
+        
 
     def is_free(self):
-        return super().is_free() and self.drop_target_id == None and self.resource_target_id == None and self.build_target_id == None
+        return super().is_free() and self.resource_target_id == None and self.drop_target_id == None and self.build_target_id == None
+
+    def reset_task(self):
+        self.resource_target_id = None
+        self.drop_target_id = None
+        self.build_target_id = None
+        self.entity_target_id = None
+
