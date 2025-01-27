@@ -93,6 +93,9 @@ def closest_town_center(context):
 def is_villager_full(unit):
     return unit['type'] == 'villager' and unit['instance'].is_full()
 
+def check_housing(context):
+    return context['housing_crisis']
+
 # ---- Actions ----
 
 def gather_resources(context):
@@ -141,6 +144,10 @@ def build_structure(context):
 def enemy_visible(context):
     return context['enemy_visible']
 
+def housing_crisis(context):
+    context['player'].build_entity(context['player'].get_entities_by_class('v'), 'H')
+    return "Building House!"
+
 # ---- Arbre de décision ----
 tree = DecisionNode(
     is_under_attack,
@@ -151,32 +158,37 @@ tree = DecisionNode(
             buildings_insufficient,
             yes_action=drop_resources,
             no_action=gather_resources,
-            priority=7
+            priority=6
         ),
         no_action=DecisionNode(
-            has_enough_military,
-            yes_action=train_military,
-            no_action=DecisionNode(
-                closest_town_center,
-                yes_action=DecisionNode(
-                    resources_critical,
-                    no_action=build_structure,
+            check_housing,
+            yes_action=housing_crisis,    
+            no_action=DecisionNode(    
+                has_enough_military,
+                yes_action=train_military,
+                no_action=DecisionNode(
+                    closest_town_center,
                     yes_action=DecisionNode(
-                        is_villager_full,
-                        yes_action=drop_resources,
-                        no_action=gather_resources,
-                        priority=10
+                        resources_critical,
+                        no_action=build_structure,
+                        yes_action=DecisionNode(
+                            is_villager_full,
+                            yes_action=drop_resources,
+                            no_action=gather_resources,
+                            priority=10
+                        ),
+                        priority=9
                     ),
-                    priority=9
+                    no_action=gather_resources,
+                    priority=8
                 ),
-                no_action=gather_resources,
-                priority=8
+                priority=7
             ),
-            priority=7
+            priority=6
         ),
-        priority=6
+        priority=5
     ),
-    priority=5
+    priority=4
 )
 
 def choose_strategy(Player):
