@@ -24,11 +24,11 @@ class AIProfile:
             differences[key] = diff
         sorted_differences = sorted(differences.items(), key=lambda x: x[1], reverse=True)
         for building_repr in sorted_differences:
-            existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))
+            existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             print(f"Old list of building : {existing_ids}")
             result = context['player'].build_entity(context['player'].get_entities_by_class('v'), building_repr[0])
             print(f"Résultat de build_entity : {result}")
-            new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))
+            new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             print(f"New list of buildings {new_ids}")
             new_building_ids = new_ids - existing_ids
             if result != 0:
@@ -74,17 +74,17 @@ class AIProfile:
         Implement the aggressive strategy by prioritizing attacks and military training.
         """
         target_ratios = {
-            'T': 0.1,
-            'H': 0.15,   
-            'C': 0.1,   
-            'F': 0.1,    
-            'B': 0.2,    
+            'T': 0.13,   
+            'C': 0.13,   
+            'F': 0.13,    
+            'B': 0.26,    
             'S': 0.15,  
             'A': 0.15,   
             'K': 0.05
         }
         player = context['player']
         map = context['map']
+
         try:
             for action in actions:
                 if action == "Attack the enemy!":
@@ -115,16 +115,15 @@ class AIProfile:
         player = context['player']
         map = context['map']
         target_ratios = {
-            'T': 0.1,
-            'H': 0.15,   
-            'C': 0.1,   
-            'F': 0.1,    
+            'T': 0.13,  
+            'C': 0.13,   
+            'F': 0.13,    
             'B': 0.05,    
             'S': 0.15,  
             'A': 0.15,   
-            'K': 0.2
+            'K': 0.26
         }
-        
+
         try:
             for action in actions:
                 if action == "Defend the village!":
@@ -166,14 +165,13 @@ class AIProfile:
         player = context['player']
         map = context['map']
         target_ratios = {
-            'T': 0.15,
-            'H': 0.2,   
-            'C': 0.1,   
-            'F': 0.15,    
-            'B': 0.1,    
-            'S': 0.1,  
-            'A': 0.1,   
-            'K': 0.1
+            'T': 0.2,   
+            'C': 0.12,   
+            'F': 0.2,    
+            'B': 0.12,    
+            'S': 0.12,  
+            'A': 0.12,   
+            'K': 0.12
         }
 
         try:
