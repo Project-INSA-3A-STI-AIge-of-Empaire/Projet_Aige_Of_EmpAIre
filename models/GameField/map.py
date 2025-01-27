@@ -620,6 +620,15 @@ class Map:
         for player in self.players_dict.values():
             player.update(dt)
 
+        for team in list(self.players_dict.keys()):
+
+            player = self.players_dict.get(team, None)
+
+            if player:
+                if player.is_dead():
+                    self.players_dict.pop(team, None)
+
+
     def update_all_events(self, dt, camera, screen):
         self.update_all_entities(dt, camera, screen)
         self.update_all_projectiles(dt)

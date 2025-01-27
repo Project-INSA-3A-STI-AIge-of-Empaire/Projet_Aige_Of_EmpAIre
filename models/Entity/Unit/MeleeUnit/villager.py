@@ -104,7 +104,16 @@ class Villager(MeleeUnit):
                     
                     if entity.is_dead():
                         self.linked_map.remove_entity(entity)
-                
+                elif isinstance(entity, Farm):
+
+                    if entity.is_empty():
+                        self.linked_map.dead_entities[entity.id] = entity
+                        entity.hp = 0
+                        entity.change_state(STATES.get(entity.representation, None).get("dying", None))
+                        
+
+
+
             elif self.animation_frame == self.len_current_animation_frames() - 1:
                 self.will_collect = True 
             
