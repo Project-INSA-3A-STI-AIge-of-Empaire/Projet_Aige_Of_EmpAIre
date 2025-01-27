@@ -113,11 +113,17 @@ def train_villagers(context):
     return "Training villagers!"
 
 def gather_resources(context):
+    resources_to_collect=("wood",'W')
+    for temp_resources in [("gold",'G'),("food",'F')]:
+        if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
+            resources_to_collect=temp_resources
     for villager in context['units']['villager']:
-        if not villager.is_full() and is_unit_idle(villager):
-            villager.collect_entity(context['resource_id'])
-        else:
-            drop_resources(context)
+        if villager.state==UNIT_IDLE:
+            print("is_idle")
+            if not villager.is_full():
+                villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+            else:
+                drop_resources(context)
     return "Gathering resources!"
 
 def train_military(context):
@@ -163,17 +169,14 @@ def housing_crisis(context):
 
 # ---- Arbre de décision ----
 tree = DecisionNode(
-    is_under_attack,
-    yes_action=attack,
     # villagers_insufficient,
     # yes_action=train_villagers,
-    no_action=DecisionNode(
-        resources_critical,
-        yes_action=DecisionNode(
-            buildings_insufficient,
-            yes_action=drop_resources,
-            no_action=gather_resources,
-            priority=6
+    resources_critical,
+    yes_action=DecisionNode(
+        buildings_insufficient,
+        yes_action=drop_resources,
+        no_action=gather_resources,
+        priority=6
         ),
         no_action=DecisionNode(
             check_housing,
@@ -201,58 +204,56 @@ tree = DecisionNode(
             ),
             priority=6
         ),
-        priority=5
-    ),
-    priority=4
+    priority=5
 )
 
 def choose_strategy(Player):
-    answer = messagebox.askyesno(
-        message='Do you want to choose the IA type for Player'+ str(Player.team)+'?',
-        icon='question',
-        title='AIge Of EmpAIres II'
-    )
+    # answer = messagebox.askyesno(
+    #     message='Do you want to choose the IA type for Player'+ str(Player.team)+'?',
+    #     icon='question',
+    #     title='AIge Of EmpAIres II'
+    # )
     
-    if answer:
-        def get_ia_values():
-            # Récupérer les valeurs des sliders lorsqu'on appuie sur le bouton
-            agressive_select = agressive.get()
-            defense_select = defense.get()
-            if defense_select == agressive_select:
-                result = "balanced", agressive_select, defense_select
-            elif defense_select > agressive_select:
-                result = "defensive", agressive_select, defense_select
-            else:
-                result = "agressive", agressive_select, defense_select
+    # if answer:
+    #     def get_ia_values():
+    #         # Récupérer les valeurs des sliders lorsqu'on appuie sur le bouton
+    #         agressive_select = agressive.get()
+    #         defense_select = defense.get()
+    #         if defense_select == agressive_select:
+    #             result = "balanced", agressive_select, defense_select
+    #         elif defense_select > agressive_select:
+    #             result = "defensive", agressive_select, defense_select
+    #         else:
+    #             result = "agressive", agressive_select, defense_select
             
-            print(result)  # Affiche le résultat pour vérifier
-            root.destroy()  # Ferme la fenêtre après validation
+    #         print(result)  # Affiche le résultat pour vérifier
+    #         root.destroy()  # Ferme la fenêtre après validation
 
-        # Création de l'interface
-        root = Tk()
-        mainframe = Frame(root)
-        mainframe.grid(column=0, row=0, sticky=(W, E, S))
+    #     # Création de l'interface
+    #     root = Tk()
+    #     mainframe = Frame(root)
+    #     mainframe.grid(column=0, row=0, sticky=(W, E, S))
 
-        root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=1)
+    #     root.columnconfigure(0, weight=1)
+    #     root.rowconfigure(0, weight=1)
 
-        # Titre et slider "Agressive"
-        Label(mainframe, text="Agressive").grid(column=1, row=1, sticky=W)
-        agressive = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
-        agressive.grid(column=1, row=2, sticky=(W, E))
+    #     # Titre et slider "Agressive"
+    #     Label(mainframe, text="Agressive").grid(column=1, row=1, sticky=W)
+    #     agressive = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+    #     agressive.grid(column=1, row=2, sticky=(W, E))
 
-        # Titre et slider "Defense"
-        Label(mainframe, text="Defense").grid(column=2, row=1, sticky=W)
-        defense = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
-        defense.grid(column=2, row=2, sticky=(W, E))
+    #     # Titre et slider "Defense"
+    #     Label(mainframe, text="Defense").grid(column=2, row=1, sticky=W)
+    #     defense = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+    #     defense.grid(column=2, row=2, sticky=(W, E))
 
-        # Bouton de validation
-        Button(mainframe, text="Confirm", command=get_ia_values).grid(column=3, row=2, sticky=(W, E))
+    #     # Bouton de validation
+    #     Button(mainframe, text="Confirm", command=get_ia_values).grid(column=3, row=2, sticky=(W, E))
 
-        root.mainloop()
-    else:
+    #     root.mainloop()
+    # else:
         # Choix aléatoire si l'utilisateur refuse de configurer l'IA
-        Strategy_list = ["agressive", "defensive", "balanced"]
+        Strategy_list = ["aggressive", "defensive", "balanced"]
         seed(time.perf_counter())
         n = randint(0, 2)
         return Strategy_list[n]
