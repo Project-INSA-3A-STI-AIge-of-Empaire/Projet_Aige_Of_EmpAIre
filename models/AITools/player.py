@@ -180,7 +180,7 @@ tree = DecisionNode(
 )
 
 def choose_strategy(Player):
-    Strategy_list=["agressive","defensive","balanced"]
+    Strategy_list=["aggressive","defensive","balanced"]
     seed(time.perf_counter())
     n=randint(0,2)
     return Strategy_list[n]

@@ -85,21 +85,21 @@ class AIProfile:
         }
         player = context['player']
         map = context['map']
-
         try:
             for action in actions:
                 if action == "Attack the enemy!":
                     return attack(context)
 
-                if action == "Train military units!":
+                elif action == "Train military units!":
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
+                    if training_buildings == None:
+                        action = "Building structure!"
                     for building in training_buildings:
                         (context[player].linked_map.get_entity_by_id(building)).train_unit(context[player], 'h')  # Train HorseMan
                     return "Trained military units"
                 
-                if action == "Building structure!":
-                    print("bonjour")
+                elif action == "Building structure!":
                     self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
                     return "Structure are built!"
 
@@ -124,7 +124,7 @@ class AIProfile:
             'A': 0.15,   
             'K': 0.2
         }
-
+        
         try:
             for action in actions:
                 if action == "Defend the village!":
