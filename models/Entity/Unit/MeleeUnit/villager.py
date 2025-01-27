@@ -257,3 +257,6 @@ class Villager(MeleeUnit):
         #    self.build_target_id = None
         #    self.resource_target_id = None
         #    self.drop_target_id = None
+
+    def is_free(self):
+        return super().is_free() and self.drop_target_id == None and self.resource_target_id == None and self.build_target_id == None

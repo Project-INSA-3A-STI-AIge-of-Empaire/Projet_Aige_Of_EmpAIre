@@ -87,4 +87,6 @@ class TrainingBuilding(Building):
         super().update(dt, camera, screen)
         self.try_to_train(dt)
 
+    def is_free(self):
+        return self.unit_being_trained == None and self.time_left == None
 

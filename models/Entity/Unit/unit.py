@@ -394,6 +394,8 @@ class Unit(Entity):
                 draw_percentage_bar(screen, camera, iso_x, iso_y, self.hp, self.max_hp, self.sq_size, self.team)
             draw_point(screen, (0, 0, 0), px, py, radius=5)
 
+    def is_free(self):
+        return self.entity_target_id == None
 
     def is_dead(self):
         return self.hp <= 0

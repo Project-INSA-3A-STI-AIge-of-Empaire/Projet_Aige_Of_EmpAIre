@@ -102,3 +102,6 @@ class DefensiveBuilding(Building):
         #draw_isometric_circle(camera, screen, self.position.x, self.position.y, self.range*TILE_SIZE_2D, TEAM_COLORS.get(self.team)) 
 
         super().display(dt, screen, camera, g_width, g_height)        
+
+    def is_free(self):
+        return True
