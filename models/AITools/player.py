@@ -70,7 +70,8 @@ class DecisionNode:
 # ---- Questions ----
 def villagers_insufficient(context):
     villager_count = len(context['player'].get_entities_by_class(['v']))  # 'v' pour les villageois
-    return villager_count < context['desired_villager_count']
+    return villager_count < context['desired_villager_count'] and len(context['player'].get_entities_by_class(['F']))>=1
+
 
 def is_under_attack(context):
     return context['under_attack']
@@ -83,7 +84,7 @@ def buildings_insufficient(context):
     return not context['buildings'].get('storage', False)
 
 def has_enough_military(context):
-    return context['ratio_military'] >= 0.5 or len(context['units']['villager']) <= 10
+    return context['ratio_military'] >= 0.5 or len(context['units']['villager']) <= 5
 
 def is_unit_idle(unit):
     return unit.state == UNIT_IDLE
@@ -173,25 +174,15 @@ tree = DecisionNode(
         check_housing,
         yes_action=housing_crisis,    
         no_action=DecisionNode(    
-        #     villagers_insufficient,
-        #     yes_action=train_villager,
-        #     no_action=DecisionNode(
+            villagers_insufficient,
+            yes_action=train_villager,
+            no_action=DecisionNode(
                 has_enough_military,
                 no_action=train_military,
                 yes_action=DecisionNode(
                     can_we_attack,
                     yes_action=attack,
-                    no_action=DecisionNode(
-                        resources_critical,
-                        no_action=build_structure,
-                        yes_action=DecisionNode(
-                            is_villager_full,
-                            yes_action=drop_resources,
-                            no_action=gather_resources,
-                            priority=10
-                        ),
-                        priority=9
-                    ),
+                    no_action=build_structure,
                     priority=8
                 ),
                 priority=7
@@ -199,6 +190,7 @@ tree = DecisionNode(
             priority=6
         ),
     priority=5
+    )
 )
 
 def choose_strategy(Player):
