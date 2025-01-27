@@ -156,7 +156,7 @@ def enemy_visible(context):
     return context['enemy_visible']
 
 def housing_crisis(context):
-    context['player'].build_entity(context['player'].get_entities_by_class('v', is_free = True), 'H')
+    context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True), 'H')
     return "Building House!"
 
 # ---- Arbre de décision ----
