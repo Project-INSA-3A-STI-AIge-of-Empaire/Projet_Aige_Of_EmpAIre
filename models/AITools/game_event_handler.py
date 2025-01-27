@@ -52,10 +52,10 @@ class GameEventHandler:
 
             },
             'enemy_id': enemy_id,
-            'resource_id': self.players.entity_closest_to(['G','W','F'], self.players.cell_Y, self.players.cell_X),
-            'drop_off_id': self.players.entity_closest_to(['T','C'], self.players.cell_Y, self.players.cell_X),
+            'resource_id': self.players.ect(['G','W','F'], self.players.cell_Y, self.players.cell_X)[0],
+            'drop_off_id': self.players.ect(['T','C'], self.players.cell_Y, self.players.cell_X)[0],
             'player': self.players,
-            'closest_town_center': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
+            'closest_town_center': self.players.ect(['T'], self.players.cell_Y, self.players.cell_X)[0],
             'map' : self.map,
             'under_attack' : (self.players.get_closest_ennemy()[1] < 20),
             'housing_crisis':(self.players.current_population >= self.players.get_current_population_capacity())
