@@ -204,7 +204,7 @@ class AIProfile:
                             if not villager.is_full():
                                 villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
                             else:
-                                villager.drop_entity(context['drop_off_id'])
+                                villager.drop_to_entity(context['drop_off_id'])
                         return "Gathering resources!"
 
                 elif action == "Dropping off resources!":
