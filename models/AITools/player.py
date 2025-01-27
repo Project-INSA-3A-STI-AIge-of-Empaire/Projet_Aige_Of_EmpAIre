@@ -67,6 +67,10 @@ class DecisionNode:
         return [action if isinstance(action, str) else action[0] for action in actions]
 
 # ---- Questions ----
+def villagers_insufficient(context):
+    villager_count = len(context['player'].get_entities_by_class(['v']))  # 'v' pour les villageois
+    return villager_count < context['desired_villager_count']
+
 def is_under_attack(context):
     return context['under_attack']
 
@@ -78,7 +82,7 @@ def buildings_insufficient(context):
     return not context['buildings'].get('storage', False)
 
 def has_enough_military(context):
-    return context['ratio_military'] >= 0.5 or len(context['units']['villager']) >= 10
+    return context['ratio_military'] >= 0.5 or len(context['units']['villager']) <= 10
 
 def is_unit_idle(unit):
     return unit.state == UNIT_IDLE
@@ -97,6 +101,15 @@ def check_housing(context):
     return context['housing_crisis']
 
 # ---- Actions ----
+def train_villagers(context):
+    for towncenter_id in context['player'].get_entities_by_class(['T']):
+        print(towncenter_id)
+        print(context['player'].get_entities_by_class(['T']))
+        towncenter=context['player'].linked_map.get_entity_by_id(towncenter_id)
+        towncenter.train_unit(context['player'],'v')
+        if context['player'].get_current_resources()['food']<50:
+            gather_resources(context)
+    return "Training villagers!"
 
 def gather_resources(context):
     for villager in context['units']['villager']:
@@ -124,7 +137,6 @@ def drop_resources(context):
     return "Dropping off resources!"
 
 def find_closest_resources(context):
-    print("find ressources de jules")
     resources_to_find='W'
     if min(context['resources']["gold"], context['resources']["wood"])==context['resources']["gold"]:
         resources_to_find='G'
@@ -152,6 +164,8 @@ def housing_crisis(context):
 tree = DecisionNode(
     is_under_attack,
     yes_action=attack,
+    # villagers_insufficient,
+    # yes_action=train_villagers,
     no_action=DecisionNode(
         resources_critical,
         yes_action=DecisionNode(
@@ -165,8 +179,8 @@ tree = DecisionNode(
             yes_action=housing_crisis,    
             no_action=DecisionNode(    
                 has_enough_military,
-                yes_action=train_military,
-                no_action=DecisionNode(
+                no_action=train_military,
+                yes_action=DecisionNode(
                     closest_town_center,
                     yes_action=DecisionNode(
                         resources_critical,

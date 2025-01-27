@@ -17,12 +17,16 @@ class AIProfile:
         self.defense = defense
 
     def compare_ratios(self, actual_ratios, target_ratios, context):
+        if len(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))<2:
+            result = context['player'].build_entity(context['player'].get_entities_by_class('v'), 'F')
+            return
         differences = {}
         for key, target in target_ratios.items():
             actual = actual_ratios.get(key, 0)
             diff = abs(target - actual)
             differences[key] = diff
         sorted_differences = sorted(differences.items(), key=lambda x: x[1], reverse=True)
+        print(f"sorted differences : {sorted_differences}")
         for building_repr in sorted_differences:
             existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             print(f"Old list of building : {existing_ids}")
@@ -36,14 +40,14 @@ class AIProfile:
                 building = context['player'].linked_map.get_entity_by_id(new_building_id)
                 if building.state == BUILDING_ACTIVE:
                     return
-            # elif result == 0:
-            #         print("test compare ratios ==0")
-            #         for villager in context['units']['villager']:
-            #             if villager.state == UNIT_IDLE:
-            #                 villager.collect_entity(context['resource_id'])  # Start collecting resources
-            #             elif villager.is_full():
-            #                 villager.drop_to_entity(context['drop_off_id'])
-            #         return "Gathered resources"
+            elif result == 0:
+                    print("test compare ratios ==0")
+                    for villager in context['units']['villager']:
+                        if villager.state == UNIT_IDLE:
+                            villager.collect_entity(context['resource_id'])  # Start collecting resources
+                        if villager.is_full():
+                            villager.drop_to_entity(context['drop_off_id'])
+                    return "Gathered resources"
                 
 
 
@@ -133,6 +137,15 @@ class AIProfile:
                         unit = map.get_entity_by_id(unit_id)
                         unit.attack_entity(context['enemy_id'])  # Attack the enemy
                     return "Executed defense strategy"
+                
+                if action == "Train military units!":
+                    # Train military units in training buildings
+                    training_buildings = context['buildings']['training']
+                    if training_buildings == None:
+                        action = "Building structure!"
+                    for building in training_buildings:
+                        building['instance'].train_unit(player, context['current_time'], 'v')  # Train Villager
+                    return "Trained military units"
 
                 if action == "Repair critical buildings!":
                     # Repair damaged buildings
@@ -177,17 +190,22 @@ class AIProfile:
         try:
             for action in actions:
                 if action == "Gathering resources!":
-                    # Gather resources with villager
                     for villager in context['units']['villager']:
-                        villager.collect_entity(context['resource_id'])  # Start collecting resources
-                    return "Gathered resources"
+                        if villager.state == UNIT_IDLE:
+                            if not villager.is_full() :
+                                villager.collect_entity(context['resource_id'])
+                            else:
+                                action = "Dropping off resources!"
+                                return "Dropping off resources!"
+                    return "Gathering resources!"
 
                 elif action == "Dropping off resources!":
                     # Drop resources in storage buildings
                     villagers = player.get_entities_by_class(['v'])
                     for villager_id in villagers:
-                        villager = player.linked_map.get_entity_by_id(villager_id)
-                        villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
+                        if villager.is_full():
+                            villager = player.linked_map.get_entity_by_id(villager_id)
+                            villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
                     return "Dropped off resources"
 
                 elif action == "Train military units!":
