@@ -54,6 +54,9 @@ class AIProfile:
         :return: The chosen action as a string.
         """
         # Get the actions from the decision tree
+        if context['player'].is_busy:
+            print("Player is busy. Waiting for the current action to complete.")
+            return
         actions = tree.decide(context)
         print(f"The action is : {actions}")
         print(f"The strategy is : {self.strategy}")
@@ -83,24 +86,27 @@ class AIProfile:
         player = context['player']
         map = context['map']
 
-        for action in actions:
-            if action == "Attack the enemy!":
-                return attack(context)
+        try:
+            for action in actions:
+                if action == "Attack the enemy!":
+                    return attack(context)
 
-            if action == "Train military units!":
-                # Train military units in training buildings
-                training_buildings = context['buildings']['training']
-                for building in training_buildings:
-                    (context[player].linked_map.get_entity_by_id(building)).train_unit(context[player], 'h')  # Train HorseMan
-                return "Trained military units"
-            
-            if action == "Building structure!":
-                print("bonjour")
-                self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
-                return "Structure are built!"
+                if action == "Train military units!":
+                    # Train military units in training buildings
+                    training_buildings = context['buildings']['training']
+                    for building in training_buildings:
+                        (context[player].linked_map.get_entity_by_id(building)).train_unit(context[player], 'h')  # Train HorseMan
+                    return "Trained military units"
+                
+                if action == "Building structure!":
+                    print("bonjour")
+                    self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
+                    return "Structure are built!"
 
-        # Default to gathering resources if no attack actions are possible
-        return "Gather resources for further attacks"
+            # Default to gathering resources if no attack actions are possible
+            return "Gather resources for further attacks"
+        finally:
+            context['player'].is_busy = False
 
     def _defensive_strategy(self, actions, context):
         """
@@ -119,36 +125,39 @@ class AIProfile:
             'K': 0.2
         }
 
-        for action in actions:
-            if action == "Defend the village!":
-                # Defend the village by attacking enemies
-                military_units = player.get_entities_by_class(['h', 'a', 's'])
-                for unit_id in military_units:
-                    unit = map.get_entity_by_id(unit_id)
-                    unit.attack_entity(context['enemy_id'])  # Attack the enemy
-                return "Executed defense strategy"
+        try:
+            for action in actions:
+                if action == "Defend the village!":
+                    # Defend the village by attacking enemies
+                    military_units = player.get_entities_by_class(['h', 'a', 's'])
+                    for unit_id in military_units:
+                        unit = map.get_entity_by_id(unit_id)
+                        unit.attack_entity(context['enemy_id'])  # Attack the enemy
+                    return "Executed defense strategy"
 
-            if action == "Repair critical buildings!":
-                # Repair damaged buildings
-                buildings_to_repair = [
-                    building for building in map.entity_matrix.values()
-                    if isinstance(building, Building) and building.hp < building.max_hp
-                ]
-                for building in buildings_to_repair:
-                    building.repair()  # Assuming a repair method exists in Building class
-                return "Repaired critical buildings"
-            
-            if action == "Building structure!":
-                print("hello")
-                self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
-                return "Structure are built!"
+                if action == "Repair critical buildings!":
+                    # Repair damaged buildings
+                    buildings_to_repair = [
+                        building for building in map.entity_matrix.values()
+                        if isinstance(building, Building) and building.hp < building.max_hp
+                    ]
+                    for building in buildings_to_repair:
+                        building.repair()  # Assuming a repair method exists in Building class
+                    return "Repaired critical buildings"
+                
+                if action == "Building structure!":
+                    print("hello")
+                    self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
+                    return "Structure are built!"
 
-        # for villager in context['units']['villager']:
-        #     if not villager.is_full() and is_unit_idle(villager):
-        #         villager.collect_entity(context['resource_id'])
-        #     else:
-        #         drop_resources(context)
-        # return "Gathering resources!"
+            # for villager in context['units']['villager']:
+            #     if not villager.is_full() and is_unit_idle(villager):
+            #         villager.collect_entity(context['resource_id'])
+            #     else:
+            #         drop_resources(context)
+            # return "Gathering resources!"
+        finally:
+            context['player'].is_busy = False
 
     def _balanced_strategy(self, actions, context):
         """
@@ -167,42 +176,44 @@ class AIProfile:
             'K': 0.1
         }
 
-        for action in actions:
-            if action == "Gathering resources!":
-                # Gather resources with villager
-                for villager in context['units']['villager']:
-                    villager.collect_entity(context['resource_id'])  # Start collecting resources
-                return "Gathered resources"
+        try:
+            for action in actions:
+                if action == "Gathering resources!":
+                    # Gather resources with villager
+                    for villager in context['units']['villager']:
+                        villager.collect_entity(context['resource_id'])  # Start collecting resources
+                    return "Gathered resources"
 
-            elif action == "Dropping off resources!":
-                # Drop resources in storage buildings
-                villagers = player.get_entities_by_class(['v'])
-                for villager_id in villagers:
-                    villager = player.linked_map.get_entity_by_id(villager_id)
-                    villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
-                return "Dropped off resources"
+                elif action == "Dropping off resources!":
+                    # Drop resources in storage buildings
+                    villagers = player.get_entities_by_class(['v'])
+                    for villager_id in villagers:
+                        villager = player.linked_map.get_entity_by_id(villager_id)
+                        villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
+                    return "Dropped off resources"
 
-            elif action == "Train military units!":
-                # Train military units in training buildings
-                training_buildings = context['buildings']['training']
-                if training_buildings == None:
-                    action = "Building structure!"
-                for building in training_buildings:
-                    building['instance'].train_unit(player, context['current_time'], 'v')  # Train Villager
-                return "Trained military units"
+                elif action == "Train military units!":
+                    # Train military units in training buildings
+                    training_buildings = context['buildings']['training']
+                    if training_buildings == None:
+                        action = "Building structure!"
+                    for building in training_buildings:
+                        building['instance'].train_unit(player, context['current_time'], 'v')  # Train Villager
+                    return "Trained military units"
 
-            elif action == "Attack the enemy!":
-                # Attack the enemy
-                military_units = player.get_entities_by_class(['h', 'a', 's','m','x','c'])
-                for unit_id in military_units:
-                    unit = map.get_entity_by_id(unit_id)
-                    unit.attack_entity(context['enemy_id'])  # Attack the enemy
-                return "Executed attack strategy"
-            
-            elif action == "Building structure!":
-                self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
-                return "Structure are built!"
-
+                elif action == "Attack the enemy!":
+                    # Attack the enemy
+                    military_units = player.get_entities_by_class(['h', 'a', 's'])
+                    for unit_id in military_units:
+                        unit = map.get_entity_by_id(unit_id)
+                        unit.attack_entity(context['enemy_id'])  # Attack the enemy
+                    return "Executed attack strategy"
+                
+                elif action == "Building structure!":
+                    self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
+                    return "Structure are built!"
+        finally:
+            context['player'].is_busy = False
         # Default to gathering resources if no actions are possible
         return "Gathered resources for balanced strategy"
 
