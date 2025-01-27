@@ -30,7 +30,7 @@ class AIProfile:
         for building_repr in sorted_differences:
             existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             print(f"Old list of building : {existing_ids}")
-            result = context['player'].build_entity(context['player'].get_entities_by_class('v'), building_repr[0])
+            result = context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True), building_repr[0])
             print(f"Résultat de build_entity : {result}")
             new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             print(f"New list of buildings {new_ids}")
@@ -42,9 +42,8 @@ class AIProfile:
                     return
             elif result == 0:
                     print("test compare ratios ==0")
-                    for villager in context['units']['villager']:
-                        if villager.state == UNIT_IDLE:
-                            villager.collect_entity(context['resource_id'])  # Start collecting resources
+                    for villager in context['units']['villager_free']:
+                        villager.collect_entity(context['resource_id'])  # Start collecting resources
                         if villager.is_full():
                             villager.drop_to_entity(context['drop_off_id'])
                     return "Gathered resources"
@@ -190,8 +189,7 @@ class AIProfile:
         try:
             for action in actions:
                 if action == "Gathering resources!":
-                    for villager in context['units']['villager']:
-                        if villager.state == UNIT_IDLE:
+                    for villager in context['units']['villager_free'] :
                             if not villager.is_full() :
                                 villager.collect_entity(context['resource_id'])
                             else:

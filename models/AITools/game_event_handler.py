@@ -48,9 +48,11 @@ class GameEventHandler:
             'units' : {
                 'military': [self.players.linked_map.get_entity_by_id(m_id) for m_id in self.players.get_entities_by_class(['h', 'a', 's'])],
                 'villager': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'])],
+                'villager_free': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'],is_free=True)],
+
             },
             'enemy_id': enemy_id,
-            'resource_id': self.players.entity_closest_to(['G', 'W'], self.players.cell_Y, self.players.cell_X),
+            'resource_id': self.players.entity_closest_to(['G', 'W','F'], self.players.cell_Y, self.players.cell_X),
             'drop_off_id': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
             'player': self.players,
             'closest_town_center': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),

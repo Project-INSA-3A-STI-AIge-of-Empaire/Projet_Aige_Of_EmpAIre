@@ -113,8 +113,8 @@ def train_villagers(context):
     return "Training villagers!"
 
 def gather_resources(context):
-    for villager in context['units']['villager']:
-        if not villager.is_full() and is_unit_idle(villager):
+    for villager in context['units']['villager_free']:
+        if not villager.is_full():
             villager.collect_entity(context['resource_id'])
         else:
             drop_resources(context)
@@ -163,17 +163,14 @@ def housing_crisis(context):
 
 # ---- Arbre de décision ----
 tree = DecisionNode(
-    is_under_attack,
-    yes_action=attack,
     # villagers_insufficient,
     # yes_action=train_villagers,
-    no_action=DecisionNode(
-        resources_critical,
-        yes_action=DecisionNode(
-            buildings_insufficient,
-            yes_action=drop_resources,
-            no_action=gather_resources,
-            priority=6
+    resources_critical,
+    yes_action=DecisionNode(
+        buildings_insufficient,
+        yes_action=drop_resources,
+        no_action=gather_resources,
+        priority=6
         ),
         no_action=DecisionNode(
             check_housing,
@@ -201,9 +198,7 @@ tree = DecisionNode(
             ),
             priority=6
         ),
-        priority=5
-    ),
-    priority=4
+    priority=5
 )
 
 def choose_strategy(Player):
