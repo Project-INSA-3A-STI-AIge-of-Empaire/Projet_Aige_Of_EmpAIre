@@ -34,7 +34,7 @@ class TrainingBuilding(Building):
         
         if self.time_left != None and self.unit_being_trained:# if not None
             
-            if self.time_left > (0 + 1e-5):
+            if self.time_left > (1e-5):
                 
                 self.time_left = self.time_left - dt
                 print(f"unit_train:{self.time_left}")
@@ -65,6 +65,7 @@ class TrainingBuilding(Building):
 
                             self.time_left = self.unit_being_trained.training_time * ONE_SEC
                     else:
+                        self.linked_map.id_generator.free_ticket(unit.id)
                         return TRAIN_NOT_AFFORDABLE
                 else:
                     return TRAIN_NOT_FOUND_UNIT

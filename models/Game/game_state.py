@@ -300,6 +300,7 @@ class GameState:
         if file_path:
             with open(file_path, 'rb') as file:
                 self.__dict__ = pickle.load(file)
+                self.states = PLAY
                 print(f"Jeu chargé depuis {file_path}")
                 messagebox.showinfo("Chargement réussi", f"Jeu chargé depuis {file_path}")
                   # Retourne l'objet chargé
