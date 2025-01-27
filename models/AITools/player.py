@@ -2,6 +2,7 @@ from GLOBAL_VAR import *
 from GLOBAL_IMPORT import *
 from .game_event_handler import *
 from .ai_profiles import*
+from tkinter import messagebox, Button, Scale, Tk, Label, Frame, Grid, HORIZONTAL, N, W, E, S
 from random import randint,seed
 import time
 
@@ -206,10 +207,55 @@ tree = DecisionNode(
 )
 
 def choose_strategy(Player):
-    Strategy_list=["aggressive","defensive","balanced"]
-    seed(time.perf_counter())
-    n=randint(0,2)
-    return Strategy_list[n]
+    answer = messagebox.askyesno(
+        message='Do you want to choose the IA type for Player'+ str(Player.team)+'?',
+        icon='question',
+        title='AIge Of EmpAIres II'
+    )
+    
+    if answer:
+        def get_ia_values():
+            # Récupérer les valeurs des sliders lorsqu'on appuie sur le bouton
+            agressive_select = agressive.get()
+            defense_select = defense.get()
+            if defense_select == agressive_select:
+                result = "balanced", agressive_select, defense_select
+            elif defense_select > agressive_select:
+                result = "defensive", agressive_select, defense_select
+            else:
+                result = "agressive", agressive_select, defense_select
+            
+            print(result)  # Affiche le résultat pour vérifier
+            root.destroy()  # Ferme la fenêtre après validation
+
+        # Création de l'interface
+        root = Tk()
+        mainframe = Frame(root)
+        mainframe.grid(column=0, row=0, sticky=(W, E, S))
+
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
+
+        # Titre et slider "Agressive"
+        Label(mainframe, text="Agressive").grid(column=1, row=1, sticky=W)
+        agressive = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+        agressive.grid(column=1, row=2, sticky=(W, E))
+
+        # Titre et slider "Defense"
+        Label(mainframe, text="Defense").grid(column=2, row=1, sticky=W)
+        defense = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+        defense.grid(column=2, row=2, sticky=(W, E))
+
+        # Bouton de validation
+        Button(mainframe, text="Confirm", command=get_ia_values).grid(column=3, row=2, sticky=(W, E))
+
+        root.mainloop()
+    else:
+        # Choix aléatoire si l'utilisateur refuse de configurer l'IA
+        Strategy_list = ["agressive", "defensive", "balanced"]
+        seed(time.perf_counter())
+        n = randint(0, 2)
+        return Strategy_list[n]
 
 class Player:
     
