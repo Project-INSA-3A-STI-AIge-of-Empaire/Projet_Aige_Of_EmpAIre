@@ -30,7 +30,7 @@ class GameEventHandler:
             },
             'enemy_visible': enemy_visible,
             'buildings': {
-                'storage': self.players.get_entities_by_class(['T']),
+                'storage': self.players.get_entities_by_class(['T','C']),
                 'training': self.players.get_entities_by_class(['B','S','A','K']),
                 'critical': self.players.is_free(),
                 'ratio':{

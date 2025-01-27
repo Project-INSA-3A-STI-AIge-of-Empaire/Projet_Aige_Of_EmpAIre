@@ -88,12 +88,8 @@ def has_enough_military(context):
 def is_unit_idle(unit):
     return unit.state == UNIT_IDLE
 
-def closest_town_center(context):
-    player = context['player']
-    town_center = player.entity_closest_to('T', player.cell_Y, player.cell_X)
-    if town_center:
-        context['closest_town_center'] = town_center
-    return town_center is not None
+def can_we_attack(context):
+    return len(context['units']['villager']) > 5 and context['units']['military']
 
 def is_villager_full(unit):
     return unit['type'] == 'villager' and unit['instance'].is_full()
@@ -132,9 +128,6 @@ def train_military(context):
     return "Train military units!"
 
 def attack(context):
-    for unit in context['units']['villager'] or context['units']['military']:
-        
-        unit.attack_entity(context['enemy_id'])
     return "Attacking the enemy!"
 
 def drop_resources(context):
@@ -185,8 +178,9 @@ tree = DecisionNode(
                 has_enough_military,
                 no_action=train_military,
                 yes_action=DecisionNode(
-                    closest_town_center,
-                    yes_action=DecisionNode(
+                    can_we_attack,
+                    yes_action=attack,
+                    no_action=DecisionNode(
                         resources_critical,
                         no_action=build_structure,
                         yes_action=DecisionNode(
@@ -197,7 +191,6 @@ tree = DecisionNode(
                         ),
                         priority=9
                     ),
-                    no_action=gather_resources,
                     priority=8
                 ),
                 priority=7

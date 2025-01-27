@@ -16,12 +16,15 @@ class AIProfile:
         self.aggressiveness = aggressiveness
         self.defense = defense
 
-    def compare_ratios(self, actual_ratios, target_ratios, context):
+    def compare_ratios(self, actual_ratios, target_ratios, context, keys_to_include=None):
         if len(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))<2:
             result = context['player'].build_entity(context['player'].get_entities_by_class('v'), 'F')
             return
+        if keys_to_include is None:
+            keys_to_include = target_ratios.keys()
         differences = {}
-        for key, target in target_ratios.items():
+        filtered_target_ratios = {key: target_ratios[key] for key in keys_to_include if key in target_ratios}
+        for key, target in filtered_target_ratios.items():
             actual = actual_ratios.get(key, 0)
             diff = abs(target - actual)
             differences[key] = diff
@@ -29,11 +32,8 @@ class AIProfile:
         print(f"sorted differences : {sorted_differences}")
         for building_repr in sorted_differences:
             existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
-            print(f"Old list of building : {existing_ids}")
             result = context['player'].build_entity(context['player'].get_entities_by_class(['v']), building_repr[0])
-            print(f"Résultat de build_entity : {result}")
             new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
-            print(f"New list of buildings {new_ids}")
             new_building_ids = new_ids - existing_ids
             if result != 0:
                 new_building_id = new_building_ids.pop()
@@ -97,13 +97,17 @@ class AIProfile:
         try:
             for action in actions:
                 if action == "Attack the enemy!":
-                    return attack(context)
+                    semi_villager_list = context['units']['villager'][:len(context['units']['villager'])//2]
+                    for unit in semi_villager_list or context['units']['military']:
+                        unit.attack_entity(context['enemy_id'])
+                    return "Attacking in progress"
 
                 elif action == "Train military units!":
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
                     if training_buildings == None:
-                        action = "Building structure!"
+                        keys_to_consider = ['B','S','A']
+                        self.compare_ratios(context['buildings']['ratio'], target_ratios, context,keys_to_consider)
                     for building in training_buildings:
                         (context[player].linked_map.get_entity_by_id(building)).train_unit(context[player], 'h')  # Train HorseMan
                     return "Trained military units"
@@ -143,16 +147,17 @@ class AIProfile:
                         unit.attack_entity(context['enemy_id'])  # Attack the enemy
                     return "Executed defense strategy"
                 
-                if action == "Train military units!":
+                elif action == "Train military units!":
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
                     if training_buildings == None:
-                        action = "Building structure!"
+                        keys_to_consider = ['S','A','T']
+                        self.compare_ratios(context['buildings']['ratio'], target_ratios, context,keys_to_consider)
                     for building in training_buildings:
                         building['instance'].train_unit(player, context['current_time'], 'v')  # Train Villager
                     return "Trained military units"
 
-                if action == "Repair critical buildings!":
+                elif action == "Repair critical buildings!":
                     # Repair damaged buildings
                     buildings_to_repair = [
                         building for building in map.entity_matrix.values()
@@ -162,7 +167,7 @@ class AIProfile:
                         building.repair()  # Assuming a repair method exists in Building class
                     return "Repaired critical buildings"
                 
-                if action == "Building structure!":
+                elif action == "Building structure!":
                     print("hello")
                     self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
                     return "Structure are built!"
@@ -220,18 +225,16 @@ class AIProfile:
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
                     if training_buildings == None:
-                        action = "Building structure!"
+                        keys_to_consider = ['F','B','S']
+                        self.compare_ratios(context['buildings']['ratio'], target_ratios, context, keys_to_consider)
                     for building in training_buildings:
                         building['instance'].train_unit(player, context['current_time'], 'v')  # Train Villager
                     return "Trained military units"
 
                 elif action == "Attack the enemy!":
-                    # Attack the enemy
-                    military_units = player.get_entities_by_class(['h', 'a', 's'])
-                    for unit_id in military_units:
-                        unit = map.get_entity_by_id(unit_id)
-                        unit.attack_entity(context['enemy_id'])  # Attack the enemy
-                    return "Executed attack strategy"
+                    for unit in context['units']['military']:
+                        unit.attack_entity(context['enemy_id'])
+                    return "Attacking in progress"
                 
                 elif action == "Building structure!":
                     self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
