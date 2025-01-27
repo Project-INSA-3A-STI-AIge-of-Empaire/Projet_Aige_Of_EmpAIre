@@ -192,7 +192,7 @@ class Player:
         self.cell_Y = cell_Y
         self.cell_X = cell_X
         self.storages_id = set() # resource storages
-        self.houses_id = set() # towncenters and storages
+        self.houses_id = set() # towncenters and habitats
 
         self.current_population = 0
         self.homeless_units = 0
@@ -265,6 +265,15 @@ class Player:
             return 1
         return 0
 
+    def can_afford(self, representation):
+
+        if representation in CLASS_MAPPING:
+            InstClass = CLASS_MAPPING.get(representation, None)
+
+            Instance = InstClass(IdGenerator(), None, None, None, self.team) # fake instance 
+
+            return Instance.affordable_by(self.get_current_resources())
+
     def get_entities_by_class(self, representations, is_free = False): # list of representations for exemple : ['a', 'h', 'v']
 
         id_list = []
@@ -306,6 +315,8 @@ class Player:
                             villager.build_entity(Instance.id)
                 
                     return 1
+                else:
+                    self.linked_map.id_generator.free_ticket(Instance.id)
                 return 0
             else:
                 for villager_id in villager_id_list:

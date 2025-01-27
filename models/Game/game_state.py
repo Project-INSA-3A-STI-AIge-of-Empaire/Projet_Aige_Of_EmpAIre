@@ -83,7 +83,7 @@ class GameState:
             #self.screen.set_alpha(None)
     def set_speed(self, new_speed):
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
-            if new_speed > 0.3 and new_speed < 5:
+            if new_speed > 0.3 and new_speed < 8:
                 self.speed = new_speed
             self.last_time_switched = pygame.time.get_ticks()
             
@@ -300,6 +300,7 @@ class GameState:
         if file_path:
             with open(file_path, 'rb') as file:
                 self.__dict__ = pickle.load(file)
+                self.states = PLAY
                 print(f"Jeu chargé depuis {file_path}")
                 messagebox.showinfo("Chargement réussi", f"Jeu chargé depuis {file_path}")
                   # Retourne l'objet chargé

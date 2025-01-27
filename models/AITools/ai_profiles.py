@@ -193,7 +193,7 @@ class AIProfile:
 
             elif action == "Attack the enemy!":
                 # Attack the enemy
-                military_units = player.get_entities_by_class(['h', 'a', 's'])
+                military_units = player.get_entities_by_class(['h', 'a', 's','m','x','c'])
                 for unit_id in military_units:
                     unit = map.get_entity_by_id(unit_id)
                     unit.attack_entity(context['enemy_id'])  # Attack the enemy
