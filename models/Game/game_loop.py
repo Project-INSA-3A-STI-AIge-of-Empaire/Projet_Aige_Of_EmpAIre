@@ -81,7 +81,7 @@ class GameLoop:
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.pausemenu.handle_click(event.pos, self.state)
 
-    def handle_play_events(self, event, mouse_x, mouse_y):
+    def handle_play_events(self, event, mouse_x, mouse_y, dt):
         if event.type == pygame.MOUSEBUTTONDOWN:
 
             if event.button == LEFT_CLICK:
@@ -90,6 +90,12 @@ class GameLoop:
                 self.state.mouse_held = True
         elif event.type == pygame.MOUSEBUTTONUP:
             self.state.mouse_held = False
+        elif event.type == pygame.MOUSEWHEEL:
+            if event.y == 1:
+                self.state.camera.adjust_zoom(dt, 0.1, SCREEN_WIDTH, SCREEN_HEIGHT)
+            elif event.y == -1:
+                self.state.camera.adjust_zoom(dt, -0.1, SCREEN_WIDTH, SCREEN_HEIGHT)
+
 
     def handle_keyboard_inputs(self, move_flags, dt):
         keys = pygame.key.get_pressed()
@@ -205,7 +211,7 @@ class GameLoop:
                     self.handle_pause_events(dt, event)
                 elif self.state.states == PLAY:
                     self.state.change_music(self.state.map.state)
-                    self.handle_play_events(event, mouse_x, mouse_y)
+                    self.handle_play_events(event, mouse_x, mouse_y, dt)
 
             if self.state.mouse_held:
                 self.state.map.minimap.update_camera(self.state.camera, mouse_x, mouse_y)

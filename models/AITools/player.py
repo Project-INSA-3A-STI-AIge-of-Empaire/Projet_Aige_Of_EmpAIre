@@ -2,6 +2,7 @@ from GLOBAL_VAR import *
 from GLOBAL_IMPORT import *
 from .game_event_handler import *
 from .ai_profiles import*
+from tkinter import messagebox, Button, Scale, Tk, Label, Frame, Grid, HORIZONTAL, N, W, E, S
 from random import randint,seed
 import time
 
@@ -67,6 +68,10 @@ class DecisionNode:
         return [action if isinstance(action, str) else action[0] for action in actions]
 
 # ---- Questions ----
+def villagers_insufficient(context):
+    villager_count = len(context['player'].get_entities_by_class(['v']))  # 'v' pour les villageois
+    return villager_count < context['desired_villager_count']
+
 def is_under_attack(context):
     return context['under_attack']
 
@@ -78,7 +83,7 @@ def buildings_insufficient(context):
     return not context['buildings'].get('storage', False)
 
 def has_enough_military(context):
-    return context['ratio_military'] >= 0.5 or len(context['units']['villager']) >= 10
+    return context['ratio_military'] >= 0.5 or len(context['units']['villager']) <= 10
 
 def is_unit_idle(unit):
     return unit.state == UNIT_IDLE
@@ -93,7 +98,19 @@ def closest_town_center(context):
 def is_villager_full(unit):
     return unit['type'] == 'villager' and unit['instance'].is_full()
 
+def check_housing(context):
+    return context['housing_crisis']
+
 # ---- Actions ----
+def train_villagers(context):
+    for towncenter_id in context['player'].get_entities_by_class(['T']):
+        print(towncenter_id)
+        print(context['player'].get_entities_by_class(['T']))
+        towncenter=context['player'].linked_map.get_entity_by_id(towncenter_id)
+        towncenter.train_unit(context['player'],'v')
+        if context['player'].get_current_resources()['food']<50:
+            gather_resources(context)
+    return "Training villagers!"
 
 def gather_resources(context):
     for villager in context['units']['villager']:
@@ -121,7 +138,6 @@ def drop_resources(context):
     return "Dropping off resources!"
 
 def find_closest_resources(context):
-    print("find ressources de jules")
     resources_to_find='W'
     if min(context['resources']["gold"], context['resources']["wood"])==context['resources']["gold"]:
         resources_to_find='G'
@@ -141,49 +157,105 @@ def build_structure(context):
 def enemy_visible(context):
     return context['enemy_visible']
 
+def housing_crisis(context):
+    context['player'].build_entity(context['player'].get_entities_by_class('v'), 'H')
+    return "Building House!"
+
 # ---- Arbre de décision ----
 tree = DecisionNode(
     is_under_attack,
     yes_action=attack,
+    # villagers_insufficient,
+    # yes_action=train_villagers,
     no_action=DecisionNode(
         resources_critical,
         yes_action=DecisionNode(
             buildings_insufficient,
             yes_action=drop_resources,
             no_action=gather_resources,
-            priority=7
+            priority=6
         ),
         no_action=DecisionNode(
-            has_enough_military,
-            yes_action=train_military,
-            no_action=DecisionNode(
-                closest_town_center,
+            check_housing,
+            yes_action=housing_crisis,    
+            no_action=DecisionNode(    
+                has_enough_military,
+                no_action=train_military,
                 yes_action=DecisionNode(
-                    resources_critical,
-                    no_action=build_structure,
+                    closest_town_center,
                     yes_action=DecisionNode(
-                        is_villager_full,
-                        yes_action=drop_resources,
-                        no_action=gather_resources,
-                        priority=10
+                        resources_critical,
+                        no_action=build_structure,
+                        yes_action=DecisionNode(
+                            is_villager_full,
+                            yes_action=drop_resources,
+                            no_action=gather_resources,
+                            priority=10
+                        ),
+                        priority=9
                     ),
-                    priority=9
+                    no_action=gather_resources,
+                    priority=8
                 ),
-                no_action=gather_resources,
-                priority=8
+                priority=7
             ),
-            priority=7
+            priority=6
         ),
-        priority=6
+        priority=5
     ),
-    priority=5
+    priority=4
 )
 
 def choose_strategy(Player):
-    Strategy_list=["agressive","defensive","balanced"]
-    seed(time.perf_counter())
-    n=randint(0,2)
-    return Strategy_list[n]
+    answer = messagebox.askyesno(
+        message='Do you want to choose the IA type for Player'+ str(Player.team)+'?',
+        icon='question',
+        title='AIge Of EmpAIres II'
+    )
+    
+    if answer:
+        def get_ia_values():
+            # Récupérer les valeurs des sliders lorsqu'on appuie sur le bouton
+            agressive_select = agressive.get()
+            defense_select = defense.get()
+            if defense_select == agressive_select:
+                result = "balanced", agressive_select, defense_select
+            elif defense_select > agressive_select:
+                result = "defensive", agressive_select, defense_select
+            else:
+                result = "agressive", agressive_select, defense_select
+            
+            print(result)  # Affiche le résultat pour vérifier
+            root.destroy()  # Ferme la fenêtre après validation
+
+        # Création de l'interface
+        root = Tk()
+        mainframe = Frame(root)
+        mainframe.grid(column=0, row=0, sticky=(W, E, S))
+
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
+
+        # Titre et slider "Agressive"
+        Label(mainframe, text="Agressive").grid(column=1, row=1, sticky=W)
+        agressive = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+        agressive.grid(column=1, row=2, sticky=(W, E))
+
+        # Titre et slider "Defense"
+        Label(mainframe, text="Defense").grid(column=2, row=1, sticky=W)
+        defense = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+        defense.grid(column=2, row=2, sticky=(W, E))
+
+        # Bouton de validation
+        Button(mainframe, text="Confirm", command=get_ia_values).grid(column=3, row=2, sticky=(W, E))
+
+        root.mainloop()
+    else:
+        # Choix aléatoire si l'utilisateur refuse de configurer l'IA
+        Strategy_list = ["agressive", "defensive", "balanced"]
+        seed(time.perf_counter())
+        n = randint(0, 2)
+        return Strategy_list[n]
 
 class Player:
     

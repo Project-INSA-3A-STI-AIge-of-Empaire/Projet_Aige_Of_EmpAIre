@@ -17,18 +17,22 @@ class AIProfile:
         self.defense = defense
 
     def compare_ratios(self, actual_ratios, target_ratios, context):
+        if len(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))<2:
+            result = context['player'].build_entity(context['player'].get_entities_by_class('v'), 'F')
+            return
         differences = {}
         for key, target in target_ratios.items():
             actual = actual_ratios.get(key, 0)
             diff = abs(target - actual)
             differences[key] = diff
         sorted_differences = sorted(differences.items(), key=lambda x: x[1], reverse=True)
+        print(f"sorted differences : {sorted_differences}")
         for building_repr in sorted_differences:
-            existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))
+            existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             print(f"Old list of building : {existing_ids}")
             result = context['player'].build_entity(context['player'].get_entities_by_class('v'), building_repr[0])
             print(f"Résultat de build_entity : {result}")
-            new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))
+            new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             print(f"New list of buildings {new_ids}")
             new_building_ids = new_ids - existing_ids
             if result != 0:
@@ -36,14 +40,14 @@ class AIProfile:
                 building = context['player'].linked_map.get_entity_by_id(new_building_id)
                 if building.state == BUILDING_ACTIVE:
                     return
-            # elif result == 0:
-            #         print("test compare ratios ==0")
-            #         for villager in context['units']['villager']:
-            #             if villager.state == UNIT_IDLE:
-            #                 villager.collect_entity(context['resource_id'])  # Start collecting resources
-            #             elif villager.is_full():
-            #                 villager.drop_to_entity(context['drop_off_id'])
-            #         return "Gathered resources"
+            elif result == 0:
+                    print("test compare ratios ==0")
+                    for villager in context['units']['villager']:
+                        if villager.state == UNIT_IDLE:
+                            villager.collect_entity(context['resource_id'])  # Start collecting resources
+                        if villager.is_full():
+                            villager.drop_to_entity(context['drop_off_id'])
+                    return "Gathered resources"
                 
 
 
@@ -74,11 +78,10 @@ class AIProfile:
         Implement the aggressive strategy by prioritizing attacks and military training.
         """
         target_ratios = {
-            'T': 0.1,
-            'H': 0.15,   
-            'C': 0.1,   
-            'F': 0.1,    
-            'B': 0.2,    
+            'T': 0.13,   
+            'C': 0.13,   
+            'F': 0.13,    
+            'B': 0.26,    
             'S': 0.15,  
             'A': 0.15,   
             'K': 0.05
@@ -91,15 +94,16 @@ class AIProfile:
                 if action == "Attack the enemy!":
                     return attack(context)
 
-                if action == "Train military units!":
+                elif action == "Train military units!":
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
+                    if training_buildings == None:
+                        action = "Building structure!"
                     for building in training_buildings:
                         (context[player].linked_map.get_entity_by_id(building)).train_unit(context[player], 'h')  # Train HorseMan
                     return "Trained military units"
                 
-                if action == "Building structure!":
-                    print("bonjour")
+                elif action == "Building structure!":
                     self.compare_ratios(context['buildings']['ratio'], target_ratios, context)
                     return "Structure are built!"
 
@@ -115,14 +119,13 @@ class AIProfile:
         player = context['player']
         map = context['map']
         target_ratios = {
-            'T': 0.1,
-            'H': 0.15,   
-            'C': 0.1,   
-            'F': 0.1,    
+            'T': 0.13,  
+            'C': 0.13,   
+            'F': 0.13,    
             'B': 0.05,    
             'S': 0.15,  
             'A': 0.15,   
-            'K': 0.2
+            'K': 0.26
         }
 
         try:
@@ -134,6 +137,15 @@ class AIProfile:
                         unit = map.get_entity_by_id(unit_id)
                         unit.attack_entity(context['enemy_id'])  # Attack the enemy
                     return "Executed defense strategy"
+                
+                if action == "Train military units!":
+                    # Train military units in training buildings
+                    training_buildings = context['buildings']['training']
+                    if training_buildings == None:
+                        action = "Building structure!"
+                    for building in training_buildings:
+                        building['instance'].train_unit(player, context['current_time'], 'v')  # Train Villager
+                    return "Trained military units"
 
                 if action == "Repair critical buildings!":
                     # Repair damaged buildings
@@ -166,30 +178,34 @@ class AIProfile:
         player = context['player']
         map = context['map']
         target_ratios = {
-            'T': 0.15,
-            'H': 0.2,   
-            'C': 0.1,   
-            'F': 0.15,    
-            'B': 0.1,    
-            'S': 0.1,  
-            'A': 0.1,   
-            'K': 0.1
+            'T': 0.2,   
+            'C': 0.12,   
+            'F': 0.2,    
+            'B': 0.12,    
+            'S': 0.12,  
+            'A': 0.12,   
+            'K': 0.12
         }
 
         try:
             for action in actions:
                 if action == "Gathering resources!":
-                    # Gather resources with villager
                     for villager in context['units']['villager']:
-                        villager.collect_entity(context['resource_id'])  # Start collecting resources
-                    return "Gathered resources"
+                        if villager.state == UNIT_IDLE:
+                            if not villager.is_full() :
+                                villager.collect_entity(context['resource_id'])
+                            else:
+                                action = "Dropping off resources!"
+                                return "Dropping off resources!"
+                    return "Gathering resources!"
 
                 elif action == "Dropping off resources!":
                     # Drop resources in storage buildings
                     villagers = player.get_entities_by_class(['v'])
                     for villager_id in villagers:
-                        villager = player.linked_map.get_entity_by_id(villager_id)
-                        villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
+                        if villager.is_full():
+                            villager = player.linked_map.get_entity_by_id(villager_id)
+                            villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
                     return "Dropped off resources"
 
                 elif action == "Train military units!":
