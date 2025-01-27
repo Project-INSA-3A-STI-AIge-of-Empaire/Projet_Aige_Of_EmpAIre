@@ -156,7 +156,7 @@ def enemy_visible(context):
     return context['enemy_visible']
 
 def housing_crisis(context):
-    context['player'].build_entity(context['player'].get_entities_by_class('v'), 'H')
+    context['player'].build_entity(context['player'].get_entities_by_class('v', is_free = True), 'H')
     return "Building House!"
 
 # ---- Arbre de décision ----
@@ -571,6 +571,26 @@ class Player:
             
         return closest_id
     
+
+    def ect(self, ent_repr_list, cell_Y, cell_X):
+        entity_distances = []
+
+        for ent_repr in ent_repr_list:
+            if ent_repr not in ["W", "G"]:
+                ent_ids = self.get_entities_by_class(ent_repr)
+            else:
+                ent_ids = self.linked_map.resource_id_dict.get(ent_repr, None)
+
+            if ent_ids:
+                for ent_id in ent_ids:
+                    current_entity = self.linked_map.get_entity_by_id(ent_id)
+                    if current_entity:
+                        current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
+                        entity_distances.append((current_entity.id, current_dist))
+
+        sorted_entities = sorted(entity_distances, key=lambda x: x[1])
+        return [entity_id for entity_id, _ in sorted_entities]
+    
     def get_closest_ennemy(self):
         closest_id = None
         closest_distance = float('inf')
@@ -589,9 +609,10 @@ class Player:
     def is_dead(self):
         return not(self.entities_dict)
 
+    def get_buildings(self):
+        return self.get_entities_by_class(["T","C","H","K","F","S","B","A"])
+
     def update(self, dt):
-        print(f"[nonoccup] {self.get_entities_by_class(['v'], is_free= True)}")
-        print(f"[tous] {self.get_entities_by_class(['v'])}")
 
         self.update_population(dt)
 

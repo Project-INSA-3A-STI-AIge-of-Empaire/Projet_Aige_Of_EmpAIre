@@ -18,7 +18,7 @@ class AIProfile:
 
     def compare_ratios(self, actual_ratios, target_ratios, context, keys_to_include=None):
         if len(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S', 'H']))<2:
-            result = context['player'].build_entity(context['player'].get_entities_by_class('v'), 'F')
+            result = context['player'].build_entity(context['player'].get_entities_by_class('v', is_free = True), 'F')
             return
         if keys_to_include is None:
             keys_to_include = target_ratios.keys()
@@ -32,7 +32,7 @@ class AIProfile:
         print(f"sorted differences : {sorted_differences}")
         for building_repr in sorted_differences:
             existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
-            result = context['player'].build_entity(context['player'].get_entities_by_class(['v']), building_repr[0])
+            result = context['player'].build_entity(context['player'].get_entities_by_class(['v'], is_free = True), building_repr[0])
             new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             new_building_ids = new_ids - existing_ids
             if result != 0:
