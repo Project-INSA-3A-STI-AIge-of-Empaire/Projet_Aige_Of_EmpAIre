@@ -30,7 +30,7 @@ class GameEventHandler:
             },
             'enemy_visible': enemy_visible,
             'buildings': {
-                'storage': self.players.get_entities_by_class(['T']),
+                'storage': self.players.get_entities_by_class(['T','C']),
                 'training': self.players.get_entities_by_class(['B','S','A','K']),
                 'critical': self.players.is_free(),
                 'ratio':{
@@ -52,8 +52,8 @@ class GameEventHandler:
 
             },
             'enemy_id': enemy_id,
-            'resource_id': self.players.entity_closest_to(['G', 'W','F'], self.players.cell_Y, self.players.cell_X),
-            'drop_off_id': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
+            'resource_id': self.players.entity_closest_to(['G','W','F'], self.players.cell_Y, self.players.cell_X),
+            'drop_off_id': self.players.entity_closest_to(['T','C'], self.players.cell_Y, self.players.cell_X),
             'player': self.players,
             'closest_town_center': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
             'map' : self.map,

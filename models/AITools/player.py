@@ -70,7 +70,8 @@ class DecisionNode:
 # ---- Questions ----
 def villagers_insufficient(context):
     villager_count = len(context['player'].get_entities_by_class(['v']))  # 'v' pour les villageois
-    return villager_count < context['desired_villager_count']
+    return villager_count < context['desired_villager_count'] and len(context['player'].get_entities_by_class(['F']))>=1
+
 
 def is_under_attack(context):
     return context['under_attack']
@@ -83,26 +84,22 @@ def buildings_insufficient(context):
     return not context['buildings'].get('storage', False)
 
 def has_enough_military(context):
-    return context['ratio_military'] >= 0.5 or len(context['units']['villager']) <= 10
+    return context['ratio_military'] >= 0.5 or len(context['units']['villager']) <= 5
 
 def is_unit_idle(unit):
     return unit.state == UNIT_IDLE
 
-def closest_town_center(context):
-    player = context['player']
-    town_center = player.entity_closest_to('T', player.cell_Y, player.cell_X)
-    if town_center:
-        context['closest_town_center'] = town_center
-    return town_center is not None
+def can_we_attack(context):
+    return len(context['units']['villager']) > 5 and context['units']['military']
 
 def is_villager_full(unit):
     return unit['type'] == 'villager' and unit['instance'].is_full()
 
 def check_housing(context):
-    return context['housing_crisis']
+    return context['housing_crisis']  # ajouter les houses in building
 
 # ---- Actions ----
-def train_villagers(context):
+def train_villager(context):
     for towncenter_id in context['player'].get_entities_by_class(['T']):
         print(towncenter_id)
         print(context['player'].get_entities_by_class(['T']))
@@ -117,13 +114,12 @@ def gather_resources(context):
     for temp_resources in [("gold",'G'),("food",'F')]:
         if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
             resources_to_collect=temp_resources
-    for villager in context['units']['villager']:
-        if villager.state==UNIT_IDLE:
-            print("is_idle")
-            if not villager.is_full():
-                villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
-            else:
-                drop_resources(context)
+    for villager in [context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]:
+        if not villager.is_full():
+            print(f"villager free : {context['units']['villager_free']}")
+            villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+        else:
+            drop_resources(context)
     return "Gathering resources!"
 
 def train_military(context):
@@ -132,14 +128,11 @@ def train_military(context):
     return "Train military units!"
 
 def attack(context):
-    for unit in context['units']['villager'] or context['units']['military']:
-        
-        unit.attack_entity(context['enemy_id'])
     return "Attacking the enemy!"
 
 def drop_resources(context):
     for unit in context['units']['villager']:
-        if unit.is_full() and not is_under_attack(context):
+        if unit.is_full():
             unit.drop_to_entity(context['drop_off_id'])
     return "Dropping off resources!"
 
@@ -158,7 +151,6 @@ def build_structure(context):
     # if villager_ids:
     #     context['player'].build_entity(villager_ids, 'B',)  # Example for Town Center
     return "Building structure!"
-        
 
 def enemy_visible(context):
     return context['enemy_visible']
@@ -178,26 +170,19 @@ tree = DecisionNode(
         no_action=gather_resources,
         priority=6
         ),
-        no_action=DecisionNode(
-            check_housing,
-            yes_action=housing_crisis,    
-            no_action=DecisionNode(    
+    no_action=DecisionNode(
+        check_housing,
+        yes_action=housing_crisis,    
+        no_action=DecisionNode(    
+            villagers_insufficient,
+            yes_action=train_villager,
+            no_action=DecisionNode(
                 has_enough_military,
                 no_action=train_military,
                 yes_action=DecisionNode(
-                    closest_town_center,
-                    yes_action=DecisionNode(
-                        resources_critical,
-                        no_action=build_structure,
-                        yes_action=DecisionNode(
-                            is_villager_full,
-                            yes_action=drop_resources,
-                            no_action=gather_resources,
-                            priority=10
-                        ),
-                        priority=9
-                    ),
-                    no_action=gather_resources,
+                    can_we_attack,
+                    yes_action=attack,
+                    no_action=build_structure,
                     priority=8
                 ),
                 priority=7
@@ -205,6 +190,7 @@ tree = DecisionNode(
             priority=6
         ),
     priority=5
+    )
 )
 
 def choose_strategy(Player):
