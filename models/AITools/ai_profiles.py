@@ -12,6 +12,7 @@ class AIProfile:
         :param aggressiveness: Aggressiveness level
         :param defense: Defense level
         """
+
         self.strategy = strategy
         self.aggressiveness = aggressiveness
         self.defense = defense
