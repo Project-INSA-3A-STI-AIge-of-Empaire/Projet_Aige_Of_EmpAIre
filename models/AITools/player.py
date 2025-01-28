@@ -75,9 +75,6 @@ def villagers_insufficient(context):
 def has_farm(context):
     return len(context['player'].get_entities_by_class(['F']))>0
 
-def is_under_attack(context):
-    return context['under_attack']
-
 def resources_critical(context):
     resources = context['player'].get_current_resources()
     return resources['gold'] < 50 or resources['food'] < 50 or resources['wood'] < 50
@@ -88,14 +85,8 @@ def buildings_insufficient(context):
 def has_enough_military(context):
     return context['ratio_military'] >= 0.5 or len(context['units']['villager']) <= 5
 
-def is_unit_idle(unit):
-    return unit.state == UNIT_IDLE
-
 def can_we_attack(context):
     return len(context['units']['villager']) > 5 and context['units']['military_free']
-
-def is_villager_full(unit):
-    return unit['type'] == 'villager' and unit['instance'].is_full()
 
 def check_housing(context):
     return context['housing_crisis']  # ajouter les houses in building
@@ -103,8 +94,6 @@ def check_housing(context):
 # ---- Actions ----
 def train_villager(context):
     for towncenter_id in context['player'].get_entities_by_class(['T']):
-        print(towncenter_id)
-        print(context['player'].get_entities_by_class(['T']))
         towncenter=context['player'].linked_map.get_entity_by_id(towncenter_id)
         towncenter.train_unit(context['player'],'v')
         if context['player'].get_current_resources()['food']<50:
@@ -134,8 +123,6 @@ def gather_resources(context):
     return "Gathering resources!"
 
 def train_military(context):
-    # for building in context['buildings']['training']:
-    #     building['instance'].train_unit(context['player'], 'v')
     return "Train military units!"
 
 def attack(context):
@@ -149,15 +136,8 @@ def drop_resources(context):
     return "Dropping off resources!"
 
 
-
 def build_structure(context):
-    # villager_ids = [unit.id for unit in context['units'].get('villager', []) if is_unit_idle(unit)]
-    # if villager_ids:
-    #     context['player'].build_entity(villager_ids, 'B',)  # Example for Town Center
     return "Building structure!"
-
-def enemy_visible(context):
-    return context['enemy_visible']
 
 def housing_crisis(context):
     context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True), 'H')

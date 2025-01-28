@@ -22,16 +22,10 @@ class GameEventHandler:
         context = {
             'desired_villager_count': len(self.players.get_entities_by_class(['T','H','C','F','B','S','A','K']))+2,
             'resources': self.players.get_current_resources(),
-            'military_units': len(self.players.get_entities_by_class(['h', 'a', 's','x','m','c'])),
             'ratio_military':len(self.players.get_entities_by_class(['h', 'a', 's','x','m','c']))/len(self.players.get_entities_by_class(['h', 'a', 's','v','x','m','c'])) if len(self.players.get_entities_by_class(['h','a','s','v','x','m','c'])) != 0 else 0,
-            'military_units_details': {
-                'archers': len(self.players.get_entities_by_class(['a','m'])),
-                'infantry': len(self.players.get_entities_by_class(['s','c'])),
-            },
             'buildings': {
                 'storage': self.players.get_entities_by_class(['T','C']),
                 'training': self.players.get_entities_by_class(['B','S','A']),
-                'critical': self.players.is_free(),
                 'ratio':{
                     'T' : len(self.players.entities_dict['T'])/sum(len(self.players.entities_dict[k]) for k in self.players.entities_dict.keys()) if 'T' in self.players.entities_dict.keys() else 0,
                     'H' : len(self.players.entities_dict['H'])/sum(len(self.players.entities_dict[k]) for k in self.players.entities_dict.keys()) if 'H' in self.players.entities_dict.keys() else 0,
@@ -50,11 +44,8 @@ class GameEventHandler:
 
             },
             'enemy_id': None,
-            'resource_id': self.players.ect(['G','W','F'], self.players.cell_Y, self.players.cell_X)[0],
             'drop_off_id': self.players.ect(['T','C'], self.players.cell_Y, self.players.cell_X)[0],
             'player': self.players,
-            'closest_town_center': self.players.ect(['T'], self.players.cell_Y, self.players.cell_X)[0],
-            'map' : self.map,
             'housing_crisis':(self.players.current_population >= self.players.get_current_population_capacity())
         }
         return context
