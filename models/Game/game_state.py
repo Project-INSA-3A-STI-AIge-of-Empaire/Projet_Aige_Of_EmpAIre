@@ -40,6 +40,9 @@ class GameState:
             pygame.mixer.music.play(-1)  # Jouer en boucle (-1 = boucle infinie)
             self.music_state = state
 
+    def go_to_main_menu(self):
+        self.states = START
+
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""
         self.map.generate_map(self.selected_map_type, self.selected_mode, self.selected_players)
@@ -83,7 +86,7 @@ class GameState:
             #self.screen.set_alpha(None)
     def set_speed(self, new_speed):
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
-            if new_speed > 0.3 and new_speed < 8:
+            if new_speed >= 0.3 and new_speed <= 8:
                 self.speed = new_speed
             self.last_time_switched = pygame.time.get_ticks()
             

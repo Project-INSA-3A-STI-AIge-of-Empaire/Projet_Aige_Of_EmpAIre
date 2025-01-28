@@ -2,7 +2,7 @@ import pygame
 import tkinter as tk
 from tkinter import messagebox, Button, Tk
 
-from ImageProcessingDisplay import UserInterface
+from ImageProcessingDisplay import UserInterface, EndMenu
 from GLOBAL_VAR import *
 from Game.game_state import * 
 
@@ -25,6 +25,7 @@ class GameLoop:
         self.state.set_screen_size(self.screen.get_width(), self.screen.get_height())
         self.startmenu = StartMenu(self.screen)
         self.pausemenu = PauseMenu(self.screen)
+        self.endmenu = EndMenu(self.screen)
         self.ui = UserInterface(self.screen)
         self.action_in_progress = False
         
@@ -113,6 +114,13 @@ class GameLoop:
         if keys[pygame.K_2]:
             self.state.set_speed(self.state.speed-0.1)
 
+        if keys[pygame.K_3]:
+            self.state.set_speed(0.3)
+        if keys[pygame.K_4]:
+            self.state.set_speed(1)
+        if keys[pygame.K_5]:
+            self.state.set_speed(8.0)
+
         # Basculer le mode d'affichage
         if keys[pygame.K_F10]:
             self.state.toggle_display_mode(self)
@@ -135,9 +143,11 @@ class GameLoop:
             self.state.toggle_pause()
 
         # Pause
-        if keys[pygame.K_p] or keys[pygame.K_ESCAPE]:
+        if keys[pygame.K_p] :
             self.state.toggle_pause()
 
+        if keys[pygame.K_ESCAPE]:
+            self.state.states = END
 
         # Mouvement de la caméra
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
@@ -227,8 +237,12 @@ class GameLoop:
                         self.state.map.players_dict[team].player_turn(dt)  # Trigger player turn
                         self.action_in_progress = False  # Action finished, ready for the next one
             """
-
-            self.update_game_state(dt)
+            if self.state.states == PLAY:
+                self.update_game_state(dt)
+            if self.state.states == END:
+                #self.state.change_music("end")
+                self.endmenu.draw(self.state.map.score_players)
+                self.endmenu.handle_click(pygame.mouse.get_pos(), self.state)
             self.render_display(dt, mouse_x, mouse_y)
             
 
