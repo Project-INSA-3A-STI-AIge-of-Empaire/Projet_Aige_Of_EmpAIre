@@ -90,7 +90,7 @@ def is_unit_idle(unit):
     return unit.state == UNIT_IDLE
 
 def can_we_attack(context):
-    return len(context['units']['villager']) > 5 and context['units']['military']
+    return len(context['units']['villager']) > 5 and context['units']['military_free']
 
 def is_villager_full(unit):
     return unit['type'] == 'villager' and unit['instance'].is_full()
@@ -227,6 +227,8 @@ def choose_strategy(Player):
             root.destroy()  # Ferme la fenêtre après validation
         # Création de l'interface
         root = Tk()
+
+
         root.title("Choose the Strategy")
         root.config(cursor="arrow")
         mainframe = Frame(root)
