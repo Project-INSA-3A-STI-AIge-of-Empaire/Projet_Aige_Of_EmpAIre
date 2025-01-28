@@ -123,7 +123,9 @@ class GameLoop:
         if keys[pygame.K_4]:
             self.state.set_speed(1)
         if keys[pygame.K_5]:
-            self.state.set_speed(8.0)
+            self.state.set_speed(2)
+        if keys[pygame.K_6]:
+            self.state.set_speed(8)
 
         # Basculer le mode d'affichage
         if keys[pygame.K_F10]:
@@ -147,11 +149,8 @@ class GameLoop:
             self.state.toggle_pause()
 
         # Pause
-        if keys[pygame.K_p] :
+        if keys[pygame.K_p] or keys[pygame.K_ESCAPE] :
             self.state.toggle_pause()
-
-        if keys[pygame.K_ESCAPE]:
-            self.state.states = END
 
         # Mouvement de la caméra
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
@@ -192,7 +191,7 @@ class GameLoop:
         elif self.state.states == PAUSE:
             self.pausemenu.draw()
         elif self.state.states == END:
-            self.endmenu.draw(self.map.score_players)
+            self.endmenu.draw(self.state.map.score_players)
         elif self.state.states == PLAY:
             if self.state.display_mode == ISO2D:
                 self.state.map.display(dt, self.screen, self.state.camera, self.screen_width, self.screen_height)
