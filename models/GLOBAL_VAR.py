@@ -90,6 +90,7 @@ RIGHT_CLICK = 3
 START = 0
 PLAY = 1
 PAUSE = 2
+END = 3
 
 
 #map

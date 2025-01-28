@@ -42,8 +42,8 @@ class EndMenu:
         self.screen.blit(title_text, title_rect)
 
         # Draw leaderboard
-        for i, (player, score) in enumerate(player_scores):
-            score_text = self.font.render(f"{i + 1}. {player}: {score}", True, WHITE_COLOR)
+        for i, (player, time) in enumerate(player_scores):
+            score_text = self.font.render(f"{i + 1}. {player}: {time}", True, WHITE_COLOR)
             score_rect = score_text.get_rect(center=(self.screen.get_width() // 2, 150 + i * 40))
             self.screen.blit(score_text, score_rect)
 
