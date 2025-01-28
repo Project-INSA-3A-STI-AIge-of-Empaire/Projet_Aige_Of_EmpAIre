@@ -1,6 +1,7 @@
 from Entity.entity import *
 from .player import *
 from Entity.Building import *
+from GLOBAL_VAR import *
 import time
 from random import *
 # from GameField.map import Map
@@ -108,6 +109,28 @@ class AIProfile:
             n = randint(0, 1)
             return units_list[n]
         
+    def closest_player(self,context):
+        list_player = context['player'].linked_map.players_dict.values()
+        distance = {}
+        for player in list_player:
+            if player != context['player']:
+                dx = context['player'].cell_X - player.cell_X
+                dy = context['player'].cell_Y - player.cell_Y
+                distance[player] = (dx ** 2 + dy ** 2) ** 0.5
+        closest = min(distance.items(), key=lambda x: x[1])
+        return closest[0]
+    
+    def closest_enemy_building(self,context):
+        player = self.closest_player(context)
+        minus_building = player.ect(BUILDINGS, player.cell_Y, player.cell_X)
+        print(f"The minus id {minus_building[0]}")
+        if minus_building:
+            closest = minus_building[0]
+        else:
+            minus_entity = player.ect(UNITS, player.cell_Y, player.cell_X)
+            closest = minus_entity[0]
+        return closest
+            
                 
 
 
@@ -153,6 +176,7 @@ class AIProfile:
             for action in actions:
                 if action == "Attacking the enemy!":
                     unit_list = context['units']['military_free']+context['units']['villager_free'][:len(context['units']['villager_free'])//2]
+                    context['ennemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
@@ -224,6 +248,7 @@ class AIProfile:
                     
                 elif action == "Attacking the enemy!":
                     unit_list = context['units']['military_free'][:len(context['units']['military_free'])//2]
+                    context['ennemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
@@ -277,6 +302,7 @@ class AIProfile:
                             v.collect_entity(c_ids[c_pointer])
                             counter += 1
                         else:
+                            print(f"The drop off id is : {context['drop_off_id']}")
                             villager.drop_to_entity(context['drop_off_id'])
                     return "Gathering resources!"
 
@@ -301,6 +327,7 @@ class AIProfile:
 
                 elif action == "Attacking the enemy!":
                     unit_list = context['units']['military_free']
+                    context['ennemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"

@@ -142,6 +142,7 @@ def drop_resources(context):
     for unit in context['units']['villager']:
         if unit.is_full():
             unit.drop_to_entity(context['drop_off_id'])
+            print(f"The dropp of id : {context['drop_off_id']}")
     return "Dropping off resources!"
 
 
@@ -625,18 +626,6 @@ class Player:
 
         sorted_entities = sorted(entity_distances, key=lambda x: x[1])
         return [entity_id for entity_id, _ in sorted_entities]
-    
-    def get_closest_ennemy(self):
-        closest_id = None
-        closest_distance = float('inf')
-        for entity_id,entity in self.linked_map.entity_id_dict.items():
-            if entity.team != self.team and isinstance(entity, Unit):
-                current_distance = math.dist([entity.cell_X, entity.cell_Y],[self.cell_X,self.cell_Y])
-                if current_distance < closest_distance:
-                    closest_id = entity_id
-                    closest_distance = current_distance
-        closest_entity = self.linked_map.get_entity_by_id(closest_id)
-        return closest_entity,closest_distance, closest_id
 
     def is_free(self):
         return 'is_free'

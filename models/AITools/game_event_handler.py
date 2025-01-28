@@ -1,6 +1,7 @@
 # from GameField.map import Map
 # from ai_profiles import AIProfile
 from Entity.entity import Entity
+from GLOBAL_VAR import *
 
 
 class GameEventHandler:
@@ -18,7 +19,6 @@ class GameEventHandler:
         print(f"Player {self.players.team} Actions: {actions}")
 
     def get_context_for_player(self):
-        enemy_visible, enemy_distance, enemy_id = self.players.get_closest_ennemy()
         context = {
             'desired_villager_count': 5,
             'resources': self.players.get_current_resources(),
@@ -28,7 +28,6 @@ class GameEventHandler:
                 'archers': len(self.players.get_entities_by_class(['a','m'])),
                 'infantry': len(self.players.get_entities_by_class(['s','c'])),
             },
-            'enemy_visible': enemy_visible,
             'buildings': {
                 'storage': self.players.get_entities_by_class(['T','C']),
                 'training': self.players.get_entities_by_class(['B','S','A']),
@@ -44,20 +43,18 @@ class GameEventHandler:
                     'K' : len(self.players.entities_dict['K'])/sum(len(self.players.entities_dict[k]) for k in self.players.entities_dict.keys()) if 'K' in self.players.entities_dict.keys() else 0,
                 }
             },
-            'enemy_distance': enemy_distance,
             'units' : {
                 'military_free': [self.players.linked_map.get_entity_by_id(m_id) for m_id in self.players.get_entities_by_class(['h', 'a', 's','m','c','x'], is_free=True)],
                 'villager': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'])],
                 'villager_free': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'],is_free=True)],
 
             },
-            'enemy_id': enemy_id,
+            'enemy_id': None,
             'resource_id': self.players.ect(['G','W','F'], self.players.cell_Y, self.players.cell_X)[0],
             'drop_off_id': self.players.ect(['T','C'], self.players.cell_Y, self.players.cell_X)[0],
             'player': self.players,
             'closest_town_center': self.players.ect(['T'], self.players.cell_Y, self.players.cell_X)[0],
             'map' : self.map,
-            'under_attack' : (self.players.get_closest_ennemy()[1] < 20),
             'housing_crisis':(self.players.current_population >= self.players.get_current_population_capacity())
         }
         return context
