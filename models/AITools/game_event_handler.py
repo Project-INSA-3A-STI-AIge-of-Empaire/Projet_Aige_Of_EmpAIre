@@ -20,7 +20,7 @@ class GameEventHandler:
 
     def get_context_for_player(self):
         context = {
-            'desired_villager_count': 5,
+            'desired_villager_count': len(self.players.get_entities_by_class(['T','H','C','F','B','S','A','K']))+2,
             'resources': self.players.get_current_resources(),
             'military_units': len(self.players.get_entities_by_class(['h', 'a', 's','x','m','c'])),
             'ratio_military':len(self.players.get_entities_by_class(['h', 'a', 's','x','m','c']))/len(self.players.get_entities_by_class(['h', 'a', 's','v','x','m','c'])) if len(self.players.get_entities_by_class(['h','a','s','v','x','m','c'])) != 0 else 0,

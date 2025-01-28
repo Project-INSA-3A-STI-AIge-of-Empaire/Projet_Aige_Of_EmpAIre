@@ -42,6 +42,20 @@ class GameState:
 
     def go_to_main_menu(self):
         self.states = START
+        self.speed = 1
+        self.selected_map_type = MAP_NORMAL
+        self.selected_mode = LEAN
+        self.selected_players = 2
+        self.map = Map(MAP_CELLX, MAP_CELLY)
+        self.display_mode = ISO2D # Mode d'affichage par défaut
+        self.camera = Camera()
+        self.terminal_camera = TerminalCamera()
+        self.display_mode = ISO2D # Mode d'affichage par défaut
+
+
+    def endgame(self):
+        if self.map.state == "end":
+            self.states = END
 
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""

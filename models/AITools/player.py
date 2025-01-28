@@ -72,6 +72,8 @@ def villagers_insufficient(context):
     villager_count = len(context['player'].get_entities_by_class(['v']))  # 'v' pour les villageois
     return villager_count < context['desired_villager_count'] and len(context['player'].get_entities_by_class(['F']))>=1
 
+def has_farm(context):
+    return len(context['player'].get_entities_by_class(['F']))>0
 
 def is_under_attack(context):
     return context['under_attack']
@@ -123,7 +125,8 @@ def gather_resources(context):
         if not v.is_full():
             if counter == 3:
                 counter = 0
-                c_pointer += 1
+                if c_pointer<len(c_ids)-1:
+                    c_pointer += 1
             v.collect_entity(c_ids[c_pointer])
             counter += 1
         else:
@@ -164,6 +167,9 @@ def housing_crisis(context):
 tree = DecisionNode(
     # villagers_insufficient,
     # yes_action=train_villagers,
+    has_farm,
+    no_action=build_structure,
+    yes_action=DecisionNode(
     resources_critical,
     yes_action=DecisionNode(
         buildings_insufficient,
@@ -192,6 +198,7 @@ tree = DecisionNode(
         ),
     priority=5
     )
+)
 )
 
 def choose_strategy(Player):
@@ -322,7 +329,7 @@ class Player:
             self.houses_id.add(entity.id)
 
     def remove_entity(self, entity):
-        print(entity)
+        
         entity_dict = self.entities_dict.get(entity.representation, None)
         if entity_dict:
             entity_dict.pop(entity.id, None)
@@ -604,11 +611,11 @@ class Player:
                             if current_dist < closest_dist:
                                 closest_id = current_entity.id
                                 closest_dist = current_dist
-            
-        return closest_id
-    
 
-    def ect(self, ent_repr_list, cell_Y, cell_X):
+        return closest_id
+
+
+    def ect(self, ent_repr_list, cell_Y, cell_X, is_dead = False):
         entity_distances = []
 
         for ent_repr in ent_repr_list:
@@ -621,8 +628,13 @@ class Player:
                 for ent_id in ent_ids:
                     current_entity = self.linked_map.get_entity_by_id(ent_id)
                     if current_entity:
-                        current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
-                        entity_distances.append((current_entity.id, current_dist))
+                        compute = True
+                        if is_dead and current_entity.is_dead():
+                            compute = False
+                        
+                        if compute:
+                            current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
+                            entity_distances.append((current_entity.id, current_dist))
 
         sorted_entities = sorted(entity_distances, key=lambda x: x[1])
         return [entity_id for entity_id, _ in sorted_entities]

@@ -77,6 +77,7 @@ TEAM_COLORS = {
     19: PEACH_COLOR,
     20: MINT_COLOR
 }
+
 MUSIC = {
     "start":"Sounds/Menu.mp3",
     "normal":"Sounds/Normal.mp3",
@@ -104,6 +105,11 @@ MAP_CENTERED = 1
 LEAN = 0
 MEAN = 1
 MARINES = 2
+
+ENTITIES = ["T","C","H","F","K","S","B","A","h","m","s","x","c","a","v"]
+BUILDINGS = ["T","C","H","F","K","S","B","A"]
+MILITARY_UNITS = ["h","m","s","x","c","a"]
+UNITS = ["h","m","s","x","c","a","v"]
 
 #smart way for generation
 MODE_GENERATION = {

@@ -399,10 +399,10 @@ class Unit(Entity):
 
     def is_dead(self):
         return self.hp <= 0
-    
+
     def will_vanish(self):
-        return self.is_dead() and self.animation_frame == self.len_current_animation_frames() - 1
-    
+        return self.is_dead() and ((self.animation_frame <= self.len_current_animation_frames() - 1) or self.self.animation_frame >= self.len_current_animation_frames() - 3)
+
     def update(self, dt, camera, screen):
         self.update_animation_frame(dt)
         self.try_to_defend(dt)

@@ -2,7 +2,7 @@ import pygame
 import tkinter as tk
 from tkinter import messagebox, Button, Tk
 
-from ImageProcessingDisplay import UserInterface, EndMenu
+from ImageProcessingDisplay import UserInterface, EndMenu, StartMenu, PauseMenu
 from GLOBAL_VAR import *
 from Game.game_state import * 
 
@@ -81,6 +81,10 @@ class GameLoop:
     def handle_pause_events(self,dt, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.pausemenu.handle_click(event.pos, self.state)
+    
+    def handle_end_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.endmenu.handle_click(event.pos, self.state)
 
     def handle_play_events(self, event, mouse_x, mouse_y, dt):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -119,7 +123,9 @@ class GameLoop:
         if keys[pygame.K_4]:
             self.state.set_speed(1)
         if keys[pygame.K_5]:
-            self.state.set_speed(8.0)
+            self.state.set_speed(2)
+        if keys[pygame.K_6]:
+            self.state.set_speed(8)
 
         # Basculer le mode d'affichage
         if keys[pygame.K_F10]:
@@ -143,11 +149,8 @@ class GameLoop:
             self.state.toggle_pause()
 
         # Pause
-        if keys[pygame.K_p] :
+        if keys[pygame.K_p] or keys[pygame.K_ESCAPE] :
             self.state.toggle_pause()
-
-        if keys[pygame.K_ESCAPE]:
-            self.state.states = END
 
         # Mouvement de la caméra
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
@@ -180,12 +183,15 @@ class GameLoop:
     def update_game_state(self, dt):
         if not (self.state.states == PAUSE):
             self.state.map.update_all_events(dt*self.state.speed, self.state.camera, self.screen)
+            self.state.endgame()
 
     def render_display(self, dt, mouse_x, mouse_y):
         if self.state.states == START:
             self.startmenu.draw()
         elif self.state.states == PAUSE:
             self.pausemenu.draw()
+        elif self.state.states == END:
+            self.endmenu.draw(self.state.map.score_players)
         elif self.state.states == PLAY:
             if self.state.display_mode == ISO2D:
                 self.state.map.display(dt, self.screen, self.state.camera, self.screen_width, self.screen_height)
@@ -222,6 +228,8 @@ class GameLoop:
                 elif self.state.states == PLAY:
                     self.state.change_music(self.state.map.state)
                     self.handle_play_events(event, mouse_x, mouse_y, dt)
+                elif self.state.states == END:
+                    self.handle_end_events(event)
 
             if self.state.mouse_held:
                 self.state.map.minimap.update_camera(self.state.camera, mouse_x, mouse_y)
@@ -239,10 +247,6 @@ class GameLoop:
             """
             if self.state.states == PLAY:
                 self.update_game_state(dt)
-            if self.state.states == END:
-                #self.state.change_music("end")
-                self.endmenu.draw(self.state.map.score_players)
-                self.endmenu.handle_click(pygame.mouse.get_pos(), self.state)
             self.render_display(dt, mouse_x, mouse_y)
             
 
