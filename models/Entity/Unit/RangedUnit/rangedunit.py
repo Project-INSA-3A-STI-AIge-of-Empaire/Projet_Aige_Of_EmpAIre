@@ -36,11 +36,11 @@ class RangedUnit(Unit):
             self.attack_time_acc = 0
 
             self.will_attack = True
-        
+
         if self.state == UNIT_ATTACKING:
             if self.animation_frame >= self.attack_frame and self.will_attack:
                 self.will_attack = False
-                
+
                 ProjectileClass = PROJECTILE_TYPE_MAPPING.get(self.projetctile_type, None)
                 projectile = ProjectileClass(self.cell_Y, self.cell_X, PVector2(self.position.x - self.projetctile_padding, self.position.y - self.projetctile_padding), _entity, self.linked_map, self.team, self.attack)
                 self.linked_map.add_projectile(projectile)
@@ -56,22 +56,37 @@ class RangedUnit(Unit):
 
             if self.entity_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
-
                 if entity != None:
                     if entity.is_dead() or entity.team == self.team:
                         self.entity_target_id = None
                         enemy = self.linked_map.players_dict.get(entity.team, None)
-                        
+
                         if enemy:
                             target_id = enemy.entity_closest_to(BUILDINGS, self.cell_Y, self.cell_X, is_dead = True)
 
                             if target_id == None:
                                 target_id = enemy.entity_closest_to(UNITS, self.cell_Y, self.cell_X, is_dead = True)
-
                             self.entity_target_id = target_id
+
                             if self.entity_target_id == None:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
+            
+            """
+            if self.entity_defend_from_id != None:
+                entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
+                
+                if entity != None:
+                    if entity.is_dead() or entity.team == self.team:
+                        self.entity_defend_from_id = None
+                        entity =None
+                    else:
+
+                        dist = math.sqrt((self.cell_X - entity.cell_X)**2 + (self.cell_Y - entity.cell_Y)**2)
+                        
+                        if dist > 10:
+                            self.entity_defend_from_id = None
+            """
 
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
@@ -80,18 +95,16 @@ class RangedUnit(Unit):
             if (entity != None):
 
                 if (entity.team != 0 and entity.team != self.team):
-                    
+
                     if (entity.is_dead() == False):
-                        
-                        
+
                         if not(self.check_range_with_target):
                             
                             if (self.check_in_range_with(entity)):
                                 
                                 self.check_range_with_target = True
                                 self.locked_with_target = True
-                                
-                                
+    
                             else:
                                 
                                 if not(self.state == UNIT_WALKING): # we need to reach it in range

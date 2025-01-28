@@ -5,10 +5,10 @@ class MeleeUnit(Unit):
         super().__init__(id_gen,cell_Y, cell_X, position, team, representation, hp, cost, training_time, speed, attack, attack_speed)
         self.start = pygame.time.get_ticks()
     def try_to_damage(self, dt, entity):
-        
+
         self.attack_time_acc += dt 
         if self.first_time_pass or (self.attack_time_acc > self.attack_delta_time):
-            
+
             if (self.first_time_pass):
                 self.first_time_pass = False
             if not(self.state == UNIT_ATTACKING):
@@ -17,7 +17,7 @@ class MeleeUnit(Unit):
             self.attack_time_acc = 0
 
             self.will_attack = True
-        
+
         if self.state == UNIT_ATTACKING:
             if self.animation_frame >= self.attack_frame and self.will_attack:
                 self.will_attack = False
@@ -38,9 +38,8 @@ class MeleeUnit(Unit):
                     entity.change_state(STATES.get(entity.representation, None).get("dying", None))
                     self.path_to_position = None
 
-
             elif self.animation_frame == (self.len_current_animation_frames() - 1):
-                
+
                 self.check_range_with_target = False # we need to recheck if it is still in range
                 self.change_state(UNIT_IDLE) # if the entity is killed we stop 
 
@@ -50,24 +49,37 @@ class MeleeUnit(Unit):
 
             if self.entity_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
-
                 if entity != None:
                     if entity.is_dead() or entity.team == self.team:
                         self.entity_target_id = None
                         enemy = self.linked_map.players_dict.get(entity.team, None)
-                        
+
                         if enemy:
                             target_id = enemy.entity_closest_to(BUILDINGS, self.cell_Y, self.cell_X, is_dead = True)
 
                             if target_id == None:
                                 target_id = enemy.entity_closest_to(UNITS, self.cell_Y, self.cell_X, is_dead = True)
-
                             self.entity_target_id = target_id
+
                             if self.entity_target_id == None:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
+            """
+            if self.entity_defend_from_id != None:
+                entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
+                
+                if entity != None:
+                    if entity.is_dead() or entity.team == self.team:
+                        self.entity_defend_from_id = None
+                        entity =None
+                    else:
 
-            
+                        dist = math.sqrt((self.cell_X - entity.cell_X)**2 + (self.cell_Y - entity.cell_Y)**2)
+                        
+                        if dist > 10:
+                            self.entity_defend_from_id = None
+            """
+
 
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)

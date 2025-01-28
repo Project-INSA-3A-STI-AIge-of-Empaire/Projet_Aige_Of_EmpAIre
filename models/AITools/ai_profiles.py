@@ -199,8 +199,12 @@ class AIProfile:
             for action in actions:
                 if action == "Attacking the enemy!":
                     unit_list = context['units']['military_free']+context['units']['villager_free'][:len(context['units']['villager_free'])//2]
-                    context['ennemy_id'] = self.closest_enemy_building(context)
+                    context['enemy_id'] = self.closest_enemy_building(context)
+
                     for unit in unit_list:
+                        en = unit.linked_map.get_entity_by_id(context['enemy_id'])
+                        print("wwwwwwww")
+                        print(f"{en}wwwwwwww")
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
 
@@ -245,7 +249,11 @@ class AIProfile:
                 if action == "Defend the village!":
                     # Defend the village by attacking enemies
                     military_units = player.get_entities_by_class(['h', 'a', 's'])
+                    
                     for unit_id in military_units:
+                        en = unit.linked_map.get_entity_by_id(context['enemy_id'])
+                        print("wwwwwwww")
+                        print(f"{en}wwwwwwww")
                         unit = map.get_entity_by_id(unit_id)
                         unit.attack_entity(context['enemy_id'])  # Attack the enemy
                     return "Executed defense strategy"
@@ -273,8 +281,11 @@ class AIProfile:
                     
                 elif action == "Attacking the enemy!":
                     unit_list = context['units']['military_free'][:len(context['units']['military_free'])//2]
-                    context['ennemy_id'] = self.closest_enemy_building(context)
+                    context['enemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
+                        en = unit.linked_map.get_entity_by_id(context['enemy_id'])
+                        print(f"{en} wwwwwwww")
+                        
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
                 
@@ -319,7 +330,7 @@ class AIProfile:
                     counter = 0
                     c_pointer = 0
                     for id in v_ids:
-                        v = self.linked_map.get_entity_by_id(id)
+                        v = unit.linked_map.get_entity_by_id(id)
                         if not v.is_full():
                             if counter == 3:
                                 counter = 0
@@ -356,9 +367,14 @@ class AIProfile:
 
                 elif action == "Attacking the enemy!":
                     unit_list = context['units']['military_free']
-                    context['ennemy_id'] = self.closest_enemy_building(context)
+                    context['enemy_id'] = self.closest_enemy_building(context)
+                    
                     for unit in unit_list:
+                        en = unit.linked_map.get_entity_by_id(context['enemy_id'])
+                        print("wwwwwwww")
+                        print(f"{en}wwwwwwww")
                         unit.attack_entity(context['enemy_id'])
+                        
                     return "Attacking in progress"
                 
                 elif action == "Building structure!":

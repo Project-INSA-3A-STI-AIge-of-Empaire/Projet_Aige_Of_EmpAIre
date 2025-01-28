@@ -325,7 +325,7 @@ class Map:
             """ # debug purposes 
 
                                                                                     # priority to the farm ( they are like grass so the ground is displayed first) then the normal deep sort 
-            for current_entity in sorted(entity_to_display, key=lambda entity: (isinstance(entity,SwordMan),not(isinstance(entity, Farm)), entity.position.z, entity.position.y + entity.position.x, entity.position.y)):
+            for current_entity in sorted(entity_to_display, key=lambda entity: (not(isinstance(entity, Farm)), entity.position.z, entity.position.y + entity.position.x, entity.position.y)):
             
                 current_entity.display(dt, screen, camera, g_width, g_height)
 

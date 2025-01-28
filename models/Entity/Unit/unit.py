@@ -395,13 +395,13 @@ class Unit(Entity):
             draw_point(screen, (0, 0, 0), px, py, radius=5)
 
     def is_free(self):
-        return self.entity_target_id == None
+        return self.entity_target_id == None and self.entity_defend_from_id == None
 
     def is_dead(self):
         return self.hp <= 0
 
     def will_vanish(self):
-        return self.is_dead() and ((self.animation_frame <= self.len_current_animation_frames() - 1) or self.self.animation_frame >= self.len_current_animation_frames() - 3)
+        return self.is_dead() and ((self.animation_frame == self.len_current_animation_frames() - 1) or self.animation_frame >= self.len_current_animation_frames() - 3)
 
     def update(self, dt, camera, screen):
         self.update_animation_frame(dt)

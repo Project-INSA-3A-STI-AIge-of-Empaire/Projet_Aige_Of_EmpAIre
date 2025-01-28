@@ -35,10 +35,13 @@ class GameState:
     def change_music(self, state):
         
         if self.music_state != state:  # Ne changer que si l'état est différent
+            """
             pygame.mixer.music.stop()  # Arrêter la musique actuelle
             pygame.mixer.music.load(MUSIC[state])  # Charger la nouvelle musique
             pygame.mixer.music.play(-1)  # Jouer en boucle (-1 = boucle infinie)
             self.music_state = state
+            """
+            print("s")
 
     def go_to_main_menu(self):
         self.states = START
@@ -103,7 +106,7 @@ class GameState:
             if new_speed >= 0.3 and new_speed <= 8:
                 self.speed = new_speed
             self.last_time_switched = pygame.time.get_ticks()
-            
+
     def toggle_display_mode(self, gameloop):
         """Bascule entre les modes d'affichage Terminal et 2.5D."""
          
@@ -118,7 +121,7 @@ class GameState:
                 self.set_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT)
                 gameloop.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
                 gameloop.screen.set_alpha(None)
-            
+
             self.last_time_switched = pygame.time.get_ticks()
 
 
