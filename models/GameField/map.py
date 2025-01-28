@@ -34,7 +34,6 @@ class Map:
         self.id_generator = IdGenerator()
         self.state = "normal"
 
-        
 
     def get_entity_by_id(self, _entity_id):
         return self.entity_id_dict.get(_entity_id, None)
@@ -386,8 +385,6 @@ class Map:
                 sys.stdout.write(current_string)
                 
                 sys.stdout.flush()
-                   
-                                
 
 
 
@@ -405,7 +402,7 @@ class Map:
             self.add_entity_to_closest(current_gold, center_Y, center_X, random_padding=0x1)
 
     def generate_map(self,gen_mode = MAP_NORMAL , mode = MARINES ,num_players=3):
-        
+
         #print(f"mode:{gen_mode}, res:{mode}")
         # Ensure consistent random generation
 
@@ -414,7 +411,7 @@ class Map:
         if gen_mode == "Carte Centrée":
             self.generate_gold_center(num_players)
         self._place_player_starting_areas(mode, num_players)
-        
+
         self.c_generate_clusters(num_players, gen_mode)
 
     def c_generate_clusters(self, num_players, gen_mode):
@@ -631,12 +628,26 @@ class Map:
                     self.players_dict.pop(team, None)
                     self.dead_players.append((player.team, player.life_time))
 
+        if len(self.players_dict) == 1:
+            self.state = "end"
 
     def update_all_events(self, dt, camera, screen):
-        self.update_all_entities(dt, camera, screen)
-        self.update_all_projectiles(dt)
-        self.update_all_dead_entities(dt)
-        self.update_all_players(dt)
+        if self.state != "end":
+            self.update_all_entities(dt, camera, screen)
+            self.update_all_projectiles(dt)
+            self.update_all_dead_entities(dt)
+            self.update_all_players(dt)
+
+
+
+
+
+
+
+
+
+
+
 
 def angle_distribution(Y, X, player_number, scale=1, rand_rot=False):
 

@@ -80,7 +80,8 @@ TEAM_COLORS = {
 MUSIC = {
     "start":"Sounds/Menu.mp3",
     "normal":"Sounds/Normal.mp3",
-    "battle":"Sounds/Battle.mp3"
+    "battle":"Sounds/Battle.mp3",
+    "end":"Sounds/Menu.mp3"
 }
 
 LEFT_CLICK = 1 
@@ -90,6 +91,7 @@ RIGHT_CLICK = 3
 START = 0
 PLAY = 1
 PAUSE = 2
+END = 3
 
 
 #map
@@ -393,8 +395,8 @@ def META_SPRITES_CACHE_HANDLE(zoom_level, list_keys, camera): # returns image to
         
     return current_dict 
 
-def convert_seconds(seconds):
-    seconds = math.ceil(seconds/ONE_SEC)
+def convert_seconds(gseconds):
+    seconds = math.ceil(gseconds)
 
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60

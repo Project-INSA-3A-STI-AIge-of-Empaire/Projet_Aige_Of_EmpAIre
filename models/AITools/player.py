@@ -227,6 +227,8 @@ def choose_strategy(Player):
             root.destroy()  # Ferme la fenêtre après validation
         # Création de l'interface
         root = Tk()
+        root.title("Choose the Strategy")
+        root.config(cursor="arrow")
         mainframe = Frame(root)
         mainframe.grid(column=0, row=0, sticky=(W, E, S))
 
@@ -631,7 +633,7 @@ class Player:
         return self.get_entities_by_class(["T","C","H","K","F","S","B","A"], is_free)
 
     def update(self, dt):
-        self.life_time += dt
+        self.life_time += dt/ONE_SEC
 
         self.update_population(dt)
 
