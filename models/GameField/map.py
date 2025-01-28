@@ -626,11 +626,11 @@ class Map:
             if player:
                 if player.is_dead():
                     self.players_dict.pop(team, None)
-                    self.score_players.append((player.team, player.life_time))
+                    self.score_players.append((player.team, convert_seconds(player.life_time)))
 
         if len(self.players_dict) == 1:
             self.state = "end"
-            self.score_players.append((player.team, player.life_time))
+            self.score_players.append((player.team, convert_seconds(player.life_time)))
             self.score_players.reverse()
 
 
