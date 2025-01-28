@@ -57,8 +57,21 @@ class RangedUnit(Unit):
             if self.entity_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
 
-                if entity.is_dead() or entity.team == self.team:
-                    self.entity_target_id = None
+                if entity != None:
+                    if entity.is_dead() or entity.team == self.team:
+                        self.entity_target_id = None
+                        enemy = self.linked_map.players_dict.get(entity.team, None)
+                        
+                        if enemy:
+                            target_id = enemy.entity_closest_to(BUILDINGS, self.cell_Y, self.cell_X, is_dead = True)
+
+                            if target_id == None:
+                                target_id = enemy.entity_closest_to(UNITS, self.cell_Y, self.cell_X, is_dead = True)
+
+                            self.entity_target_id = target_id
+                            if self.entity_target_id == None:
+                                if not(self.state == UNIT_IDLE):
+                                    self.change_state(UNIT_IDLE)
 
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)

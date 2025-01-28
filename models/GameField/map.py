@@ -615,7 +615,7 @@ class Map:
             self.state = "normal"
 
     def update_all_players(self, dt):
-
+        print(f"players: {self.players_dict}")
         for player in self.players_dict.values():
             player.update(dt)
 

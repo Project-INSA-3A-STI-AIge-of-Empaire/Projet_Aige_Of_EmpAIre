@@ -103,7 +103,7 @@ class Building(Entity):
         return self.hp <= 0
     
     def will_vanish(self):
-        return self.is_dead() and self.animation_frame == self.len_current_animation_frames() - 1
+        return self.is_dead() and ((self.animation_frame <= self.len_current_animation_frames() - 1) or self.self.animation_frame >= self.len_current_animation_frames() - 3)
 
     def update(self, dt, camera = None, screen = None):
         self.update_animation_frame(dt)
