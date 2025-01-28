@@ -146,7 +146,6 @@ class AIProfile:
     def closest_enemy_building(self,context):
         player = self.closest_player(context)
         minus_building = player.ect(BUILDINGS, player.cell_Y, player.cell_X)
-        print(f"The minus id {minus_building[0]}")
         if minus_building:
             closest = minus_building[0]
         else:
@@ -199,7 +198,7 @@ class AIProfile:
             for action in actions:
                 if action == "Attacking the enemy!":
                     unit_list = context['units']['military_free']+context['units']['villager_free'][:len(context['units']['villager_free'])//2]
-                    context['ennemy_id'] = self.closest_enemy_building(context)
+                    context['enemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
@@ -273,8 +272,9 @@ class AIProfile:
                     
                 elif action == "Attacking the enemy!":
                     unit_list = context['units']['military_free'][:len(context['units']['military_free'])//2]
-                    context['ennemy_id'] = self.closest_enemy_building(context)
+                    context['enemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
+                        print(f"defensive enemy id : {context['enemy_id']}")
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
                 
@@ -356,8 +356,9 @@ class AIProfile:
 
                 elif action == "Attacking the enemy!":
                     unit_list = context['units']['military_free']
-                    context['ennemy_id'] = self.closest_enemy_building(context)
+                    context['enemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
+                        print(f"balanced enemy id : {context['enemy_id']}")
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
                 
