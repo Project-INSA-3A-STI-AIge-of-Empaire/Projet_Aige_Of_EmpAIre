@@ -194,52 +194,63 @@ tree = DecisionNode(
 )
 
 def choose_strategy(Player):
-    # answer = messagebox.askyesno(
-    #     message='Do you want to choose the IA type for Player'+ str(Player.team)+'?',
-    #     icon='question',
-    #     title='AIge Of EmpAIres II'
-    # )
+    answer = messagebox.askyesno(
+        message='Do you want to choose the IA type for Player'+ str(Player.team)+'?',
+        icon='question',
+        title='AIge Of EmpAIres II'
+    )
     
-    # if answer:
-    #     def get_ia_values():
-    #         # Récupérer les valeurs des sliders lorsqu'on appuie sur le bouton
-    #         agressive_select = agressive.get()
-    #         defense_select = defense.get()
-    #         if defense_select == agressive_select:
-    #             result = "balanced", agressive_select, defense_select
-    #         elif defense_select > agressive_select:
-    #             result = "defensive", agressive_select, defense_select
-    #         else:
-    #             result = "agressive", agressive_select, defense_select
+    if answer:
+        global result
+        result = []
+        def get_ia_values():
+            # Récupérer les valeurs des sliders lorsqu'on appuie sur le bouton
+            agressive_select = agressive.get()
+            defense_select = defense.get()
+            if defense_select >= agressive_select-0.5 and defense_select <= agressive_select+0.5 :
+                result.append("balanced")
+                result.append(agressive_select)
+                result.append(defense_select)
+            elif defense_select > agressive_select:
+                result.append("defensive")
+                result.append(agressive_select)
+                result.append(defense_select)
+            else:
+                result.append("aggressive")
+                result.append(agressive_select)
+                result.append(defense_select)
             
-    #         print(result)  # Affiche le résultat pour vérifier
-    #         root.destroy()  # Ferme la fenêtre après validation
+            
 
-    #     # Création de l'interface
-    #     root = Tk()
-    #     mainframe = Frame(root)
-    #     mainframe.grid(column=0, row=0, sticky=(W, E, S))
+        def on_button_click():
+            get_ia_values()
+            root.destroy()  # Ferme la fenêtre après validation
+        # Création de l'interface
+        root = Tk()
+        mainframe = Frame(root)
+        mainframe.grid(column=0, row=0, sticky=(W, E, S))
 
-    #     root.columnconfigure(0, weight=1)
-    #     root.rowconfigure(0, weight=1)
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
 
-    #     # Titre et slider "Agressive"
-    #     Label(mainframe, text="Agressive").grid(column=1, row=1, sticky=W)
-    #     agressive = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
-    #     agressive.grid(column=1, row=2, sticky=(W, E))
+        # Titre et slider "Agressive"
+        Label(mainframe, text="Agressive").grid(column=1, row=1, sticky=W)
+        agressive = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+        agressive.grid(column=1, row=2, sticky=(W, E))
 
-    #     # Titre et slider "Defense"
-    #     Label(mainframe, text="Defense").grid(column=2, row=1, sticky=W)
-    #     defense = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
-    #     defense.grid(column=2, row=2, sticky=(W, E))
+        # Titre et slider "Defense"
+        Label(mainframe, text="Defense").grid(column=2, row=1, sticky=W)
+        defense = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+        defense.grid(column=2, row=2, sticky=(W, E))
 
-    #     # Bouton de validation
-    #     Button(mainframe, text="Confirm", command=get_ia_values).grid(column=3, row=2, sticky=(W, E))
+        # Bouton de validation
+        Button(mainframe, text="Confirm", command=on_button_click).grid(column=3, row=2, sticky=(W, E))
 
-    #     root.mainloop()
-    # else:
+        root.mainloop()
+        return result
+    else:
         # Choix aléatoire si l'utilisateur refuse de configurer l'IA
-        Strategy_list = ["aggressive", "defensive", "balanced"]
+        Strategy_list = [["aggressive",3,1], ["defensive",1,3], ["balanced",1,1]]
         seed(time.perf_counter())
         n = randint(0, 2)
         return Strategy_list[n]
@@ -260,7 +271,9 @@ class Player:
         self.linked_map = None
 
         self.decision_tree= tree
-        self.ai_profile = AIProfile(strategy = choose_strategy(self))
+        strat = choose_strategy(self)
+        print(strat[0], strat[1], strat[2])
+        self.ai_profile = AIProfile(strategy = strat[0], aggressiveness= strat[1], defense = strat[2])
         self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
 
         self.refl_acc = 0
