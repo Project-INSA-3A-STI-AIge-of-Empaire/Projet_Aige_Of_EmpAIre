@@ -152,7 +152,7 @@ class AIProfile:
         try:
             for action in actions:
                 if action == "Attacking the enemy!":
-                    unit_list = context['units']['military']+context['units']['villager_free'][:len(context['units']['villager_free'])//2]
+                    unit_list = context['units']['military_free']+context['units']['villager_free'][:len(context['units']['villager_free'])//2]
                     for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
@@ -223,7 +223,7 @@ class AIProfile:
                     return "Repaired critical buildings"
                     
                 elif action == "Attacking the enemy!":
-                    unit_list = context['units']['military'][:len(context['units']['military'])//2]
+                    unit_list = context['units']['military_free'][:len(context['units']['military_free'])//2]
                     for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
@@ -300,7 +300,7 @@ class AIProfile:
                     return "Trained military units"
 
                 elif action == "Attacking the enemy!":
-                    unit_list = context['units']['military']
+                    unit_list = context['units']['military_free']
                     for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"

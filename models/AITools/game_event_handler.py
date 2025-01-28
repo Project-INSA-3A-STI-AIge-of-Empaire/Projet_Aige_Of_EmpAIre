@@ -46,7 +46,7 @@ class GameEventHandler:
             },
             'enemy_distance': enemy_distance,
             'units' : {
-                'military': [self.players.linked_map.get_entity_by_id(m_id) for m_id in self.players.get_entities_by_class(['h', 'a', 's','m','c','x'])],
+                'military_free': [self.players.linked_map.get_entity_by_id(m_id) for m_id in self.players.get_entities_by_class(['h', 'a', 's','m','c','x'], is_free=True)],
                 'villager': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'])],
                 'villager_free': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'],is_free=True)],
 
