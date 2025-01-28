@@ -33,7 +33,7 @@ class AIProfile:
         #         return
         if len(context['player'].get_entities_by_class(['F']))<1:
             print(f"nb farm : {len(context['player'].get_entities_by_class(['F']))}")
-            if context['player'].get_current_resources()["wood"]>=100:
+            if context['player'].get_current_resources()["wood"]>=61:
                 print("test wood")
                 result = context['player'].build_entity(context['player'].get_entities_by_class('v'), 'F')
                 print(f"result apres test wood:{result} et {context['player'].get_entities_by_class('v')}")
