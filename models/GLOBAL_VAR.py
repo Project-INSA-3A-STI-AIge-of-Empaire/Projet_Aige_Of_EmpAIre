@@ -393,6 +393,21 @@ def META_SPRITES_CACHE_HANDLE(zoom_level, list_keys, camera): # returns image to
         
     return current_dict 
 
+def convert_seconds(seconds):
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    secs = seconds % 60
+
+    result = []
+    if hours > 0:
+        result.append(f"{hours}h")
+    if minutes > 0:
+        result.append(f"{minutes}min")
+    if secs > 0 or not result:  
+        result.append(f"{secs}s")
+
+    return " ".join(result)
+
 CURSOR_IMG = pygame.image.load("Sprites/cursor.png").convert_alpha()
 #MINIMAP_IMG = pygame.image.load("Sprites/minimap_cus.png").convert_alpha()
 MINIMAP_IMG = pygame.image.load("Sprites/map-panel-removebg-preview.png").convert_alpha()

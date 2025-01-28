@@ -15,6 +15,7 @@ class AIProfile:
         :param aggressiveness: Aggressiveness level
         :param defense: Defense level
         """
+
         self.strategy = strategy
         self.aggressiveness = aggressiveness
         self.defense = defense
@@ -150,9 +151,8 @@ class AIProfile:
 
         try:
             for action in actions:
-                if action == "Attack the enemy!":
-                    semi_villager_list = context['units']['villager'][:len(context['units']['villager'])//2]
-                    for unit in semi_villager_list or context['units']['military']:
+                if action == "Attacking the enemy!":
+                    for unit in context['units']['military']:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
 
@@ -220,6 +220,11 @@ class AIProfile:
                     for building in buildings_to_repair:
                         building.repair()  # Assuming a repair method exists in Building class
                     return "Repaired critical buildings"
+                    
+                elif action == "Attacking the enemy!":
+                    for unit in context['units']['military']:
+                        unit.attack_entity(context['enemy_id'])
+                    return "Attacking in progress"
                 
                 elif action == "Building structure!":
                     self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context)
@@ -292,7 +297,7 @@ class AIProfile:
                         (context['player'].linked_map.get_entity_by_id(building)).train_unit(player,self.choose_units(context['player'].linked_map.get_entity_by_id(building)))
                     return "Trained military units"
 
-                elif action == "Attack the enemy!":
+                elif action == "Attacking the enemy!":
                     for unit in context['units']['military']:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"

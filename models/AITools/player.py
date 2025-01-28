@@ -543,7 +543,7 @@ class Player:
                 else:
                     self.homeless_units -= 1
 
-    def entity_closest_to(self, ent_repr_list, cell_Y, cell_X): # we give the ent_repr for the entity we want and then we give a certain position and we will return the closest entity of the given type to the cell_X, cell_Y
+    def entity_closest_to(self, ent_repr_list, cell_Y, cell_X, is_dead = False): # we give the ent_repr for the entity we want and then we give a certain position and we will return the closest entity of the given type to the cell_X, cell_Y
         closest_id = None
         ent_ids = None
 
@@ -562,12 +562,17 @@ class Player:
 
                     current_entity = self.linked_map.get_entity_by_id(ent_id)
                     if current_entity:
+                        compute = True
 
-                        current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
+                        if is_dead and current_entity.is_dead():
+                            compute = False
+                            
+                        if compute:
+                            current_dist = math.dist([current_entity.cell_X, current_entity.cell_Y], [cell_X, cell_Y])
 
-                        if current_dist < closest_dist:
-                            closest_id = current_entity.id
-                            closest_dist = current_dist 
+                            if current_dist < closest_dist:
+                                closest_id = current_entity.id
+                                closest_dist = current_dist
             
         return closest_id
     
