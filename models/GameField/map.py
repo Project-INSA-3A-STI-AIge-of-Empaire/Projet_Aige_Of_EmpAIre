@@ -20,7 +20,7 @@ class Map:
         self.entity_id_dict = {} # each element of this is an id
         self.resource_id_dict = {} # specially for the resources so the bots can easily decide to go to the closest resource ...
         self.dead_entities = {}
-        self.dead_players = [] # couple (team, life_time)
+        self.score_players = [] # couple (team, life_time)
         self.projectile_set = set()
 
         self.refresh_time_acc = 0 # refresh for the terminal display
@@ -626,10 +626,13 @@ class Map:
             if player:
                 if player.is_dead():
                     self.players_dict.pop(team, None)
-                    self.dead_players.append((player.team, player.life_time))
+                    self.score_players.append((player.team, player.life_time))
 
         if len(self.players_dict) == 1:
             self.state = "end"
+            self.score_players.append((player.team, player.life_time))
+            self.score_players.reverse()
+
 
     def update_all_events(self, dt, camera, screen):
         if self.state != "end":
