@@ -83,7 +83,7 @@ class GameState:
             #self.screen.set_alpha(None)
     def set_speed(self, new_speed):
         if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
-            if new_speed > 0.3 and new_speed < 5:
+            if new_speed > 0.3 and new_speed < 8:
                 self.speed = new_speed
             self.last_time_switched = pygame.time.get_ticks()
             

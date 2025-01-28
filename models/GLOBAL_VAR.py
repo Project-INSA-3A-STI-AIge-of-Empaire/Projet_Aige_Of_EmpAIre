@@ -112,6 +112,7 @@ MODE_GENERATION = {
             "v":3
         }
     },
+
     MEAN:{
         "resources":{"gold":2000, "wood":2000, "food":2000},
         "entities":{
@@ -119,6 +120,7 @@ MODE_GENERATION = {
             "v":3
         }
     },
+
     MARINES:{
         "resources":{"gold":20000, "wood":20000, "food":20000},
         "entities":{
@@ -390,6 +392,21 @@ def META_SPRITES_CACHE_HANDLE(zoom_level, list_keys, camera): # returns image to
             current_dict = current_dict.get(list_keys[key], None)
         
     return current_dict 
+
+def convert_seconds(seconds):
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    secs = seconds % 60
+
+    result = []
+    if hours > 0:
+        result.append(f"{hours}h")
+    if minutes > 0:
+        result.append(f"{minutes}min")
+    if secs > 0 or not result:  
+        result.append(f"{secs}s")
+
+    return " ".join(result)
 
 CURSOR_IMG = pygame.image.load("Sprites/cursor.png").convert_alpha()
 #MINIMAP_IMG = pygame.image.load("Sprites/minimap_cus.png").convert_alpha()

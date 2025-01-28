@@ -72,3 +72,6 @@ class Entity():
 
     def update(self, dt, camera = None, screen = None):
         return None
+
+    def is_free(self):
+        return True

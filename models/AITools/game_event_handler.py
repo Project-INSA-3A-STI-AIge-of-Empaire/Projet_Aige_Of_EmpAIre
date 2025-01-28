@@ -25,13 +25,13 @@ class GameEventHandler:
             'military_units': len(self.players.get_entities_by_class(['h', 'a', 's','x','m','c'])),
             'ratio_military':len(self.players.get_entities_by_class(['h', 'a', 's','x','m','c']))/len(self.players.get_entities_by_class(['h', 'a', 's','v','x','m','c'])) if len(self.players.get_entities_by_class(['h','a','s','v','x','m','c'])) != 0 else 0,
             'military_units_details': {
-                'archers': len(self.players.get_entities_by_class(['a'])),
-                'infantry': len(self.players.get_entities_by_class(['s'])),
+                'archers': len(self.players.get_entities_by_class(['a','m'])),
+                'infantry': len(self.players.get_entities_by_class(['s','c'])),
             },
             'enemy_visible': enemy_visible,
             'buildings': {
-                'storage': self.players.get_entities_by_class(['T']),
-                'training': self.players.get_entities_by_class(['B','S','A','K']),
+                'storage': self.players.get_entities_by_class(['T','C']),
+                'training': self.players.get_entities_by_class(['B','S','A']),
                 'critical': self.players.is_free(),
                 'ratio':{
                     'T' : len(self.players.entities_dict['T'])/sum(len(self.players.entities_dict[k]) for k in self.players.entities_dict.keys()) if 'T' in self.players.entities_dict.keys() else 0,
@@ -46,14 +46,16 @@ class GameEventHandler:
             },
             'enemy_distance': enemy_distance,
             'units' : {
-                'military': [self.players.linked_map.get_entity_by_id(m_id) for m_id in self.players.get_entities_by_class(['h', 'a', 's'])],
+                'military': [self.players.linked_map.get_entity_by_id(m_id) for m_id in self.players.get_entities_by_class(['h', 'a', 's','m','c','x'])],
                 'villager': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'])],
+                'villager_free': [self.players.linked_map.get_entity_by_id(v_id) for v_id in self.players.get_entities_by_class(['v'],is_free=True)],
+
             },
             'enemy_id': enemy_id,
-            'resource_id': self.players.entity_closest_to(['G', 'W'], self.players.cell_Y, self.players.cell_X),
-            'drop_off_id': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
+            'resource_id': self.players.ect(['G','W','F'], self.players.cell_Y, self.players.cell_X)[0],
+            'drop_off_id': self.players.ect(['T','C'], self.players.cell_Y, self.players.cell_X)[0],
             'player': self.players,
-            'closest_town_center': self.players.entity_closest_to(['T'], self.players.cell_Y, self.players.cell_X),
+            'closest_town_center': self.players.ect(['T'], self.players.cell_Y, self.players.cell_X)[0],
             'map' : self.map,
             'under_attack' : (self.players.get_closest_ennemy()[1] < 20),
             'housing_crisis':(self.players.current_population >= self.players.get_current_population_capacity())
