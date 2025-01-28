@@ -20,7 +20,7 @@ class Map:
         self.entity_id_dict = {} # each element of this is an id
         self.resource_id_dict = {} # specially for the resources so the bots can easily decide to go to the closest resource ...
         self.dead_entities = {}
-        self.dead_players = [] # couple (team, life_time)
+        self.score_players = [] # couple (team, life_time)
         self.projectile_set = set()
 
         self.refresh_time_acc = 0 # refresh for the terminal display
@@ -34,7 +34,6 @@ class Map:
         self.id_generator = IdGenerator()
         self.state = "normal"
 
-        
 
     def get_entity_by_id(self, _entity_id):
         return self.entity_id_dict.get(_entity_id, None)
@@ -386,8 +385,6 @@ class Map:
                 sys.stdout.write(current_string)
                 
                 sys.stdout.flush()
-                   
-                                
 
 
 
@@ -405,7 +402,7 @@ class Map:
             self.add_entity_to_closest(current_gold, center_Y, center_X, random_padding=0x1)
 
     def generate_map(self,gen_mode = MAP_NORMAL , mode = MARINES ,num_players=3):
-        
+
         #print(f"mode:{gen_mode}, res:{mode}")
         # Ensure consistent random generation
 
@@ -414,7 +411,7 @@ class Map:
         if gen_mode == "Carte Centrée":
             self.generate_gold_center(num_players)
         self._place_player_starting_areas(mode, num_players)
-        
+
         self.c_generate_clusters(num_players, gen_mode)
 
     def c_generate_clusters(self, num_players, gen_mode):
@@ -629,14 +626,31 @@ class Map:
             if player:
                 if player.is_dead():
                     self.players_dict.pop(team, None)
-                    self.dead_players.append((player.team, player.life_time))
+                    self.score_players.append((player.team, convert_seconds(player.life_time)))
+
+        if len(self.players_dict) == 1:
+            self.state = "end"
+            self.score_players.append((player.team, convert_seconds(player.life_time)))
+            self.score_players.reverse()
 
 
     def update_all_events(self, dt, camera, screen):
-        self.update_all_entities(dt, camera, screen)
-        self.update_all_projectiles(dt)
-        self.update_all_dead_entities(dt)
-        self.update_all_players(dt)
+        if self.state != "end":
+            self.update_all_entities(dt, camera, screen)
+            self.update_all_projectiles(dt)
+            self.update_all_dead_entities(dt)
+            self.update_all_players(dt)
+
+
+
+
+
+
+
+
+
+
+
 
 def angle_distribution(Y, X, player_number, scale=1, rand_rot=False):
 
