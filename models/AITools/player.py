@@ -194,11 +194,11 @@ tree = DecisionNode(
 )
 
 def choose_strategy(Player):
-    # answer = messagebox.askyesno(
-    #     message='Do you want to choose the IA type for Player'+ str(Player.team)+'?',
-    #     icon='question',
-    #     title='AIge Of EmpAIres II'
-    # )
+    answer = messagebox.askyesno(
+        message='Do you want to choose the IA type for Player'+ str(Player.team)+'?',
+        icon='question',
+        title='AIge Of EmpAIres II'
+    )
     
     if answer:
         global result
@@ -230,27 +230,25 @@ def choose_strategy(Player):
         mainframe = Frame(root)
         mainframe.grid(column=0, row=0, sticky=(W, E, S))
 
-    #     root.columnconfigure(0, weight=1)
-    #     root.rowconfigure(0, weight=1)
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
 
-    #     # Titre et slider "Agressive"
-    #     Label(mainframe, text="Agressive").grid(column=1, row=1, sticky=W)
-    #     agressive = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
-    #     agressive.grid(column=1, row=2, sticky=(W, E))
+        # Titre et slider "Agressive"
+        Label(mainframe, text="Agressive").grid(column=1, row=1, sticky=W)
+        agressive = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+        agressive.grid(column=1, row=2, sticky=(W, E))
 
-    #     # Titre et slider "Defense"
-    #     Label(mainframe, text="Defense").grid(column=2, row=1, sticky=W)
-    #     defense = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
-    #     defense.grid(column=2, row=2, sticky=(W, E))
+        # Titre et slider "Defense"
+        Label(mainframe, text="Defense").grid(column=2, row=1, sticky=W)
+        defense = Scale(mainframe, from_=1, to=3, orient=HORIZONTAL, resolution=0.1)
+        defense.grid(column=2, row=2, sticky=(W, E))
 
         # Bouton de validation
         Button(mainframe, text="Confirm", command=on_button_click).grid(column=3, row=2, sticky=(W, E))
 
         root.mainloop()
-        return result
     else:
         # Choix aléatoire si l'utilisateur refuse de configurer l'IA
-        Strategy_list = ["aggressive", "defensive", "balanced"]
         Strategy_list = ["aggressive", "defensive", "balanced"]
         seed(time.perf_counter())
         n = randint(0, 2)
@@ -273,7 +271,6 @@ class Player:
 
         self.decision_tree= tree
         strat = choose_strategy(self)
-        print(strat)
         self.ai_profile = AIProfile(strategy = strat[0], aggressiveness= strat[1], defense = strat[2])
         self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
 
