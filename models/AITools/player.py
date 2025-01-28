@@ -247,9 +247,10 @@ def choose_strategy(Player):
         Button(mainframe, text="Confirm", command=on_button_click).grid(column=3, row=2, sticky=(W, E))
 
         root.mainloop()
+        return result
     else:
         # Choix aléatoire si l'utilisateur refuse de configurer l'IA
-        Strategy_list = ["aggressive", "defensive", "balanced"]
+        Strategy_list = [["aggressive",3,1], ["defensive",1,3], ["balanced",1,1]]
         seed(time.perf_counter())
         n = randint(0, 2)
         return Strategy_list[n]
@@ -271,6 +272,7 @@ class Player:
 
         self.decision_tree= tree
         strat = choose_strategy(self)
+        print(strat[0], strat[1], strat[2])
         self.ai_profile = AIProfile(strategy = strat[0], aggressiveness= strat[1], defense = strat[2])
         self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
 
