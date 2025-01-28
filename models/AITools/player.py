@@ -114,10 +114,18 @@ def gather_resources(context):
     for temp_resources in [("gold",'G'),("food",'F')]:
         if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
             resources_to_collect=temp_resources
-    for villager in [context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]:
-        if not villager.is_full():
-            print(f"villager free : {context['units']['villager_free']}")
-            villager.collect_entity(context['player'].entity_closest_to(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X))
+    v_ids = context['player'].get_entities_by_class(['v'],is_free=True)
+    c_ids = context['player'].ect(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X)
+    counter = 0
+    c_pointer = 0
+    for id in v_ids:
+        v = context['player'].linked_map.get_entity_by_id(id)
+        if not v.is_full():
+            if counter == 3:
+                counter = 0
+                c_pointer += 1
+            v.collect_entity(c_ids[c_pointer])
+            counter += 1
         else:
             drop_resources(context)
     return "Gathering resources!"
@@ -136,15 +144,7 @@ def drop_resources(context):
             unit.drop_to_entity(context['drop_off_id'])
     return "Dropping off resources!"
 
-def find_closest_resources(context):
-    resources_to_find='W'
-    if min(context['resources']["gold"], context['resources']["wood"])==context['resources']["gold"]:
-        resources_to_find='G'
-    town_center = context['player'].linked_map.get_entity_by_id(context['closest_town_center'])
-    if town_center:
-        closest_resource = context['player'].entity_closest_to(resources_to_find, town_center.cell_Y, town_center.cell_X)  # Example for gold
-        context['resource_id'] = closest_resource if closest_resource else None
-    return "Found closest resources!"
+
 
 def build_structure(context):
     # villager_ids = [unit.id for unit in context['units'].get('villager', []) if is_unit_idle(unit)]
