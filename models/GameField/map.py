@@ -20,7 +20,7 @@ class Map:
         self.entity_id_dict = {} # each element of this is an id
         self.resource_id_dict = {} # specially for the resources so the bots can easily decide to go to the closest resource ...
         self.dead_entities = {}
-
+        self.dead_players = [] # couple (team, life_time)
         self.projectile_set = set()
 
         self.refresh_time_acc = 0 # refresh for the terminal display
@@ -33,6 +33,8 @@ class Map:
         
         self.id_generator = IdGenerator()
         self.state = "normal"
+
+        
 
     def get_entity_by_id(self, _entity_id):
         return self.entity_id_dict.get(_entity_id, None)
@@ -627,6 +629,7 @@ class Map:
             if player:
                 if player.is_dead():
                     self.players_dict.pop(team, None)
+                    self.dead_players.append((player.team, player.life_time))
 
 
     def update_all_events(self, dt, camera, screen):

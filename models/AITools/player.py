@@ -207,7 +207,7 @@ def choose_strategy(Player):
             # Récupérer les valeurs des sliders lorsqu'on appuie sur le bouton
             agressive_select = agressive.get()
             defense_select = defense.get()
-            if defense_select == agressive_select:
+            if defense_select >= agressive_select-0.5 and defense_select <= agressive_select+0.5 :
                 result.append("balanced")
                 result.append(agressive_select)
                 result.append(defense_select)
@@ -228,6 +228,7 @@ def choose_strategy(Player):
         # Création de l'interface
         root = Tk()
         mainframe = Frame(root)
+        root.title("IA Player "+str(Player.team))
         mainframe.grid(column=0, row=0, sticky=(W, E, S))
 
         root.columnconfigure(0, weight=1)
@@ -250,10 +251,23 @@ def choose_strategy(Player):
         return result
     else:
         # Choix aléatoire si l'utilisateur refuse de configurer l'IA
-        Strategy_list = [["aggressive",3,1], ["defensive",1,3], ["balanced",1,1]]
         seed(time.perf_counter())
-        n = randint(0, 2)
-        return Strategy_list[n]
+        agressive = float(randint(10,30))/10
+        defense = float(randint(10,30))/10
+        result = []
+        if defense >= agressive-0.5 and defense <= agressive+0.5 :
+            result.append("balanced")
+            result.append(agressive)
+            result.append(defense)
+        elif defense > agressive:
+            result.append("defensive")
+            result.append(agressive)
+            result.append(defense)
+        else:
+            result.append("aggressive")
+            result.append(agressive)
+            result.append(defense)
+        return result
 
 class Player:
     
@@ -272,7 +286,6 @@ class Player:
 
         self.decision_tree= tree
         strat = choose_strategy(self)
-        print(strat[0], strat[1], strat[2])
         self.ai_profile = AIProfile(strategy = strat[0], aggressiveness= strat[1], defense = strat[2])
         self.game_handler = GameEventHandler(self.linked_map,self,self.ai_profile)
 
@@ -627,14 +640,13 @@ class Player:
     def is_dead(self):
         return not(self.entities_dict)
 
-    def get_buildings(self):
-        return self.get_entities_by_class(["T","C","H","K","F","S","B","A"])
+    def get_buildings(self, is_free = False):
+        return self.get_entities_by_class(["T","C","H","K","F","S","B","A"], is_free)
 
     def update(self, dt):
+        self.life_time += dt
 
         self.update_population(dt)
-
-        self.life_time += dt
 
         self.refl_acc +=dt
         if self.refl_acc>ONE_SEC/3:

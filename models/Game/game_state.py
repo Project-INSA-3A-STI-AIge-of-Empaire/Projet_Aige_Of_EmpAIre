@@ -40,6 +40,9 @@ class GameState:
             pygame.mixer.music.play(-1)  # Jouer en boucle (-1 = boucle infinie)
             self.music_state = state
 
+    def go_to_main_menu(self):
+        self.states = START
+
     def start_game(self):
         """Méthode pour démarrer la génération de la carte après que l'utilisateur ait validé ses choix."""
         self.map.generate_map(self.selected_map_type, self.selected_mode, self.selected_players)

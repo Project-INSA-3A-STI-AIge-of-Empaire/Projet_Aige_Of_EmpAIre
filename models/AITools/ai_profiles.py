@@ -66,7 +66,7 @@ class AIProfile:
                     counter = 0
                     c_pointer = 0
                     for id in v_ids:
-                        v = self.linked_map.get_entity_by_id(id)
+                        v = context['player'].linked_map.get_entity_by_id(id)
                         if not v.is_full():
                             if counter == 3:
                                 counter = 0
@@ -74,7 +74,7 @@ class AIProfile:
                             v.collect_entity(c_ids[c_pointer])
                             counter += 1
                         if v.is_full():
-                            id.drop_to_entity(context['drop_off_id'])
+                            v.drop_to_entity(context['drop_off_id'])
                     return "Gathered resources"
             
     # def comapre_unit(self, actual_ratios, target_ratios_units,context):
@@ -152,7 +152,8 @@ class AIProfile:
         try:
             for action in actions:
                 if action == "Attacking the enemy!":
-                    for unit in context['units']['military']:
+                    unit_list = context['units']['military']+context['units']['villager_free'][:len(context['units']['villager_free'])//2]
+                    for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
 
@@ -222,7 +223,8 @@ class AIProfile:
                     return "Repaired critical buildings"
                     
                 elif action == "Attacking the enemy!":
-                    for unit in context['units']['military']:
+                    unit_list = context['units']['military'][:len(context['units']['military'])//2]
+                    for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
                 
@@ -298,7 +300,8 @@ class AIProfile:
                     return "Trained military units"
 
                 elif action == "Attacking the enemy!":
-                    for unit in context['units']['military']:
+                    unit_list = context['units']['military']
+                    for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
                 
