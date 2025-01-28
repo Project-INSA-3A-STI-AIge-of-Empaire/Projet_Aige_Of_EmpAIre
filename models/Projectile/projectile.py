@@ -5,8 +5,7 @@ from math import floor
 class Projectile:
     
     def __init__(self, cell_Y, cell_X, position, entity_target, _map, team, damage, representation = 'p', element =""):
-        global ONE_SEC
-        global PROJECTILE_ANGLE_MAPPING
+
         self.cell_Y = cell_Y
         self.cell_X = cell_X
 
@@ -18,18 +17,18 @@ class Projectile:
         self.element = element
         self.distance_left = self.position.abs_distance(entity_target.position)
         self.time_to_get_target = (ONE_SEC/5.3) * self.distance_left/_map.tile_size_2d
-        
+
         self.time_left = self.time_to_get_target
         self.direction = self.position.alpha_angle(entity_target.position)
-        
+
         self.image = None
         self.animation_time_acc = 0
         self.animation_direction = MAP_ANGLE_INDEX(self.direction, PROJECTILE_ANGLE_MAPPING)
         self.animation_frame = 0
-        
+
         self.projectile_peak = self.position.abs_distance(entity_target.position)
         self.representation = representation
-        
+
         self.linked_map = _map
 
     def update_event(self, dt):
@@ -55,12 +54,14 @@ class Projectile:
                                     resources = self.entity_target.storage.lose_resource()
                                 print(self.team)
                                 player_gained = self.linked_map.players_dict.get(self.team,None)
+                                if player_gained:
+                                    player_gained.add_resources(resources)
                                 player_gained.add_resources(resources)
 
                         self.linked_map.dead_entities[self.entity_target.id] = self.entity_target
                         print(STATES.get(self.entity_target.representation, None).get("dying", None))
                         self.entity_target.change_state(STATES.get(self.entity_target.representation, None).get("dying", None))
-                        
+
                 elif not(self.entity_target.is_dead()):
 
                     self.direction = self.position.alpha_angle(self.entity_target.position)
