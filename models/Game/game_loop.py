@@ -2,7 +2,7 @@ import pygame
 import tkinter as tk
 from tkinter import messagebox, Button, Tk
 
-from ImageProcessingDisplay import UserInterface, EndMenu
+from ImageProcessingDisplay import UserInterface, EndMenu, StartMenu, PauseMenu
 from GLOBAL_VAR import *
 from Game.game_state import * 
 
@@ -81,6 +81,10 @@ class GameLoop:
     def handle_pause_events(self,dt, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.pausemenu.handle_click(event.pos, self.state)
+    
+    def handle_end_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.endmenu.handle_click(event.pos, self.state)
 
     def handle_play_events(self, event, mouse_x, mouse_y, dt):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -180,12 +184,15 @@ class GameLoop:
     def update_game_state(self, dt):
         if not (self.state.states == PAUSE):
             self.state.map.update_all_events(dt*self.state.speed, self.state.camera, self.screen)
+            self.state.endgame()
 
     def render_display(self, dt, mouse_x, mouse_y):
         if self.state.states == START:
             self.startmenu.draw()
         elif self.state.states == PAUSE:
             self.pausemenu.draw()
+        elif self.state.states == END:
+            self.endmenu.draw(self.map.score_players)
         elif self.state.states == PLAY:
             if self.state.display_mode == ISO2D:
                 self.state.map.display(dt, self.screen, self.state.camera, self.screen_width, self.screen_height)
@@ -222,6 +229,8 @@ class GameLoop:
                 elif self.state.states == PLAY:
                     self.state.change_music(self.state.map.state)
                     self.handle_play_events(event, mouse_x, mouse_y, dt)
+                elif self.state.states == END:
+                    self.handle_end_events(event)
 
             if self.state.mouse_held:
                 self.state.map.minimap.update_camera(self.state.camera, mouse_x, mouse_y)
@@ -239,10 +248,6 @@ class GameLoop:
             """
             if self.state.states == PLAY:
                 self.update_game_state(dt)
-            if self.state.states == END:
-                #self.state.change_music("end")
-                self.endmenu.draw(self.state.map.score_players)
-                self.endmenu.handle_click(pygame.mouse.get_pos(), self.state)
             self.render_display(dt, mouse_x, mouse_y)
             
 
