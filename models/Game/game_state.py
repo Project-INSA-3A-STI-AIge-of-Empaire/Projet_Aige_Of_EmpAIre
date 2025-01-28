@@ -147,10 +147,8 @@ class GameState:
             self.last_time_switched = pygame.time.get_ticks()
 
     def generate_html_file(self, players_dict):
-        
-        # Creation of the HTML file using yattag
+    # Creation of the HTML file using yattag
         doc, tag, text = Doc().tagtext()
-
         doc.asis('<!DOCTYPE html>')
         with tag('html', lang='en'):
             with tag('head'):
@@ -164,49 +162,51 @@ class GameState:
                     pass
                 with tag('script'):
                     text('''
-            function toggleTeam(teamId) {
-                var teamDiv = document.getElementById("team-" + teamId);
-                if (teamDiv.style.display === "none") {
-                    teamDiv.style.display = "block";
-                } else {
-                    teamDiv.style.display = "none";
-                }
-            }
+                    function toggleTeam(teamId) {
+                        var teamDiv = document.getElementById("team-" + teamId);
+                        var button = document.getElementById("button-" + teamId);
+                        if (teamDiv.style.display === "none") {
+                            teamDiv.style.display = "block";
+                            button.textContent = "Show Team " + teamId;
+                        } else {
+                            teamDiv.style.display = "none";
+                            button.textContent = "Show Team " + teamId;
+                        }
+                    }
                     ''')
             with tag('body'):
-                        with tag('h1'):
-                            text('Age of Empires - Overview')
-                        for team in players_dict.keys():
-                            with tag('button', onclick=f"toggleTeam({team})"):
-                                text(f"Show Team {team}")
-                        for team, player in players_dict.items():
-                            with tag('div', id=f"team-{team}", klass="team-section", style="display:none;"):
-                                with tag('h2'):
-                                    text(f"Team {team}")
-                                    with tag('h3'):
-                                        text("Ressources : ")  # Titre du type d'entité (Unit, Building, Resource)
-                                    for resource_type, amount in player.get_current_resources().items():
-                                        with tag('ul', klass= 'resource-item'):
-                                            icons_path = ICONS_HTML.get(resource_type+"i", "default_image.png")
-                                            doc.stag('img', src=f"{icons_path}",klass  ="photo", width =50, height =50)
-                                            text(resource_type+" : ")
-                                            text(f"{amount} ")  # Ajoute le contenu HTML de l'entité
-                                    with tag('h3'):
-                                        text("Entities : ")  # Titre du type d'entité (Unit, Building, Resource)
-                                    for entity_repr in player.entities_dict.keys():
-                                        with tag('h4'):
-                                            icons_path = ICONS_HTML.get(entity_repr+"i", "default_image.png")
-                                            doc.stag('img', src=f"{icons_path}",klass  ="photo", width =50, height =50)
-                                        for id in player.get_entities_by_class(entity_repr):
-                                                with tag('ul'):
-                                                    with tag('li'):
-                                                        doc.asis(player.entities_dict[entity_repr][id].get_html())  # Ajoute le contenu HTML de l'entité
-                                                        doc.stag(
-                                                            'progress',
-                                                            klass="health-bar",     
-                                                            max=player.entities_dict[entity_repr][id].max_hp,
-                                                            value=player.entities_dict[entity_repr][id].hp
-                                                        )
+                with tag('h1'):
+                    text('Age of Empires - Overview')
+                for team in players_dict.keys():
+                    with tag('button', id=f"button-{team}", onclick=f"toggleTeam({team})"):
+                        text(f"Show Team {team}")
+                for team, player in players_dict.items():
+                    with tag('div', id=f"team-{team}", klass="team-section", style="display:none;"):
+                        with tag('h2'):
+                            text(f"Team {team}")
+                        with tag('h3'):
+                            text("Ressources : ")
+                        for resource_type, amount in player.get_current_resources().items():
+                            with tag('ul', klass='resource-item'):
+                                icons_path = ICONS_HTML.get(resource_type+"i", "default_image.png")
+                                doc.stag('img', src=f"{icons_path}", klass="photo", width=50, height=50)
+                                text(f"{resource_type} : {amount}")
+                        with tag('h3'):
+                            text("Entities : ")
+                        for entity_repr in player.entities_dict.keys():
+                            with tag('h4'):
+                                icons_path = ICONS_HTML.get(entity_repr+"i", "default_image.png")
+                                doc.stag('img', src=f"{icons_path}", klass="photo", width=50, height=50)
+                            for id in player.get_entities_by_class(entity_repr):
+                                with tag('ul'):
+                                    with tag('li'):
+                                        doc.asis(player.entities_dict[entity_repr][id].get_html())
+                                        doc.stag(
+                                            'progress',
+                                            klass="health-bar",
+                                            max=player.entities_dict[entity_repr][id].max_hp,
+                                            value=player.entities_dict[entity_repr][id].hp
+                                        )
 
         # Save the HTML content
         html_content = doc.getvalue()
@@ -291,6 +291,7 @@ class GameState:
         browser = webbrowser.open('overview.html', 1, True)
         if not browser:
             messagebox.showinfo("Erreur", "impossible d'ouvrir le fichier html")
+
 
     def save(self):
         # Sauvegarde l'objet dans un fichier
