@@ -72,7 +72,7 @@ class RangedUnit(Unit):
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
             
-            """
+            
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
                 
@@ -86,7 +86,8 @@ class RangedUnit(Unit):
                         
                         if dist > 10:
                             self.entity_defend_from_id = None
-            """
+                            entity = None
+            
 
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)

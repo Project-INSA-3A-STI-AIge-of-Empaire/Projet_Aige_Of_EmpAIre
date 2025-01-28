@@ -64,7 +64,7 @@ class MeleeUnit(Unit):
                             if self.entity_target_id == None:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
-            """
+            
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
                 
@@ -78,7 +78,7 @@ class MeleeUnit(Unit):
                         
                         if dist > 10:
                             self.entity_defend_from_id = None
-            """
+                            entity = None
 
 
             if self.entity_defend_from_id != None:
