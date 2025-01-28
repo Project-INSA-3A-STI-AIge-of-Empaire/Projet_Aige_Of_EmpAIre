@@ -4,9 +4,6 @@ from Entity.Building import *
 from GLOBAL_VAR import *
 import time
 from random import *
-# from GameField.map import Map
-# from .player import DecisionNode
-# from .decision_tree import tree  # Import the decision tree to use its structure.
 
 class AIProfile:
     def __init__(self, strategy, aggressiveness=1.0, defense=1.0):
@@ -22,15 +19,6 @@ class AIProfile:
         self.defense = defense
 
     def compare_ratios(self, actual_ratios, target_ratios, context, keys_to_include=None):
-        # ids=context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S'])
-        # print(f"len ids : {len(ids)}")
-        # for id in ids:
-        #     print(f"id : {id}")
-        #     entity= context['player'].linked_map.get_entity_by_id(id)
-        #     if entity.state==BUILDING_INPROGRESS:
-        #         print(f"id : {id}")
-        #         result=context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True),entity_id=id)
-        #         return
         if len(context['player'].get_entities_by_class(['F']))<1:
             print(f"nb farm : {len(context['player'].get_entities_by_class(['F']))}")
             if context['player'].get_current_resources()["wood"]>=100:
@@ -65,7 +53,6 @@ class AIProfile:
             diff = abs(target - actual)
             differences[key] = diff
         sorted_differences = sorted(differences.items(), key=lambda x: x[1], reverse=True)
-        print(f"sorted differences : {sorted_differences}")
         for building_repr in sorted_differences:
             existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             result = context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True), building_repr[0])
@@ -76,8 +63,6 @@ class AIProfile:
                 building = context['player'].linked_map.get_entity_by_id(new_building_id)
                 if building.state == BUILDING_ACTIVE:
                     return
-                # if building.state == BUILDING_INPROGRESS:
-                #     result=context['player'].build_entity(context['player'].get_entities_by_class('v',is_free=True),entity_id=building)
             elif result == 0:
                     print("test compare ratios ==0")
                     resources_to_collect=("wood",'W')
@@ -99,19 +84,7 @@ class AIProfile:
                             counter += 1
                         if v.is_full():
                             v.drop_to_entity(context['drop_off_id'])
-                    return "Gathered resources"
-            
-    # def comapre_unit(self, actual_ratios, target_ratios_units,context):
-    #     training_buildings = context['buildings']['training']
-    #     differences = {}
-    #     for key, target in target_ratios_units.items():
-    #         actual = actual_ratios.get(key, 0)
-    #         diff = abs(target - actual)
-    #         differences[key] = diff
-    #     sorted_differences_units = sorted(differences.items(), key=lambda x: x[1], reverse=True)
-    #     print(f"sorted differences : {sorted_differences_units}")
-    #     for building in training_buildings:
-    #         (context['players'].linked_map.get_entity_by_id(building)).train_unit(player, )  
+                    return "Gathered resources" 
 
     STOP_CONDITIONS = {TRAIN_NOT_AFFORDABLE, TRAIN_NOT_FOUND_UNIT, TRAIN_NOT_ACTIVE}
 
@@ -191,8 +164,6 @@ class AIProfile:
             'A': 0.15,   
             'K': 0.05
         }
-        player = context['player']
-        map = context['map']
 
         try:
             for action in actions:
@@ -228,7 +199,6 @@ class AIProfile:
         Implement the defensive strategy by focusing on repairs and defenses.
         """
         player = context['player']
-        map = context['map']
         target_ratios_building = {
             'T': 0.13,  
             'C': 0.13,   
@@ -240,16 +210,8 @@ class AIProfile:
         }
 
         try:
-            for action in actions:
-                if action == "Defend the village!":
-                    # Defend the village by attacking enemies
-                    military_units = player.get_entities_by_class(['h', 'a', 's'])
-                    for unit_id in military_units:
-                        unit = map.get_entity_by_id(unit_id)
-                        unit.attack_entity(context['enemy_id'])  # Attack the enemy
-                    return "Executed defense strategy"
-                
-                elif action == "Train military units!":
+            for action in actions:                
+                if action == "Train military units!":
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
                     if not training_buildings:
@@ -259,16 +221,6 @@ class AIProfile:
                     for building in training_buildings:
                         (context['player'].linked_map.get_entity_by_id(building)).train_unit(player, self.choose_units(context['player'].linked_map.get_entity_by_id(building)))  
                     return "Trained military units"
-
-                elif action == "Repair critical buildings!":
-                    # Repair damaged buildings
-                    buildings_to_repair = [
-                        building for building in map.entity_matrix.values()
-                        if isinstance(building, Building) and building.hp < building.max_hp
-                    ]
-                    for building in buildings_to_repair:
-                        building.repair()  # Assuming a repair method exists in Building class
-                    return "Repaired critical buildings"
                     
                 elif action == "Attacking the enemy!":
                     unit_list = context['units']['military_free'][:len(context['units']['military_free'])//2]
@@ -281,13 +233,7 @@ class AIProfile:
                 elif action == "Building structure!":
                     self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context)
                     return "Structure are built!"
-
-            # for villager in context['units']['villager']:
-            #     if not villager.is_full() and is_unit_idle(villager):
-            #         villager.collect_entity(context['resource_id'])
-            #     else:
-            #         drop_resources(context)
-            # return "Gathering resources!"
+                
         finally:
             context['player'].is_busy = False
 
@@ -296,7 +242,6 @@ class AIProfile:
         Implement the balanced strategy by combining gathering, training, and attacks.
         """
         player = context['player']
-        map = context['map']
         target_ratios_building = {
             'T': 0.2,   
             'C': 0.12,   
