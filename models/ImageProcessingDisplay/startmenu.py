@@ -23,7 +23,7 @@ class StartMenu:
         self.selected_player_count = 2  # Default to 2 players
         self.editing_player_count = False  # Track if the player is editing the count
 
-        self.display_mode = TERMINAL  # Default display mode
+        self.display_mode = ISO2D  # Default display mode
 
         # Buttons
         self.buttons = {
