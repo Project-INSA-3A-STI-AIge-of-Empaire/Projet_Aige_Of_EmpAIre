@@ -614,14 +614,13 @@ class Player:
     def is_dead(self):
         return not(self.entities_dict)
 
-    def get_buildings(self):
-        return self.get_entities_by_class(["T","C","H","K","F","S","B","A"])
+    def get_buildings(self, is_free = False):
+        return self.get_entities_by_class(["T","C","H","K","F","S","B","A"], is_free)
 
     def update(self, dt):
+        self.life_time += dt
 
         self.update_population(dt)
-
-        self.life_time += dt
 
         self.refl_acc +=dt
         if self.refl_acc>ONE_SEC/3:

@@ -394,6 +394,8 @@ def META_SPRITES_CACHE_HANDLE(zoom_level, list_keys, camera): # returns image to
     return current_dict 
 
 def convert_seconds(seconds):
+    seconds = math.ceil(seconds/ONE_SEC)
+
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
     secs = seconds % 60
