@@ -72,6 +72,8 @@ def villagers_insufficient(context):
     villager_count = len(context['player'].get_entities_by_class(['v']))  # 'v' pour les villageois
     return villager_count < context['desired_villager_count'] and len(context['player'].get_entities_by_class(['F']))>=1
 
+def has_farm(context):
+    return len(context['player'].get_entities_by_class(['F']))>0
 
 def is_under_attack(context):
     return context['under_attack']
@@ -123,7 +125,8 @@ def gather_resources(context):
         if not v.is_full():
             if counter == 3:
                 counter = 0
-                c_pointer += 1
+                if c_pointer<len(c_ids)-1:
+                    c_pointer += 1
             v.collect_entity(c_ids[c_pointer])
             counter += 1
         else:
@@ -163,6 +166,9 @@ def housing_crisis(context):
 tree = DecisionNode(
     # villagers_insufficient,
     # yes_action=train_villagers,
+    has_farm,
+    no_action=build_structure,
+    yes_action=DecisionNode(
     resources_critical,
     yes_action=DecisionNode(
         buildings_insufficient,
@@ -191,6 +197,7 @@ tree = DecisionNode(
         ),
     priority=5
     )
+)
 )
 
 def choose_strategy(Player):

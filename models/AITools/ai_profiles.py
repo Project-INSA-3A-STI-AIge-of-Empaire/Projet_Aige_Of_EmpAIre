@@ -31,7 +31,29 @@ class AIProfile:
         #         result=context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True),entity_id=id)
         #         return
         if len(context['player'].get_entities_by_class(['F']))<1:
-            result = context['player'].build_entity(context['player'].get_entities_by_class('v',is_free=True), 'F')
+            print(f"nb farm : {len(context['player'].get_entities_by_class(['F']))}")
+            if context['player'].get_current_resources()["wood"]>=100:
+                print("test wood")
+                result = context['player'].build_entity(context['player'].get_entities_by_class('v'), 'F')
+                print(f"result apres test wood:{result} et {context['player'].get_entities_by_class('v')}")
+                return
+            else :
+                print("pas wood")
+                v_ids = context['player'].get_entities_by_class(['v'])
+                c_ids = context['player'].ect(['W'], context['player'].cell_Y, context['player'].cell_X)
+                counter = 0
+                c_pointer = 0
+                for id in v_ids:
+                    v = context['player'].linked_map.get_entity_by_id(id)
+                    if not v.is_full():
+                        if counter == 3:
+                            counter = 0
+                            if c_pointer<len(c_ids)-1:
+                                c_pointer += 1
+                        v.collect_entity(c_ids[c_pointer])
+                        counter += 1
+                    else:
+                        v.drop_to_entity(context['drop_off_id'])
             return
         if keys_to_include is None:
             keys_to_include = target_ratios.keys()
@@ -70,7 +92,8 @@ class AIProfile:
                         if not v.is_full():
                             if counter == 3:
                                 counter = 0
-                                c_pointer += 1
+                                if c_pointer<len(c_ids)-1:
+                                    c_pointer += 1
                             v.collect_entity(c_ids[c_pointer])
                             counter += 1
                         if v.is_full():
@@ -160,7 +183,8 @@ class AIProfile:
                 elif action == "Train military units!":
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
-                    if training_buildings == None:
+                    if not training_buildings:
+                        print("agr_build_none")
                         keys_to_consider = ['B','S','A']
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context,keys_to_consider)
                     for building in training_buildings:
@@ -205,7 +229,8 @@ class AIProfile:
                 elif action == "Train military units!":
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
-                    if training_buildings == None:
+                    if not training_buildings:
+                        print("def_build_none")
                         keys_to_consider = ['S','A','T']
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context,keys_to_consider)
                     for building in training_buildings:
@@ -273,7 +298,8 @@ class AIProfile:
                         if not v.is_full():
                             if counter == 3:
                                 counter = 0
-                                c_pointer += 1
+                                if c_pointer<len(c_ids)-1:
+                                    c_pointer += 1
                             v.collect_entity(c_ids[c_pointer])
                             counter += 1
                         else:
@@ -290,12 +316,15 @@ class AIProfile:
                     return "Dropped off resources"
 
                 elif action == "Train military units!":
+                    print("bal_train_mil")
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
-                    if training_buildings == None:
+                    if not training_buildings:
+                        print("bal_build_none")
                         keys_to_consider = ['F','B','S']
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context, keys_to_consider)
                     for building in training_buildings:
+                        print("bal_build")
                         (context['player'].linked_map.get_entity_by_id(building)).train_unit(player,self.choose_units(context['player'].linked_map.get_entity_by_id(building)))
                     return "Trained military units"
 
