@@ -33,9 +33,9 @@ class AIProfile:
             result = context['player'].build_entity(context['player'].get_entities_by_class('v',is_free=True), 'F')
             return
         if keys_to_include is None:
-            keys_to_include = target_ratios_building.keys()
+            keys_to_include = target_ratios.keys()
         differences = {}
-        filtered_target_ratios_building = {key: target_ratios_building[key] for key in keys_to_include if key in target_ratios_building}
+        filtered_target_ratios_building = {key: target_ratios[key] for key in keys_to_include if key in target_ratios}
         for key, target in filtered_target_ratios_building.items():
             actual = actual_ratios.get(key, 0)
             diff = abs(target - actual)
