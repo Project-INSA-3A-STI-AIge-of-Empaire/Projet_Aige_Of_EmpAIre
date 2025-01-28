@@ -207,7 +207,7 @@ def choose_strategy(Player):
             # Récupérer les valeurs des sliders lorsqu'on appuie sur le bouton
             agressive_select = agressive.get()
             defense_select = defense.get()
-            if defense_select == agressive_select:
+            if defense_select >= agressive_select-0.5 and defense_select <= agressive_select+0.5 :
                 result.append("balanced")
                 result.append(agressive_select)
                 result.append(defense_select)
