@@ -227,8 +227,8 @@ class GameLoop:
                         self.state.map.players_dict[team].player_turn(dt)  # Trigger player turn
                         self.action_in_progress = False  # Action finished, ready for the next one
             """
-
-            self.update_game_state(dt)
+            if self.state.states == PLAY:
+                self.update_game_state(dt)
             self.render_display(dt, mouse_x, mouse_y)
             
 
