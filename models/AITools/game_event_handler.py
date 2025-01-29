@@ -44,7 +44,7 @@ class GameEventHandler:
 
             },
             'enemy_id': None,
-            'drop_off_id': self.players.ect(['T','C'], self.players.cell_Y, self.players.cell_X)[0],
+            'drop_off_id': self.players.ect(['T', 'C'], self.players.cell_Y, self.players.cell_X)[0] if self.players.ect(['T', 'C'], self.players.cell_Y, self.players.cell_X) else None,
             'player': self.players,
             'housing_crisis':(self.players.current_population >= self.players.get_current_population_capacity())
         }

@@ -42,6 +42,8 @@ class AIProfile:
                         v.collect_entity(c_ids[c_pointer])
                         counter += 1
                     else:
+                        if context['drop_off_id'] is None:
+                            return
                         v.drop_to_entity(context['drop_off_id'])
             return
         if keys_to_include is None:
@@ -83,6 +85,8 @@ class AIProfile:
                             v.collect_entity(c_ids[c_pointer])
                             counter += 1
                         if v.is_full():
+                            if context['drop_off_id'] is None:
+                                return "Gathered resources"
                             v.drop_to_entity(context['drop_off_id'])
                     return "Gathered resources" 
 
@@ -123,7 +127,10 @@ class AIProfile:
             closest = minus_building[0]
         else:
             minus_entity = player.ect(UNITS, player.cell_Y, player.cell_X)
-            closest = minus_entity[0]
+            if minus_entity:
+                closest = minus_entity[0]
+            else:
+                return None
         return closest
             
                 
@@ -171,9 +178,6 @@ class AIProfile:
                     unit_list = context['units']['military_free']+context['units']['villager_free'][:len(context['units']['villager_free'])//2]
                     context['enemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
-                        en = unit.linked_map.get_entity_by_id(context['enemy_id'])
-                        print("wwwwwwww")
-                        print(f"{en}wwwwwwww")
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
 
@@ -277,6 +281,8 @@ class AIProfile:
                             counter += 1
                         else:
                             print(f"The drop off id is : {context['drop_off_id']}")
+                            if context['drop_off_id'] is None:
+                                return "Gathering resources"
                             villager.drop_to_entity(context['drop_off_id'])
                     return "Gathering resources!"
 
@@ -286,6 +292,8 @@ class AIProfile:
                     for villager_id in villagers:
                         if villager.is_full():
                             villager = player.linked_map.get_entity_by_id(villager_id)
+                            if context['drop_off_id'] is None:
+                                return "Dropped of resources"
                             villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
                     return "Dropped off resources"
 
