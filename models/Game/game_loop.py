@@ -32,6 +32,7 @@ class GameLoop:
 
     
     def handle_start_events(self, event):
+        pygame.mouse.set_visible(True)
         if pygame.key.get_pressed()[pygame.K_F12]:
             loaded = self.state.load()
             if loaded:
@@ -52,6 +53,7 @@ class GameLoop:
                 self.state.set_players(self.startmenu.selected_player_count)
                 self.state.start_game()
                 self.state.states = PLAY
+                
                 if self.state.display_mode == TERMINAL:
                     self.state.set_screen_size(20, 20)
                     pygame.display.set_mode(
@@ -192,6 +194,7 @@ class GameLoop:
         elif self.state.states == END:
             self.endmenu.draw(self.state.map.score_players)
         elif self.state.states == PLAY:
+            pygame.mouse.set_visible(False)
             if self.state.display_mode == ISO2D:
                 self.state.map.display(dt, self.screen, self.state.camera, self.screen_width, self.screen_height)
                 fps = int(self.clock.get_fps())
