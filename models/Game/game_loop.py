@@ -209,7 +209,6 @@ class GameLoop:
 
 
     def run(self):
-        global ID_GENERATOR
         running = True
         while running:
             dt = self.clock.tick(FPS)
@@ -249,7 +248,7 @@ class GameLoop:
             if self.state.states == PLAY:
                 self.update_game_state(dt)
             self.render_display(dt, mouse_x, mouse_y)
-            
+
 
         pygame.quit()
 
