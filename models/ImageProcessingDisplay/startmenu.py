@@ -6,10 +6,10 @@ class StartMenu:
         self.screen = screen
 
         # Map cell counts for X and Y
-        self.map_cell_count_x = 250  # Default value for X
-        self.map_cell_count_y = 250  # Default value for Y
-        self.editing_map_cell_count_x = False  # Track if the user is editing the cell count for X
-        self.editing_map_cell_count_y = False  # Track if the user is editing the cell count for Y
+        self.map_cell_count_x = 250
+        self.map_cell_count_y = 250
+        self.editing_map_cell_count_x = False
+        self.editing_map_cell_count_y = False
 
         # Map type options
         self.map_options = ["Carte Normal", "Carte Centrée"]
@@ -20,10 +20,13 @@ class StartMenu:
         self.selected_mode_index = LEAN
 
         # Player count options
-        self.selected_player_count = 2  # Default to 2 players
-        self.editing_player_count = False  # Track if the player is editing the count
+        self.selected_player_count = 2
+        self.editing_player_count = False
 
-        self.display_mode = ISO2D  # Default display mode
+        self.display_mode = ISO2D
+
+        # Volume control
+        self.volume = 0.5  # Default volume (between 0.0 and 1.0)
 
         # Buttons
         self.buttons = {
@@ -42,12 +45,20 @@ class StartMenu:
             "Lancer la Partie": pygame.Rect(0, 0, 300, 50)
         }
 
+        # Slider for volume
+        self.slider_rect = pygame.Rect(screen.get_width() - 320, screen.get_height() - 50, 300, 10)
+        self.slider_thumb_rect = pygame.Rect(self.slider_rect.x + int(self.volume * 300), self.slider_rect.y - 5, 10, 20)
+
     def draw(self):
-        """Draw buttons and selected options on the screen."""
+        """Draw buttons, slider, and selected options on the screen."""
         self.screen.fill((255, 255, 255))  # Fill the screen with white
         screen_width, screen_height = self.screen.get_size()
         self.screen.blit(adjust_sprite(START_IMG, screen_width, screen_height), (0, 0))
 
+                # Update slider position dynamically to always be at the bottom right
+        self.slider_rect.topleft = (screen_width - 320, screen_height - 50)
+        self.slider_thumb_rect.topleft = (self.slider_rect.x + int(self.volume * 300), self.slider_rect.y - 5)
+        
         # Calculate positions based on screen size
         center_x = screen_width // 2
         center_y = screen_height // 2
@@ -68,19 +79,13 @@ class StartMenu:
 
         # Draw map cell count for X
         self._draw_button("left_map_x", "<")
-        if self.editing_map_cell_count_x:
-            map_cell_label_x = "Cellules X: _"
-        else:
-            map_cell_label_x = f"Cellules X: {self.map_cell_count_x}"
+        map_cell_label_x = f"Cellules X: {self.map_cell_count_x}" if not self.editing_map_cell_count_x else "Cellules X: _"
         self._draw_text(map_cell_label_x, (center_x, center_y - 245), centered=True)
         self._draw_button("right_map_x", ">")
 
         # Draw map cell count for Y
         self._draw_button("left_map_y", "<")
-        if self.editing_map_cell_count_y:
-            map_cell_label_y = "Cellules Y: _"
-        else:
-            map_cell_label_y = f"Cellules Y: {self.map_cell_count_y}"
+        map_cell_label_y = f"Cellules Y: {self.map_cell_count_y}" if not self.editing_map_cell_count_y else "Cellules Y: _"
         self._draw_text(map_cell_label_y, (center_x, center_y - 185), centered=True)
         self._draw_button("right_map_y", ">")
 
@@ -98,10 +103,7 @@ class StartMenu:
 
         # Draw player count selection
         self._draw_button("left_player_count", "<")
-        if self.editing_player_count:
-            player_count_label = "Joueurs: _"
-        else:
-            player_count_label = f"Joueurs: {self.selected_player_count}"
+        player_count_label = f"Joueurs: {self.selected_player_count}" if not self.editing_player_count else "Joueurs: _"
         self._draw_text(player_count_label, (center_x, center_y - 5), centered=True)
         self._draw_button("right_player_count", ">")
 
@@ -112,10 +114,22 @@ class StartMenu:
         # Draw launch game button
         self._draw_button("Lancer la Partie", "Lancer la Partie")
 
+        # Draw volume control slider
+        self._draw_slider()
+
+    def _draw_slider(self):
+        """Draw the volume slider and its thumb."""
+        pygame.draw.rect(self.screen, (200, 200, 200), self.slider_rect)  # Slider track
+        pygame.draw.rect(self.screen, (0, 0, 255), self.slider_thumb_rect)  # Slider thumb
+
+        # Draw volume text
+        volume_text = f"Volume: {int(self.volume * 100)}%"
+        self._draw_text(volume_text, (self.slider_rect.centerx, self.slider_rect.bottom + 10), centered=True)
+
     def _draw_button(self, key, text, selected=False):
         """Draw a button with text."""
         rect = self.buttons[key]
-        color = (0, 128, 0) if selected else (128, 128, 128)  # Green if selected, grey otherwise
+        color = (0, 128, 0) if selected else (128, 128, 128)
         pygame.draw.rect(self.screen, color, rect)
         font = pygame.font.Font(MEDIEVALSHARP, 28)
         button_text = font.render(text, True, (255, 255, 255))
@@ -158,7 +172,14 @@ class StartMenu:
         elif self.buttons["Lancer la Partie"].collidepoint(pos):
             return True  # Indicate that the game can start
 
-        return False  # Indicate that the game cannot start
+        # Handle volume slider interaction
+        if self.slider_rect.collidepoint(pos):
+            # Update volume based on the mouse x position
+            self.volume = max(0.0, min(1.0, (pos[0] - self.slider_rect.x) / self.slider_rect.width))
+            self.slider_thumb_rect.x = self.slider_rect.x + int(self.volume * self.slider_rect.width)
+            pygame.mixer.music.set_volume(self.volume)  # Update volume of the music
+
+        return False
 
     def handle_keydown(self, event):
         """Handle keyboard input for editable fields."""

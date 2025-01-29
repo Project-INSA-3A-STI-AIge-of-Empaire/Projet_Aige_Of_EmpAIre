@@ -40,7 +40,7 @@ class GameState:
             pygame.mixer.music.load(MUSIC[state])  # Charger la nouvelle musique
             pygame.mixer.music.play(-1)  # Jouer en boucle (-1 = boucle infinie)
             self.music_state = state
-            
+    
 
     def go_to_main_menu(self):
         self.states = START
