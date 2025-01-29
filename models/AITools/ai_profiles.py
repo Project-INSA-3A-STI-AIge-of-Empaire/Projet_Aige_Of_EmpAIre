@@ -177,7 +177,8 @@ class AIProfile:
         try:
             for action in actions:
                 if action == "Attacking the enemy!":
-                    unit_list = context['units']['military_free']+context['units']['villager_free'][:len(context['units']['villager_free'])//2]
+                    villager_free=[context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]
+                    unit_list = context['units']['military_free']+villager_free[:len(villager_free)//2]
                     context['enemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
                         unit.attack_entity(context['enemy_id'])
@@ -192,10 +193,10 @@ class AIProfile:
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context,keys_to_consider)
                     for building in training_buildings:
                         (context['player'].linked_map.get_entity_by_id(building)).train_unit(context['player'], self.choose_units(context['player'].linked_map.get_entity_by_id(building)))
-                    resources_to_collect=("wood",'W')
-                    for temp_resources in [("gold",'G'),("food",'F')]:
-                        if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
-                            resources_to_collect=temp_resources
+                    # resources_to_collect=("wood",'W')
+                    # for temp_resources in [("gold",'G'),("food",'F')]:
+                    #     if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
+                    #         resources_to_collect=temp_resources
                     # v_ids = context['player'].get_entities_by_class(['v'],is_free=True)
                     # c_ids = context['player'].ect(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X)
                     # counter = 0
@@ -330,7 +331,7 @@ class AIProfile:
 
                 elif action == "Dropping off resources!":
                     # Drop resources in storage buildings
-                    villagers = player.get_entities_by_class(['v'])
+                    villagers = player.get_entities_by_class(['v'],is_free=True)
                     for villager_id in villagers:
                         if villager.is_full():
                             villager = player.linked_map.get_entity_by_id(villager_id)
@@ -345,7 +346,7 @@ class AIProfile:
                     training_buildings = context['buildings']['training']
                     if not training_buildings:
                         print("bal_build_none")
-                        keys_to_consider = ['F','B','S']
+                        keys_to_consider = ['T','B','S']
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context, keys_to_consider)
                     for building in training_buildings:
                         print("bal_build")
