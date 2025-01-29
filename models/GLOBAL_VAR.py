@@ -107,6 +107,7 @@ MEAN = 1
 MARINES = 2
 
 ENTITIES = ["T","C","H","F","K","S","B","A","h","m","s","x","c","a","v"]
+
 BUILDINGS = ["T","C","H","F","K","S","B","A"]
 
 MILITARY_UNITS = ["h","m","s","x","c","a"]
@@ -137,8 +138,7 @@ MODE_GENERATION = {
             "B":2,
             "S":2,
             "A":2,
-            "v":3,
-            "c":3
+            "v":15
         }
     }
 }

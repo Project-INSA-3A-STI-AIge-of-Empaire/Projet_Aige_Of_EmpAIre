@@ -311,7 +311,7 @@ class Unit(Entity):
                                     distance = self.position.abs_distance(entity.position)
                     
                                     if isinstance(entity, Unit):
-                                        if distance < COLLISION_THRESHOLD:
+                                        if distance < COLLISION_THRESHOLD and distance > 1:
                                             if self.collide_with_entity(entity):
                                                 
                                                 #self.update_path_nodes(entity)
@@ -321,6 +321,7 @@ class Unit(Entity):
                                                 # Calculate the direction to push the unit away from the other
                                                 diff = self.position - entity.position
                                                 diff.normalize()  # Normalize to get direction
+
                                                 diff *= 1/distance  # Stronger force the closer the units are
                                                 avoidance_force += diff
                                                 #entity.position -= diff * 0.5
