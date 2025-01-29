@@ -132,7 +132,7 @@ def drop_resources(context):
     for unit in [context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]:
 
         if unit.is_full():
-            unit.drop_to_entity(context['drop_off_id'])
+            unit.drop_to_entity(context['player'].entity_closest_to(["T","C"], unit.cell_Y, unit.cell_X, is_dead = True))
             print(f"The dropp of id : {context['drop_off_id']}")
     return "Dropping off resources!"
 

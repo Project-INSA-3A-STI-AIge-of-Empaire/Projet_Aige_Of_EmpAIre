@@ -44,7 +44,9 @@ class AIProfile:
                     else:
                         if context['drop_off_id'] is None:
                             return
-                        v.drop_to_entity(context['drop_off_id'])
+                        v.drop_to_entity(context['player'].entity_closest_to(["T","C"], v.cell_Y, v.cell_X, is_dead = True))
+                        #v.drop_to_entity(context['player'].entity_closest_to(["T","C"], v.cell_Y, v.cell_X, is_dead = True))
+                        
             return
         if keys_to_include is None:
             keys_to_include = target_ratios.keys()
@@ -92,7 +94,7 @@ class AIProfile:
                         if v.is_full():
                             if context['drop_off_id'] is None:
                                 return "Gathered resources"
-                            v.drop_to_entity(context['drop_off_id'])
+                            v.drop_to_entity(context['player'].entity_closest_to(["T","C"], v.cell_Y, v.cell_X, is_dead = True))
                     return "Gathered resources" 
 
     STOP_CONDITIONS = {TRAIN_NOT_AFFORDABLE, TRAIN_NOT_FOUND_UNIT, TRAIN_NOT_ACTIVE}
@@ -214,7 +216,7 @@ class AIProfile:
                     #         v.collect_entity(c_ids[c_pointer])
                     #         counter += 1
                     #     if v.is_full():
-                    #         v.drop_to_entity(context['drop_off_id'])
+                    #         v.drop_to_entity(context['player'].entity_closest_to(["T","C"], v.cell_Y, v.cell_X, is_dead = True))
                     self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context)
                     return "Trained military units"
                 
@@ -271,7 +273,7 @@ class AIProfile:
                     #         v.collect_entity(c_ids[c_pointer])
                     #         counter += 1
                     #     if v.is_full():
-                    #         v.drop_to_entity(context['drop_off_id'])
+                    #         v.drop_to_entity(context['player'].entity_closest_to(["T","C"], v.cell_Y, v.cell_X, is_dead = True))
                     self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context)
                     return "Trained military units"
                     
@@ -329,7 +331,7 @@ class AIProfile:
                             print(f"The drop off id is : {context['drop_off_id']}")
                             if context['drop_off_id'] is None:
                                 return "Gathering resources"
-                            villager.drop_to_entity(context['drop_off_id'])
+                            villager.drop_to_entity(context['player'].entity_closest_to(["T","C"], villager.cell_Y, villager.cell_X, is_dead = True))
                     return "Gathering resources!"
 
                 elif action == "Dropping off resources!":
@@ -340,7 +342,7 @@ class AIProfile:
                             villager = player.linked_map.get_entity_by_id(villager_id)
                             if context['drop_off_id'] is None:
                                 return "Dropped of resources"
-                            villager.drop_to_entity(context['drop_off_id'])  # Drop off resources
+                            villager.drop_to_entity(context['player'].entity_closest_to(["T","C"], villager.cell_Y, villager.cell_X, is_dead = True))  # Drop off resources
                     return "Dropped off resources"
 
                 elif action == "Train military units!":
@@ -373,7 +375,7 @@ class AIProfile:
                     #         v.collect_entity(c_ids[c_pointer])
                     #         counter += 1
                     #     if v.is_full():
-                    #         v.drop_to_entity(context['drop_off_id'])
+                    #         v.drop_to_entity(context['player'].entity_closest_to(["T","C"], v.cell_Y, v.cell_X, is_dead = True))
                     self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context)
                     return "Trained military units"
 
