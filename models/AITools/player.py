@@ -209,10 +209,7 @@ def choose_strategy(Player):
             root.destroy()  # Ferme la fenêtre après validation
         # Création de l'interface
         root = Tk()
-
-
         root.title("Choose the Strategy")
-        root.config(cursor="arrow")
         mainframe = Frame(root)
         root.title("IA Player "+str(Player.team))
         mainframe.grid(column=0, row=0, sticky=(W, E, S))
