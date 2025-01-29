@@ -57,6 +57,9 @@ class AIProfile:
         sorted_differences = sorted(differences.items(), key=lambda x: x[1], reverse=True)
         for building_repr in sorted_differences:
             existing_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
+            villagers = context['player'].get_entities_by_class(['v'], is_free=True)
+            if not villagers:
+                return
             result = context['player'].build_entity(context['player'].get_entities_by_class(['v'],is_free=True), building_repr[0])
             new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             new_building_ids = new_ids - existing_ids
@@ -168,10 +171,10 @@ class AIProfile:
             'T': 0.13,   
             'C': 0.13,   
             'F': 0.13,    
-            'B': 0.26,    
-            'S': 0.15,  
-            'A': 0.15,   
-            'K': 0.05
+            'B': 0.18,    
+            'S': 0.165,  
+            'A': 0.165,   
+            'K': 0.1
         }
 
         try:
@@ -230,12 +233,12 @@ class AIProfile:
         player = context['player']
         target_ratios_building = {
             'T': 0.13,  
-            'C': 0.13,   
-            'F': 0.13,    
-            'B': 0.05,    
+            'C': 0.15,   
+            'F': 0.15,    
+            'B': 0.08,    
             'S': 0.15,  
             'A': 0.15,   
-            'K': 0.26
+            'K': 0.19
         }
 
         try:
