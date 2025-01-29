@@ -23,12 +23,12 @@ class AIProfile:
             print(f"nb farm : {len(context['player'].get_entities_by_class(['F']))}")
             if context['player'].get_current_resources()["wood"]>=61:
                 print("test wood")
-                result = context['player'].build_entity(context['player'].get_entities_by_class('v'), 'F')
+                result = context['player'].build_entity(context['player'].get_entities_by_class('v',is_free=True), 'F')
                 print(f"result apres test wood:{result} et {context['player'].get_entities_by_class('v')}")
                 return
             else :
                 print("pas wood")
-                v_ids = context['player'].get_entities_by_class(['v'])
+                v_ids = context['player'].get_entities_by_class(['v'],is_free=True)
                 c_ids = context['player'].ect(['W'], context['player'].cell_Y, context['player'].cell_X)
                 counter = 0
                 c_pointer = 0
@@ -61,6 +61,8 @@ class AIProfile:
             new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             new_building_ids = new_ids - existing_ids
             if result != 0:
+                if not new_building_ids:
+                    continue
                 new_building_id = new_building_ids.pop()
                 building = context['player'].linked_map.get_entity_by_id(new_building_id)
                 if building.state == BUILDING_ACTIVE:
@@ -190,6 +192,26 @@ class AIProfile:
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context,keys_to_consider)
                     for building in training_buildings:
                         (context['player'].linked_map.get_entity_by_id(building)).train_unit(context['player'], self.choose_units(context['player'].linked_map.get_entity_by_id(building)))
+                    resources_to_collect=("wood",'W')
+                    for temp_resources in [("gold",'G'),("food",'F')]:
+                        if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
+                            resources_to_collect=temp_resources
+                    # v_ids = context['player'].get_entities_by_class(['v'],is_free=True)
+                    # c_ids = context['player'].ect(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X)
+                    # counter = 0
+                    # c_pointer = 0
+                    # for id in v_ids:
+                    #     v = context['player'].linked_map.get_entity_by_id(id)
+                    #     if not v.is_full():
+                    #         if counter == 3:
+                    #             counter = 0
+                    #             if c_pointer<len(c_ids)-1:
+                    #                 c_pointer += 1
+                    #         v.collect_entity(c_ids[c_pointer])
+                    #         counter += 1
+                    #     if v.is_full():
+                    #         v.drop_to_entity(context['drop_off_id'])
+                    self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context)
                     return "Trained military units"
                 
                 elif action == "Building structure!":
@@ -227,6 +249,26 @@ class AIProfile:
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context,keys_to_consider)
                     for building in training_buildings:
                         (context['player'].linked_map.get_entity_by_id(building)).train_unit(player, self.choose_units(context['player'].linked_map.get_entity_by_id(building)))  
+                    resources_to_collect=("wood",'W')
+                    for temp_resources in [("gold",'G'),("food",'F')]:
+                        if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
+                            resources_to_collect=temp_resources
+                    # v_ids = context['player'].get_entities_by_class(['v'],is_free=True)
+                    # c_ids = context['player'].ect(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X)
+                    # counter = 0
+                    # c_pointer = 0
+                    # for id in v_ids:
+                    #     v = context['player'].linked_map.get_entity_by_id(id)
+                    #     if not v.is_full():
+                    #         if counter == 3:
+                    #             counter = 0
+                    #             if c_pointer<len(c_ids)-1:
+                    #                 c_pointer += 1
+                    #         v.collect_entity(c_ids[c_pointer])
+                    #         counter += 1
+                    #     if v.is_full():
+                    #         v.drop_to_entity(context['drop_off_id'])
+                    self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context)
                     return "Trained military units"
                     
                 elif action == "Attacking the enemy!":
@@ -308,6 +350,27 @@ class AIProfile:
                     for building in training_buildings:
                         print("bal_build")
                         (context['player'].linked_map.get_entity_by_id(building)).train_unit(player,self.choose_units(context['player'].linked_map.get_entity_by_id(building)))
+                    resources_to_collect=("wood",'W')
+                    for temp_resources in [("gold",'G'),("food",'F')]:
+                        if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
+                            resources_to_collect=temp_resources
+                    
+                    # v_ids = context['player'].get_entities_by_class(['v'],is_free=True)
+                    # c_ids = context['player'].ect(resources_to_collect[1], context['player'].cell_Y, context['player'].cell_X)
+                    # counter = 0
+                    # c_pointer = 0
+                    # for id in v_ids:
+                    #     v = context['player'].linked_map.get_entity_by_id(id)
+                    #     if not v.is_full():
+                    #         if counter == 3:
+                    #             counter = 0
+                    #             if c_pointer<len(c_ids)-1:
+                    #                 c_pointer += 1
+                    #         v.collect_entity(c_ids[c_pointer])
+                    #         counter += 1
+                    #     if v.is_full():
+                    #         v.drop_to_entity(context['drop_off_id'])
+                    self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context)
                     return "Trained military units"
 
                 elif action == "Attacking the enemy!":
