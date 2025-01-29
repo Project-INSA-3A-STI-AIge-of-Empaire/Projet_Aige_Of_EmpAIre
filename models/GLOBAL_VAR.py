@@ -108,6 +108,7 @@ MARINES = 2
 
 ENTITIES = ["T","C","H","F","K","S","B","A","h","m","s","x","c","a","v"]
 BUILDINGS = ["T","C","H","F","K","S","B","A"]
+
 MILITARY_UNITS = ["h","m","s","x","c","a"]
 UNITS = ["h","m","s","x","c","a","v"]
 

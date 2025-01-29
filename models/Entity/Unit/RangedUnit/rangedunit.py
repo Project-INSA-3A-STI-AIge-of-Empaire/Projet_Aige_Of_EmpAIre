@@ -57,7 +57,7 @@ class RangedUnit(Unit):
             if self.entity_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
                 if entity != None:
-                    if entity.is_dead() or entity.team == self.team:
+                    if entity.is_dead():
                         self.entity_target_id = None
                         enemy = self.linked_map.players_dict.get(entity.team, None)
 
@@ -71,8 +71,8 @@ class RangedUnit(Unit):
                             if self.entity_target_id == None:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
-            
-            
+
+            """
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
                 
@@ -87,7 +87,7 @@ class RangedUnit(Unit):
                         if dist > 10:
                             self.entity_defend_from_id = None
                             entity = None
-            
+            """
 
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
@@ -105,7 +105,7 @@ class RangedUnit(Unit):
                                 
                                 self.check_range_with_target = True
                                 self.locked_with_target = True
-    
+
                             else:
                                 
                                 if not(self.state == UNIT_WALKING): # we need to reach it in range

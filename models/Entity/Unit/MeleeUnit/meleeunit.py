@@ -50,7 +50,7 @@ class MeleeUnit(Unit):
             if self.entity_target_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_target_id)
                 if entity != None:
-                    if entity.is_dead() or entity.team == self.team:
+                    if entity.is_dead():
                         self.entity_target_id = None
                         enemy = self.linked_map.players_dict.get(entity.team, None)
 
@@ -64,22 +64,24 @@ class MeleeUnit(Unit):
                             if self.entity_target_id == None:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
-            
+            """
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)
-                
+
                 if entity != None:
+
                     if entity.is_dead() or entity.team == self.team:
                         self.entity_defend_from_id = None
-                        entity =None
+                        entity = None
+
                     else:
 
                         dist = math.sqrt((self.cell_X - entity.cell_X)**2 + (self.cell_Y - entity.cell_Y)**2)
-                        
+
                         if dist > 10:
                             self.entity_defend_from_id = None
                             entity = None
-
+            """
 
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)

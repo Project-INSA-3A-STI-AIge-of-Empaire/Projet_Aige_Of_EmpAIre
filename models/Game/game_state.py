@@ -22,7 +22,7 @@ class GameState:
         self.map = Map(MAP_CELLX, MAP_CELLY)
         self.display_mode = ISO2D # Mode d'affichage par défaut
         # Pour gérer le délai de basculement d'affichage
-        self.last_time_switched = 0
+        self.switch_time_acc = 0
         self.switch_cooldown = ONE_SEC*(0.2) # Délai de 200ms (0,2 secondes)
         self.full_screen = False
         self.mouse_held = False
@@ -78,15 +78,16 @@ class GameState:
 
     def set_players(self, players):
         self.selected_players = players
+
     def toggle_pause(self):
         """Activer/désactiver la pause avec un délai pour éviter le spam."""
-        
-        if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
+
+        if self.switch_time_acc >= self.switch_cooldown:
             if self.states == PAUSE:
                 self.states = PLAY
             elif self.states == PLAY:
                 self.states = PAUSE
-            self.last_time_switched = pygame.time.get_ticks()
+            self.switch_time_acc = 0
 
     def set_screen_size(self, width, height):
         self.screen_width = width
@@ -110,7 +111,7 @@ class GameState:
     def toggle_display_mode(self, gameloop):
         """Bascule entre les modes d'affichage Terminal et 2.5D."""
          
-        if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
+        if self.switch_time_acc>= self.switch_cooldown:
             if self.display_mode == ISO2D:
                 self.display_mode = TERMINAL
                 
@@ -122,32 +123,33 @@ class GameState:
                 gameloop.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
                 gameloop.screen.set_alpha(None)
 
-            self.last_time_switched = pygame.time.get_ticks()
 
 
     def toggle_resources(self, ui):
         
          
-        if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
+        if self.switch_time_acc>= self.switch_cooldown:
             ui.toggle_resources()
-            self.last_time_switched = pygame.time.get_ticks()
+            self.switch_time_acc = 0
 
     def toggle_units(self, ui):
         
-        if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
+        if self.switch_time_acc >= self.switch_cooldown:
             ui.toggle_units()
-            self.last_time_switched = pygame.time.get_ticks()
-
+            self.switch_time_acc = 0
     def toggle_builds(self, ui):
          
-        if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
+        if self.switch_time_acc >= self.switch_cooldown:
+            self.switch_time_acc = 0
             ui.toggle_builds()
-            self.last_time_switched = pygame.time.get_ticks()
 
     def toggle_all(self, ui):
-        if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
+        if self.switch_time_acc >= self.switch_cooldown:
+            self.switch_time_acc = 0
             ui.toggle_all()
-            self.last_time_switched = pygame.time.get_ticks()
+
+    def update(self, dt):
+        self.switch_time_acc += dt
 
     def generate_html_file(self, players_dict):
     # Creation of the HTML file using yattag
