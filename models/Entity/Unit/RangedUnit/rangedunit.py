@@ -25,7 +25,7 @@ class RangedUnit(Unit):
 
     def try_to_damage(self, dt, _entity):
         global PROJECTILE_TYPE_MAPPING
-        
+
         self.attack_time_acc += dt 
         if self.first_time_pass or (self.attack_time_acc> self.attack_delta_time):
             if (self.first_time_pass):
@@ -49,7 +49,6 @@ class RangedUnit(Unit):
                 self.check_range_with_target = False # we need to recheck if it is still in range
                 self.change_state(UNIT_IDLE) # if the entity is killed we stop
 
-
     def try_to_attack(self,dt, camera, screen):
         if (self.state != UNIT_DYING):
             entity = None
@@ -71,6 +70,34 @@ class RangedUnit(Unit):
                             if self.entity_target_id == None:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
+                else:
+                    players = self.linked_map.players_dict 
+                    cteam = None
+                    cdist = float('inf')
+
+                    for team, player in players.items():
+
+                        if self.team != team:
+                            dist = math.sqrt((self.cell_X - player.cell_X)**2 + (self.cell_Y - player.cell_Y)**2)
+
+                            if dist < cdist:
+                                cdist = dist
+                                cteam = team
+
+                    if cteam != None:
+                        enemy = players.get(cteam, None)
+                        if enemy:
+                            target_id = enemy.entity_closest_to(BUILDINGS, self.cell_Y, self.cell_X, is_dead = True)
+
+                            if target_id == None:
+                                target_id = enemy.entity_closest_to(UNITS, self.cell_Y, self.cell_X, is_dead = True)
+                            self.entity_target_id = target_id
+
+                            if self.entity_target_id == None:
+                                if not(self.state == UNIT_IDLE):
+                                    self.change_state(UNIT_IDLE)
+
+
 
             """
             if self.entity_defend_from_id != None:
@@ -107,16 +134,14 @@ class RangedUnit(Unit):
                                 self.locked_with_target = True
 
                             else:
-                                
+
                                 if not(self.state == UNIT_WALKING): # we need to reach it in range
                                     self.change_state(UNIT_WALKING)
 
                                 self._entity_optional_target_id = entity.id
                                 self.move_position.x = entity.position.x
                                 self.move_position.y = entity.position.y
-                                
 
-                                
                                 self.locked_with_target = False
                                 self.first_time_pass = True
                                 self.try_to_move(dt,camera,screen)

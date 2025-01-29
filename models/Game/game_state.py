@@ -55,7 +55,6 @@ class GameState:
         self.terminal_camera = TerminalCamera()
         self.display_mode = ISO2D # Mode d'affichage par défaut
 
-
     def endgame(self):
         if self.map.state == "end":
             self.states = END
@@ -103,11 +102,10 @@ class GameState:
             gameloop.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
             #self.screen.set_alpha(None)
     def set_speed(self, new_speed):
-        if pygame.time.get_ticks() - self.last_time_switched >= self.switch_cooldown:
+        if self.switch_time_acc >= self.switch_cooldown:
             if new_speed >= 0.3 and new_speed <= 8:
                 self.speed = new_speed
-            self.last_time_switched = pygame.time.get_ticks()
-
+            self.switch_time_acc = 0
     def toggle_display_mode(self, gameloop):
         """Bascule entre les modes d'affichage Terminal et 2.5D."""
          

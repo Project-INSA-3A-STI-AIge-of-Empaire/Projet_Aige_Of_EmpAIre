@@ -64,6 +64,33 @@ class MeleeUnit(Unit):
                             if self.entity_target_id == None:
                                 if not(self.state == UNIT_IDLE):
                                     self.change_state(UNIT_IDLE)
+
+                else:
+                    players = self.linked_map.players_dict 
+                    cteam = None
+                    cdist = float('inf')
+
+                    for team, player in players.items():
+
+                        if self.team != team:
+                            dist = math.sqrt((self.cell_X - player.cell_X)**2 + (self.cell_Y - player.cell_Y)**2)
+
+                            if dist < cdist:
+                                cdist = dist
+                                cteam = team
+
+                    if cteam != None:
+                        enemy = players.get(cteam, None)
+                        if enemy:
+                            target_id = enemy.entity_closest_to(BUILDINGS, self.cell_Y, self.cell_X, is_dead = True)
+
+                            if target_id == None:
+                                target_id = enemy.entity_closest_to(UNITS, self.cell_Y, self.cell_X, is_dead = True)
+                            self.entity_target_id = target_id
+
+                            if self.entity_target_id == None:
+                                if not(self.state == UNIT_IDLE):
+                                    self.change_state(UNIT_IDLE)
             """
             if self.entity_defend_from_id != None:
                 entity = self.linked_map.get_entity_by_id(self.entity_defend_from_id)

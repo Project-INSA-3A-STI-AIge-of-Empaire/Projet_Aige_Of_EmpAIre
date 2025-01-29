@@ -13,7 +13,6 @@ class Unit(Entity):
         self.cost=cost
 
         self.distance_acc = 0
-        self.last = pygame.time.get_ticks()
         self.attack = attack
         self.attack_speed = attack_speed
         self.range= _range
@@ -200,7 +199,6 @@ class Unit(Entity):
         if collided:
             self.position += avoidance_force
 
-
         if self.path_to_position != None and self.current_to_position == self.move_position:
 
             to_target_directly = False
@@ -216,8 +214,8 @@ class Unit(Entity):
             if to_target_directly:
                 self.target_direction = self.position.alpha_angle(self.move_position)
                 
-                amount_x = math.cos(self.target_direction)* (dt/ONE_SEC) * self.speed * self.linked_map.tile_size_2d
-                amount_y = math.sin(self.target_direction)* (dt/ONE_SEC) * self.speed * self.linked_map.tile_size_2d
+                amount_x = math.cos(self.target_direction)* (dt/ONE_SEC) * self.speed * self.linked_map.tile_size_2d/2
+                amount_y = math.sin(self.target_direction)* (dt/ONE_SEC) * self.speed * self.linked_map.tile_size_2d/2
                 self.position.x += amount_x
                 self.position.y += amount_y    
 
@@ -282,7 +280,7 @@ class Unit(Entity):
                     self.move_to_position(dt, camera, screen )
     
     def avoid_others(self, dt):
-        self.avoid_time_acc +dt
+        #self.avoid_time_acc +dt
         collided = False
         max_num = 10
         current_num = 0
@@ -290,14 +288,19 @@ class Unit(Entity):
 
         # Check surrounding cells for nearby units
         for offsetY in [-1, 0, 1]:
+            if current_num == max_num:
+                break
             for offsetX in [-1, 0, 1]:
+                if current_num == max_num:
+                    break
+                
                 currentY = self.cell_Y + offsetY
                 currentX = self.cell_X + offsetX
 
                 current_region = self.linked_map.entity_matrix.get((currentY//self.linked_map.region_division, currentX//self.linked_map.region_division))
 
                 if current_region:
-                    
+
                     for team_region in current_region.values():
                         current_set = team_region.get((currentY, currentX))
 
@@ -322,6 +325,7 @@ class Unit(Entity):
                                                 avoidance_force += diff
                                                 #entity.position -= diff * 0.5
                                                 collided = True
+                                                current_num += 1
                                     elif not(entity.walkable):
                                         if entity.id != self._entity_optional_target_id:
                                             if self.collide_with_entity(entity):
@@ -333,6 +337,7 @@ class Unit(Entity):
                                                 diff *= TILE_SIZE_2D/distance  
                                                 avoidance_force += diff
                                                 collided = True
+                                                current_num += 1
 
 
 
@@ -355,12 +360,13 @@ class Unit(Entity):
             self.animation_frame = random.randint(0, self.len_current_animation_frames() - 1)
         else:
             self.animation_frame = 0 # we put the animationframe index to 0 for attack and dying or task
-        
+
         if new_state == UNIT_IDLE:
             self.path_to_position = None
             self._entity_optional_target_id = None
         if self.will_attack:
             self.will_attack = False
+
         # to avoid index out of bound in the animationframes list, 
         # for exmample for Archer 
         # idle has 60 frames, move has 30
@@ -371,19 +377,18 @@ class Unit(Entity):
           
 
     def attack_entity(self, entity_id):
-            
+
         self.entity_target_id = entity_id
         if self.entity_target_id == None:
             if not(self.state == UNIT_IDLE):
                 self.change_state(UNIT_IDLE)
-        #self.last_time_attacked = pygame.time.get_ticks()
         self.check_range_with_target = False
         self.locked_with_target = False
 
     def display(self, dt, screen, camera, g_width, g_height):
-        
+
         iso_x, iso_y = camera.convert_to_isometric_2d(self.position.x, self.position.y)
-        
+
         px, py = camera.convert_to_isometric_2d(self.cell_X*TILE_SIZE_2D + TILE_SIZE_2D/2, self.cell_Y*TILE_SIZE_2D + TILE_SIZE_2D/2)
         if (camera.check_in_point_of_view(iso_x, iso_y, g_width, g_height)):
             draw_isometric_circle(camera, screen, self.position.x, self.position.y, self.box_size, RED_COLOR)
