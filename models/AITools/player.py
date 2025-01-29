@@ -89,7 +89,7 @@ def can_we_attack(context):
     return len(context['units']['villager']) > 5 and context['units']['military_free']
 
 def check_housing(context):
-    return context['housing_crisis']  # ajouter les houses in building
+    return (context['player'].current_population >= context['player'].get_current_population_capacity())
 
 # ---- Actions ----
 def train_villager(context):
@@ -129,7 +129,8 @@ def attack(context):
     return "Attacking the enemy!"
 
 def drop_resources(context):
-    for unit in context['units']['villager']:
+    for unit in [context['player'].linked_map.get_entity_by_id(v_id) for v_id in context['player'].get_entities_by_class(['v'],is_free=True)]:
+
         if unit.is_full():
             unit.drop_to_entity(context['drop_off_id'])
             print(f"The dropp of id : {context['drop_off_id']}")

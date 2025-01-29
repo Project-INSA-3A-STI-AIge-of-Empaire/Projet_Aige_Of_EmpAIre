@@ -629,6 +629,7 @@ class Map:
                     self.score_players.append((player.team, convert_seconds(player.life_time)))
 
         if len(self.players_dict) == 1:
+            player = list(self.players_dict.values())[0]
             self.state = "end"
             self.score_players.append((player.team, convert_seconds(player.life_time)))
             self.score_players.reverse()
