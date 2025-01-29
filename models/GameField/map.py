@@ -408,7 +408,7 @@ class Map:
 
         # Ensure consistent random generation
 
-        random.seed(0xba)
+        #random.seed(0xba)
         
         if gen_mode == "Carte Centrée":
             self.generate_gold_center(num_players)

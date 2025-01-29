@@ -370,7 +370,7 @@ class Player:
     def build_entity(self, villager_id_list, representation = "", entity_id = None):
         if villager_id_list:
             if entity_id == None:
-                if (representation in ["T","H"]) and self.get_current_population_capacity() >= MAX_UNIT_POPULATION:
+                if (representation in ["T","H"]) and (len(self.get_entities_by_class(["T","H"])) * 5) >= MAX_UNIT_POPULATION:
                     return BUILDING_POPULATION_MAX_LIMIT
                 
                 BuildingClass = CLASS_MAPPING.get(representation, None)
