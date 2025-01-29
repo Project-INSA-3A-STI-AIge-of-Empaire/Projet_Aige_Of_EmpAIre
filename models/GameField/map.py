@@ -272,7 +272,6 @@ class Map:
             range_right = (right[0] // self.region_division, right[1] // self.region_division) 
             range_bottom = (bottom[0] // self.region_division, bottom[1] // self.region_division) 
     
-            #print(f"top:{top}, left:{left}, right:{right}")
 
             entity_to_display = set()
             
@@ -290,7 +289,6 @@ class Map:
 
                     if region_Y_to_display >= 0 and region_Y_to_display < self.nb_CellY//self.region_division \
                         and region_X_to_display>=0 and region_X_to_display < self.nb_CellX//self.region_division:
-                        #print(f"REG_Y: {region_Y_to_display}, REG_X: {region_X_to_display}")
 
                         # these are the real X Y of the region in the sparse matrix
 
@@ -408,7 +406,6 @@ class Map:
 
     def generate_map(self,gen_mode = MAP_NORMAL , mode = MARINES ,num_players=3):
 
-        #print(f"mode:{gen_mode}, res:{mode}")
         # Ensure consistent random generation
 
         random.seed(0xba)
@@ -508,7 +505,6 @@ class Map:
     def _place_player_starting_areas(self, mode, num_players):
         
         polygon = angle_distribution(self.nb_CellY, self.nb_CellX, num_players, scale=0.75, rand_rot=0x1)
-        print(polygon)
         for i in range(len(polygon)):
             
             # Base position for this player's starting area
@@ -520,7 +516,6 @@ class Map:
             self.players_dict[current_player.team] = current_player
 
             if not(self.check_cell(center_Y, center_X)) :
-                print(mode)
                 gen_option = MODE_GENERATION.get(mode)
                 
                 entities_gen = gen_option.get("entities")
@@ -541,8 +536,7 @@ class Map:
             current_player_resources = gen_option.get("resources").copy() # we dont want togive it as a pointer else all players will share the same resources haha
             current_player.add_resources(current_player_resources)
             
-            for type, set in current_player.entities_dict.items():
-                print(f"type:{type} dict:{set}")
+            
         
 
     def _add_starting_resources(self, center_Y, center_X):
@@ -684,10 +678,7 @@ def ellipse_distribution(ry, rx, Cy, Cx, angle_num, rand_rot = False):
 
 def spiral_distribution(Y, X, reg_div, player_num):
     points = []
-    print(min(Y, X))
-    print(reg_div**reg_div)
     spiral_lvl = int(min(Y, X) /(reg_div**(math.sqrt(reg_div))))
-    print(spiral_lvl)
 
     Y_step = Y/2 /spiral_lvl
     X_step = X/2 /spiral_lvl
@@ -699,7 +690,6 @@ def spiral_distribution(Y, X, reg_div, player_num):
 
     for lvl in range(spiral_lvl):
         rY, rX = lvl*Y_step, lvl*X_step
-        print(rY,rX)
         points += ellipse_distribution(rY, rX, Cy, Cx, angle_num, rand_rot=True)
         angle_num += angle_step
 

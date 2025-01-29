@@ -35,13 +35,12 @@ class GameState:
     def change_music(self, state):
         
         if self.music_state != state:  # Ne changer que si l'état est différent
-            """
+            
             pygame.mixer.music.stop()  # Arrêter la musique actuelle
             pygame.mixer.music.load(MUSIC[state])  # Charger la nouvelle musique
             pygame.mixer.music.play(-1)  # Jouer en boucle (-1 = boucle infinie)
             self.music_state = state
-            """
-            print("s")
+            
 
     def go_to_main_menu(self):
         self.states = START
@@ -308,10 +307,8 @@ class GameState:
         if file_path:
             with open(file_path, 'wb') as file:
                 pickle.dump(self.__dict__, file)
-            print(f"Jeu sauvegardé dans {file_path}")
             messagebox.showinfo("Sauvegarde réussie", f"Jeu sauvegardé dans {file_path}")
         else:
-            print("Sauvegarde annulée.")
             messagebox.showwarning("Aucune sauvegarde", "Sauvegarde annulée.")
 
     def load(self):
@@ -325,12 +322,10 @@ class GameState:
             with open(file_path, 'rb') as file:
                 self.__dict__ = pickle.load(file)
                 self.states = PLAY
-                print(f"Jeu chargé depuis {file_path}")
                 messagebox.showinfo("Chargement réussi", f"Jeu chargé depuis {file_path}")
                   # Retourne l'objet chargé
             return True
         else:
-            print("Aucun fichier sélectionné.")
             messagebox.showwarning("Aucun fichier", "Vous n'avez pas sélectionné de fichier.")
             return False  # Retourne None si aucune sauvegarde n'est chargée
 

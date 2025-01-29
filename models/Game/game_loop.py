@@ -35,7 +35,6 @@ class GameLoop:
         if pygame.key.get_pressed()[pygame.K_F12]:
             loaded = self.state.load()
             if loaded:
-                print(self.state.states)
                 pygame.display.set_mode(
                     (self.state.screen_width, self.state.screen_height),
                     pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE,

@@ -15,7 +15,6 @@ class rayCastingRange:
     def __iter__(self):
         min_X, min_Y = self.left[1], self.top[0]
         max_X, max_Y = self.right[1], self.bottom[0]
-        print(f"min:({min_Y},{min_X}) | max:({max_Y},{max_X})")
         for current_Y in range(min_Y, max_Y + 1):
             for current_X in range(min_X, max_X + 1):
                 if self.polygon.contains(Point(current_X, current_Y)):

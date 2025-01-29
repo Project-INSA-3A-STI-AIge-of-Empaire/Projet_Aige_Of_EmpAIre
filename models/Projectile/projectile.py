@@ -52,13 +52,11 @@ class Projectile:
                                     resources = self.entity_target.resources
                                 else:
                                     resources = self.entity_target.storage.lose_resource()
-                                print(self.team)
                                 player_gained = self.linked_map.players_dict.get(self.team,None)
                                 if player_gained:
                                     player_gained.add_resources(resources)
 
                         self.linked_map.dead_entities[self.entity_target.id] = self.entity_target
-                        print(STATES.get(self.entity_target.representation, None).get("dying", None))
                         self.entity_target.change_state(STATES.get(self.entity_target.representation, None).get("dying", None))
 
                 elif not(self.entity_target.is_dead()):

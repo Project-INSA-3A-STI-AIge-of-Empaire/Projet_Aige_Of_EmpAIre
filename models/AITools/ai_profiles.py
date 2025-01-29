@@ -20,14 +20,10 @@ class AIProfile:
 
     def compare_ratios(self, actual_ratios, target_ratios, context, keys_to_include=None):
         if len(context['player'].get_entities_by_class(['F']))<1:
-            print(f"nb farm : {len(context['player'].get_entities_by_class(['F']))}")
             if context['player'].get_current_resources()["wood"]>=61:
-                print("test wood")
                 result = context['player'].build_entity(context['player'].get_entities_by_class('v',is_free=True), 'F')
-                print(f"result apres test wood:{result} et {context['player'].get_entities_by_class('v')}")
                 return
             else :
-                print("pas wood")
                 v_ids = context['player'].get_entities_by_class(['v'],is_free=True)
                 c_ids = context['player'].ect(['W'], context['player'].cell_Y, context['player'].cell_X)
                 counter = 0
@@ -73,7 +69,6 @@ class AIProfile:
                 if building.state == BUILDING_ACTIVE:
                     return
             elif result == 0:
-                    print("test compare ratios ==0")
                     resources_to_collect=("wood",'W')
                     for temp_resources in [("gold",'G'),("food",'F')]:
                         if context['resources'][temp_resources[0]]<context['resources'][resources_to_collect[0]]:
@@ -151,11 +146,8 @@ class AIProfile:
         """
         # Get the actions from the decision tree
         if context['player'].is_busy:
-            print("Player is busy. Waiting for the current action to complete.")
             return
         actions = tree.decide(context)
-        print(f"The action is : {actions}")
-        print(f"The strategy is : {self.strategy}")
 
         # Call the appropriate strategy
         if self.strategy == "aggressive":
@@ -193,7 +185,6 @@ class AIProfile:
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
                     if not training_buildings:
-                        print("agr_build_none")
                         keys_to_consider = ['B','S','A']
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context,keys_to_consider)
                     for building in training_buildings:
@@ -250,7 +241,6 @@ class AIProfile:
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
                     if not training_buildings:
-                        print("def_build_none")
                         keys_to_consider = ['S','A','T']
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context,keys_to_consider)
                     for building in training_buildings:
@@ -281,7 +271,6 @@ class AIProfile:
                     unit_list = context['units']['military_free'][:len(context['units']['military_free'])//2]
                     context['enemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
-                        print(f"defensive enemy id : {context['enemy_id']}")
                         unit.attack_entity(context['enemy_id'])
                     return "Attacking in progress"
                 
@@ -328,7 +317,6 @@ class AIProfile:
                             v.collect_entity(c_ids[c_pointer])
                             counter += 1
                         else:
-                            print(f"The drop off id is : {context['drop_off_id']}")
                             if context['drop_off_id'] is None:
                                 return "Gathering resources"
                             villager.drop_to_entity(context['player'].entity_closest_to(["T","C"], villager.cell_Y, villager.cell_X, is_dead = True))
@@ -346,15 +334,12 @@ class AIProfile:
                     return "Dropped off resources"
 
                 elif action == "Train military units!":
-                    print("bal_train_mil")
                     # Train military units in training buildings
                     training_buildings = context['buildings']['training']
                     if not training_buildings:
-                        print("bal_build_none")
                         keys_to_consider = ['T','B','S']
                         self.compare_ratios(context['buildings']['ratio'], target_ratios_building, context, keys_to_consider)
                     for building in training_buildings:
-                        print("bal_build")
                         (context['player'].linked_map.get_entity_by_id(building)).train_unit(player,self.choose_units(context['player'].linked_map.get_entity_by_id(building)))
                     resources_to_collect=("wood",'W')
                     for temp_resources in [("gold",'G'),("food",'F')]:
@@ -383,7 +368,6 @@ class AIProfile:
                     unit_list = context['units']['military_free']
                     context['enemy_id'] = self.closest_enemy_building(context)
                     for unit in unit_list:
-                        print(f"balanced enemy id : {context['enemy_id']}")
                         unit.attack_entity(context['enemy_id'])
                         
                     return "Attacking in progress"

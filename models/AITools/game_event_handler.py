@@ -13,10 +13,8 @@ class GameEventHandler:
     def process_ai_decisions(self, tree):
         all_action = []
         context = self.get_context_for_player()
-        print(f"Here is the context : {context}")
         actions = self.ai_profiles.decide_action(tree, context)
         all_action.append(actions)
-        print(f"Player {self.players.team} Actions: {actions}")
 
     def get_context_for_player(self):
         context = {

@@ -37,7 +37,6 @@ class TrainingBuilding(Building):
             if self.time_left > (1e-5):
                 
                 self.time_left = self.time_left - dt
-                print(f"unit_train:{self.time_left}")
             else:
                 
                 if self.unit_being_trained:

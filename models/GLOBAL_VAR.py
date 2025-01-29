@@ -374,7 +374,6 @@ def META_SPRITES_CACHE_HANDLE(zoom_level, list_keys, camera): # returns image to
 
     global META_SPRITES_CACHE
 
-    #print(f"zoom:{zoom_level}, keys:{list_keys}")
     current_dict = META_SPRITES_CACHE.get(zoom_level, None)
 
     if (current_dict == None):

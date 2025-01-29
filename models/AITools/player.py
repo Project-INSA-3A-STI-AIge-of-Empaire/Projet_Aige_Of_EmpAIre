@@ -42,29 +42,23 @@ class DecisionNode:
 
     def decide(self, context):
         actions = []
-        print(f"Question result: {self.question(context)}")
         if self.question(context):
-            print(f"Taking YES branch: {self.yes_action}")
             if isinstance(self.yes_action, DecisionNode):
                 actions.extend(self.yes_action.decide(context))
             else:
                 if callable(self.yes_action):
                     result = self.yes_action(context)
                     actions.append((result, self.priority))
-                    print(f"Yes action called: {actions}")
         else:
-            print(f"Taking NO branch: {self.no_action}")
             if isinstance(self.no_action, DecisionNode):
                 actions.extend(self.no_action.decide(context))
             else:
                 if callable(self.no_action):
-                    print(f"No action called: {actions}")
                     result = self.no_action(context)
                     actions.append((result, self.priority))
 
         actions.sort(key=lambda x: x[1], reverse=True)
 
-        print(f"The decide method return : {actions}")
         return [action if isinstance(action, str) else action[0] for action in actions]
 
 # ---- Questions ----
@@ -133,7 +127,6 @@ def drop_resources(context):
 
         if unit.is_full():
             unit.drop_to_entity(context['player'].entity_closest_to(["T","C"], unit.cell_Y, unit.cell_X, is_dead = True))
-            print(f"The dropp of id : {context['drop_off_id']}")
     return "Dropping off resources!"
 
 
@@ -532,7 +525,6 @@ class Player:
     
     def remove_population(self):
         actual_ids = set()
-        print("removing")
         for house_id in self.houses_id:
             current_habitat = self.linked_map.get_entity_by_id(house_id) 
             if current_habitat.state == BUILDING_ACTIVE:
@@ -568,7 +560,6 @@ class Player:
 
         for ent_repr in ent_repr_list:
             if ent_repr not in ["W", "G"]:
-                print(f"Searching closest entity: {ent_repr} at coordinates ({cell_Y}, {cell_X})")
                 ent_ids = self.get_entities_by_class(ent_repr)
             else:
                 ent_ids = self.linked_map.resource_id_dict.get(ent_repr, None)
@@ -639,9 +630,7 @@ class Player:
             self.player_turn(dt)
 
     def player_turn(self,dt):
-        print("Decision tree avant utilisation:", self.decision_tree)
         decision = self.game_handler.process_ai_decisions(self.decision_tree)
-        print(f"Decision effectué : {decision}")
         self.refl_acc=0
 
         # # decision = self.ai_profile.decide_action(self.decision_tree, context)
