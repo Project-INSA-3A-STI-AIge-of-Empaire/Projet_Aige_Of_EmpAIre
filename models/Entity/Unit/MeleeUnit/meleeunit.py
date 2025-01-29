@@ -41,7 +41,7 @@ class MeleeUnit(Unit):
             elif self.animation_frame == (self.len_current_animation_frames() - 1):
 
                 self.check_range_with_target = False # we need to recheck if it is still in range
-                self.change_state(UNIT_IDLE) # if the entity is killed we stop 
+                #self.change_state(UNIT_IDLE) # if the entity is killed we stop 
 
     def try_to_attack(self,dt, camera, screen):
         if (self.state != UNIT_DYING):

@@ -57,8 +57,8 @@ class Unit(Entity):
 
     def adapte_attack_delta_time(self):
         self.attack_delta_time = (self.attack_speed) * ONE_SEC
-        if self.attack_speed < 1:
-            self.animation_speed[2] = self.animation_speed[2]/self.attack_speed
+        
+        self.animation_speed[2] = self.animation_speed[2]/self.attack_speed
 
     
     def set_direction_index(self):
@@ -68,7 +68,7 @@ class Unit(Entity):
         for resource, amount in resources.items():
             if amount < self.cost.get(resource, None):
                 return False
-        
+
         return True 
 
     def update_path_nodes(self, entity):

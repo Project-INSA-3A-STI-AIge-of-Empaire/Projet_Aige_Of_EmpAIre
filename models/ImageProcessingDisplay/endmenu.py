@@ -47,12 +47,12 @@ class EndMenu:
             self.screen.blit(rank_text, rank_rect)
 
             # Draw player name in the color of their team (using TEAM_COLORS)
-            player_name_text = self.font.render(f"Joueur {player}", True, TEAM_COLORS[player])
+            player_name_text = self.font.render(f"Player {player}", True, TEAM_COLORS[player])
             player_name_rect = player_name_text.get_rect(center=(self.screen.get_width() // 2, 150 + i * 40))
             self.screen.blit(player_name_text, player_name_rect)
 
             # Draw score in white
-            score_text = self.font.render(f": {score}", True, WHITE_COLOR)
+            score_text = self.font.render(f"{(int(len(score)))*' '}:{score}", True, WHITE_COLOR)
             score_rect = score_text.get_rect(center=(self.screen.get_width() // 2 + 100, 150 + i * 40))
             self.screen.blit(score_text, score_rect)
 
