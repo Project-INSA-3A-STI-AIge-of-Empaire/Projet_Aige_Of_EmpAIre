@@ -394,10 +394,15 @@ class Map:
 
     def generate_gold_center(self, num_players):
         center_Y, center_X = self.nb_CellY//2, self.nb_CellX//2
+        gold_adjustment = (self.nb_CellY*self.nb_CellX)/14400
 
-        number_gold = num_players*self.region_division
+        tiles_factor = (num_players*7500)/800
 
-        for _ in range(number_gold**2):
+        total_tiles = int(tiles_factor * gold_adjustment)
+
+        number_gold = num_players*int(self.region_division/(1.5))
+
+        for _ in range(total_tiles):
             current_gold = Gold(self.id_generator,center_Y, center_X, None)
             self.add_entity_to_closest(current_gold, center_Y, center_X, random_padding=0x1)
 
@@ -559,10 +564,6 @@ class Map:
                 tree = Tree(self.id_generator,tree_Y, tree_X, None)
                 self.add_entity(tree)
 
-
-
-
-
     def mouse_get_entity(self, camera, iso_x, iso_y):
 
         res_entity = None
@@ -615,7 +616,6 @@ class Map:
             self.state = "normal"
 
     def update_all_players(self, dt):
-        print(f"players: {self.players_dict}")
         for player in self.players_dict.values():
             player.update(dt)
 

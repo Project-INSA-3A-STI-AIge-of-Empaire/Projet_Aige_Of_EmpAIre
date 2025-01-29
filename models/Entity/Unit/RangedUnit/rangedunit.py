@@ -66,6 +66,7 @@ class RangedUnit(Unit):
                             if target_id == None:
                                 target_id = enemy.entity_closest_to(UNITS, self.cell_Y, self.cell_X, is_dead = True)
                             self.entity_target_id = target_id
+                            self.check_range_with_target = False
 
                             if self.entity_target_id == None:
                                 if not(self.state == UNIT_IDLE):
@@ -92,6 +93,7 @@ class RangedUnit(Unit):
                             if target_id == None:
                                 target_id = enemy.entity_closest_to(UNITS, self.cell_Y, self.cell_X, is_dead = True)
                             self.entity_target_id = target_id
+                            self.check_range_with_target = False
 
                             if self.entity_target_id == None:
                                 if not(self.state == UNIT_IDLE):

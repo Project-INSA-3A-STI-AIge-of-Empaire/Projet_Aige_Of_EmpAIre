@@ -150,7 +150,6 @@ class GameState:
         self.switch_time_acc += dt
 
     def generate_html_file(self, players_dict):
-    # Creation of the HTML file using yattag
         doc, tag, text = Doc().tagtext()
         doc.asis('<!DOCTYPE html>')
         with tag('html', lang='en'):
@@ -168,34 +167,35 @@ class GameState:
                     function toggleTeam(teamId) {
                         var teamDiv = document.getElementById("team-" + teamId);
                         var button = document.getElementById("button-" + teamId);
-                        if (teamDiv.style.display === "none") {
+                        if (teamDiv.style.display === "none" || teamDiv.style.display === "") {
                             teamDiv.style.display = "block";
-                            button.textContent = "Show Team " + teamId;
+                            button.textContent = "Hide Team " + teamId;
                         } else {
                             teamDiv.style.display = "none";
                             button.textContent = "Show Team " + teamId;
                         }
                     }
                     ''')
+
             with tag('body'):
                 with tag('h1'):
                     text('Age of Empires - Overview')
                 for team in players_dict.keys():
-                    with tag('button', id=f"button-{team}", onclick=f"toggleTeam({team})"):
+                    with tag('button', id=f"button-{team}", onclick=f"toggleTeam('{team}')"):
                         text(f"Show Team {team}")
                 for team, player in players_dict.items():
                     with tag('div', id=f"team-{team}", klass="team-section", style="display:none;"):
                         with tag('h2'):
                             text(f"Team {team}")
                         with tag('h3'):
-                            text("Ressources : ")
+                            text("Resources: ")
                         for resource_type, amount in player.get_current_resources().items():
                             with tag('ul', klass='resource-item'):
                                 icons_path = ICONS_HTML.get(resource_type+"i", "default_image.png")
                                 doc.stag('img', src=f"{icons_path}", klass="photo", width=50, height=50)
                                 text(f"{resource_type} : {amount}")
                         with tag('h3'):
-                            text("Entities : ")
+                            text("Entities: ")
                         for entity_repr in player.entities_dict.keys():
                             with tag('h4'):
                                 icons_path = ICONS_HTML.get(entity_repr+"i", "default_image.png")
@@ -211,13 +211,13 @@ class GameState:
                                             value=player.entities_dict[entity_repr][id].hp
                                         )
 
-        # Save the HTML content
+        #save HTML 
         html_content = doc.getvalue()
 
         with open('overview.html', 'w') as f:
             f.write(html_content)
 
-        # Generate CSS file
+        #CSS
         css_content = """
         @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
 
@@ -261,6 +261,7 @@ class GameState:
             background: #deb887;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;  /* Initially hidden */
         }
 
         h2, h3 {
@@ -291,9 +292,11 @@ class GameState:
         with open('styles.css', 'w') as f:
             f.write(css_content)
 
+        #Open directly the generated file in the browser
         browser = webbrowser.open('overview.html', 1, True)
         if not browser:
-            messagebox.showinfo("Erreur", "impossible d'ouvrir le fichier html")
+            messagebox.showinfo("Erreur", "Impossible d'ouvrir le fichier HTML")
+
 
 
     def save(self):

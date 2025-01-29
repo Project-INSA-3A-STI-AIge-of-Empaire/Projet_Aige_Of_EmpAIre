@@ -271,7 +271,6 @@ class Unit(Entity):
         if (self.state != UNIT_DYING):
             if self.state == UNIT_WALKING:
                 if self.position == self.move_position:
-                    print("hello")
                     if not(self.state == UNIT_IDLE):
                         self.change_state(UNIT_IDLE)
                 else:
@@ -392,13 +391,13 @@ class Unit(Entity):
 
         px, py = camera.convert_to_isometric_2d(self.cell_X*TILE_SIZE_2D + TILE_SIZE_2D/2, self.cell_Y*TILE_SIZE_2D + TILE_SIZE_2D/2)
         if (camera.check_in_point_of_view(iso_x, iso_y, g_width, g_height)):
-            draw_isometric_circle(camera, screen, self.position.x, self.position.y, self.box_size, RED_COLOR)
+            #draw_isometric_circle(camera, screen, self.position.x, self.position.y, self.box_size, RED_COLOR)
             #camera.draw_box(screen, self)
             self.set_direction_index()
             display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = [self.representation, self.state, self.animation_direction, self.animation_frame], camera = camera), iso_x, iso_y, screen, 0x04, 1)
             if not(self.is_dead()):
                 draw_percentage_bar(screen, camera, iso_x, iso_y, self.hp, self.max_hp, self.sq_size, self.team)
-            draw_point(screen, (0, 0, 0), px, py, radius=5)
+            #draw_point(screen, (0, 0, 0), px, py, radius=5)
 
     def is_free(self):
         return self.entity_target_id == None and self.entity_defend_from_id == None

@@ -72,12 +72,12 @@ class Building(Entity):
         px, py = camera.convert_to_isometric_2d(self.cell_X*TILE_SIZE_2D + TILE_SIZE_2D/2, self.cell_Y*TILE_SIZE_2D + TILE_SIZE_2D/2)
         if (camera.check_in_point_of_view(iso_x, iso_y, g_width, g_height)):
             
-            camera.draw_box(screen, self)
+            #camera.draw_box(screen, self)
 
             display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = [self.representation, self.state, self.display_choice, self.animation_frame], camera = camera), iso_x, iso_y, screen, 0x04, 1)
             if not(self.is_dead()):
                 draw_percentage_bar(screen, camera, iso_x, iso_y, self.hp, self.max_hp, self.sq_size, self.team)
-            draw_point(screen, (0, 0, 0), px, py, radius=5)
+            #draw_point(screen, (0, 0, 0), px, py, radius=5)
 
             if self.state == BUILDING_INPROGRESS:
 

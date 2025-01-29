@@ -15,7 +15,7 @@ class Resources(Entity):
         self.HitboxClass = "RoundedSquare"
     def display(self, dt, screen, camera, g_width, g_height):
         iso_x, iso_y = camera.convert_to_isometric_2d(self.position.x, self.position.y)
-        camera.draw_box(screen, self)
+        #camera.draw_box(screen, self)
         #if (camera.check_in_point_of_view(iso_x, iso_y, g_width, g_height)):
         display_image(META_SPRITES_CACHE_HANDLE(camera.zoom, list_keys = [self.representation, self.display_choice],camera = camera), iso_x, iso_y, screen, 0x04)
         draw_percentage_bar(screen, camera, iso_x, iso_y, self.resources.get(self.resource_indicator, None), self.max_storage, self.sq_size)

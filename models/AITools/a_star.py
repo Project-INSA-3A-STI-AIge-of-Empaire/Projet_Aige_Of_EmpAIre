@@ -64,12 +64,9 @@ def A_STAR(start_X, start_Y, end_X, end_Y, _map, the_moving_unit, pass_flags = 0
     collided_with_entity = False # these 3 variables are used in case we have an entity as target
 
     collision_node = None 
-    print("new")
     while searching:
         _, best_node = heapq.heappop(searching)
-        print(the_moving_unit)
-        print(_map.get_entity_by_id(the_moving_unit._entity_optional_target_id))
-        print(f"searching:{start_X, start_Y, end_X, end_Y}")
+
         # these conditions are have only sense when the target is an entity 
         # not a normal position path finding, but it doesnt affect 
         # the algo in the case of normal pathfinding
