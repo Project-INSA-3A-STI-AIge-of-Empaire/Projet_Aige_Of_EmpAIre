@@ -1,5 +1,6 @@
 import pygame
 from GLOBAL_VAR import *
+from random import uniform
 
 class IAMenu:
     def __init__(self, screen, num_players):
@@ -8,14 +9,17 @@ class IAMenu:
         self.sliders = []
         self.confirm_button = pygame.Rect(0, 0, 200, 50)  # Position updated in draw()
         
+        # Ajuster l'espacement entre les joueurs
+        self.slider_spacing = 100  # Plus d'espace entre les joueurs
+        
         for i in range(num_players):
-            aggressive_slider = pygame.Rect(100, 100 + i * 60, 300, 10)
-            defensive_slider = pygame.Rect(100, 130 + i * 60, 300, 10)
+            aggressive_slider = pygame.Rect(100, 100 + i * self.slider_spacing, 300, 10)
+            defensive_slider = pygame.Rect(100, 130 + i * self.slider_spacing, 300, 10)
             self.sliders.append({
                 "aggressive": aggressive_slider,
                 "defensive": defensive_slider,
-                "aggressive_value": 1,
-                "defensive_value": 1
+                "aggressive_value": round(uniform(1, 3), 1),
+                "defensive_value": round(uniform(1, 3), 1)
             })
     
     def draw(self):
@@ -23,8 +27,11 @@ class IAMenu:
         screen_width, screen_height = self.screen.get_size()
         
         for i, slider_set in enumerate(self.sliders):
-            self._draw_slider(slider_set["aggressive"], slider_set["aggressive_value"], f"Agressive {i+1}")
-            self._draw_slider(slider_set["defensive"], slider_set["defensive_value"], f"Defense {i+1}")
+            player_label = f"Player {i + 1}"  # Display Player 1, Player 2, etc.
+            # Afficher l'étiquette du joueur plus haut pour chaque joueur
+            self._draw_text(player_label, (slider_set["aggressive"].x, slider_set["aggressive"].y - 40))  
+            self._draw_slider(slider_set["aggressive"], slider_set["aggressive_value"], f"Agressive")
+            self._draw_slider(slider_set["defensive"], slider_set["defensive_value"], f"Defense")
         
         self.confirm_button.topleft = (screen_width // 2 - 100, screen_height - 80)
         pygame.draw.rect(self.screen, (0, 255, 0), self.confirm_button)
@@ -39,15 +46,21 @@ class IAMenu:
     def _draw_text(self, text, pos, centered=False):
         font = pygame.font.Font(None, 28)
         rendered_text = font.render(text, True, (0, 0, 0))
-        text_rect = rendered_text.get_rect(center=pos if centered else None)
-        self.screen.blit(rendered_text, text_rect if centered else pos)
+        text_rect = rendered_text.get_rect()
+        
+        if centered:
+            text_rect.center = pos
+        else:
+            text_rect.topleft = pos
+        
+        self.screen.blit(rendered_text, text_rect)
     
     def handle_click(self, pos):
         for slider_set in self.sliders:
             if slider_set["aggressive"].collidepoint(pos):
-                slider_set["aggressive_value"] = min(3, max(1, slider_set["aggressive_value"] + 1))
+                slider_set["aggressive_value"] = min(3, max(1, round(slider_set["aggressive_value"] + 0.1, 1)))
             elif slider_set["defensive"].collidepoint(pos):
-                slider_set["defensive_value"] = min(3, max(1, slider_set["defensive_value"] + 1))
+                slider_set["defensive_value"] = min(3, max(1, round(slider_set["defensive_value"] + 0.1, 1)))
         
         if self.confirm_button.collidepoint(pos):
             return self.get_ai_values()
