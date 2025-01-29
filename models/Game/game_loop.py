@@ -2,7 +2,7 @@ import pygame
 import tkinter as tk
 from tkinter import messagebox, Button, Tk
 
-from ImageProcessingDisplay import UserInterface, EndMenu, StartMenu, PauseMenu
+from ImageProcessingDisplay import UserInterface, EndMenu, StartMenu, PauseMenu, IAMenu
 from GLOBAL_VAR import *
 from Game.game_state import * 
 
@@ -32,7 +32,6 @@ class GameLoop:
 
     
     def handle_start_events(self, event):
-        pygame.mouse.set_visible(True)
         if pygame.key.get_pressed()[pygame.K_F12]:
             loaded = self.state.load()
             if loaded:
@@ -78,6 +77,9 @@ class GameLoop:
             # Handle keyboard events for editing
             self.startmenu.handle_keydown(event)
 
+    def handle_config_events(self,dt, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.iamenu.handle_click(event.pos, self.state)
 
     def handle_pause_events(self,dt, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -189,6 +191,8 @@ class GameLoop:
     def render_display(self, dt, mouse_x, mouse_y):
         if self.state.states == START:
             self.startmenu.draw()
+        elif self.state.states == CONFIG:
+            self.iamenu.draw()
         elif self.state.states == PAUSE:
             self.pausemenu.draw()
         elif self.state.states == END:
