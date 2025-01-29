@@ -61,6 +61,8 @@ class AIProfile:
             new_ids = set(context['player'].get_entities_by_class(['A','B','C','K','T', 'F', 'S']))
             new_building_ids = new_ids - existing_ids
             if result != 0:
+                if not new_building_ids:
+                    continue
                 new_building_id = new_building_ids.pop()
                 building = context['player'].linked_map.get_entity_by_id(new_building_id)
                 if building.state == BUILDING_ACTIVE:
