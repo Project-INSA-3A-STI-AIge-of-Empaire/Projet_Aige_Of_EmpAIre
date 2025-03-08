@@ -11,8 +11,6 @@
     <a href="https://github.com/Project-INSA-3A-STI-AIge-of-Empaire/Projet_Aige_Of_EmpAIre/index.html"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/Project-INSA-3A-STI-AIge-of-Empaire/Projet_Aige_Of_EmpAIre">View Demo</a>
-    ·
     <a href="https://github.com/Project-INSA-3A-STI-AIge-of-Empaire/Projet_Aige_Of_EmpAIre/issues">Report Bug</a>
     ·
     <a href="https://github.com/Project-INSA-3A-STI-AIge-of-Empaire/Projet_Aige_Of_EmpAIre/issues">Request Feature</a>
