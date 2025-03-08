@@ -3,10 +3,6 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/Project-INSA-3A-STI-AIge-of-Empaire/Projet_Aige_Of_EmpAIre">
-    <img src="https://github.com/Project-INSA-3A-STI-AIge-of-Empaire/Projet_Aige_Of_EmpAIre/blob/main/logo.png" alt="Logo" width="160" height="50">
-  </a>
-
   <h2 align="center">Aige Of Empaire</h2>
 
   <p align="center">
