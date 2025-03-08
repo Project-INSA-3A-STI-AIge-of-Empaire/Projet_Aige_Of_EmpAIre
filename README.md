@@ -1,61 +1,4 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aige Of Empaire</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            text-align: center;
-            padding: 2rem;
-            background-color: #f8f9fa;
-        }
-        header img {
-            max-width: 100%;
-            height: auto;
-        }
-        nav {
-            text-align: center;
-            margin: 2rem 0;
-        }
-        nav a {
-            margin: 0 1rem;
-            text-decoration: none;
-            color: #007bff;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        main {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-        h1, h2, h3 {
-            color: #333;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            margin-bottom: 1rem;
-        }
-        footer {
-            text-align: center;
-            padding: 2rem;
-            background-color: #f8f9fa;
-            margin-top: 2rem;
-        }
-    </style>
-</head>
-<body>
+
     <a name="readme-top"></a>
     <!-- PROJECT LOGO -->
     <br />
@@ -162,5 +105,3 @@
     <footer>
         <p>&copy; 2023 Aige Of Empaire. All rights reserved.</p>
     </footer>
-</body>
-</html>
