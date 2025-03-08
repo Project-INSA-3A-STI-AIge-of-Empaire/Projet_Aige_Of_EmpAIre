@@ -83,7 +83,14 @@ Voir les [issues ouvertes](https://github.com/Project-INSA-3A-STI-AIge-of-Empair
 <!-- CONTACT -->
 ## Contact
 
-[Nom] - [LinkedIn](https://www.linkedin.com/in/[linkedin]) - [Email](mailto:[email])
+[Ted BARBIER] - [LinkedIn](https://www.linkedin.com/in/ted-barbier) - [Email](mailto:[ted.barbier@insa-cvl.fr])
+[Yassine BEN BELGACEM] - [Email](mailto:[yassine.ben_belgacem@insa-cvl.fr])
+[Amaury CHAU] - [LinkedIn](https://www.linkedin.com/in/amaury-chau-601093306) - [Email](mailto:[amaury.chau@insa-cvl.fr])
+[Shujun CHEN]  - [Email](mailto:[shujun.chen@insa-cvl.fr])
+[Jules COCHARD] - [LinkedIn](https://www.linkedin.com/in/jules-cochard-835180335) - [Email](mailto:[jules.cochard@insa-cvl.fr])
+[Paul DAVESNE]  - [Email](mailto:[paul.davesne@insa-cvl.fr])
+[Ali TERRO] - [LinkedIn](https://www.linkedin.com/in/ali-terro) - [Email](mailto:[ali.terro@insa-cvl.fr])
+
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
